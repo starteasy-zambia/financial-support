@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Financial Support & Management | StartEasy Zambia</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700;1,800&display=swap" rel="stylesheet">
@@ -171,8 +172,15 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .kpi-trend.down { background: #FFE8E5; color: #B8564F; }
 .balance-badge { font-family: 'Consolas', monospace; font-weight: 700; color: #0A1F12; }
 .balance-badge.neg { color: #B8564F; }
-.cat-bar { height: 8px; border-radius: 4px; background: #F1F5F9; overflow: hidden; margin-top: 4px; }
-.cat-bar-fill { height: 100%; background: linear-gradient(90deg,#E8730F,#F5A623); }
+.chart-container { position: relative; height: 220px; width: 100%; }
+
+/* Toasts */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast { background: #0A1F12; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideIn 0.3s ease; }
+.toast.success { border-left: 4px solid #1E7B3C; }
+.toast.error { border-left: 4px solid #B8564F; }
+.toast.info { border-left: 4px solid #1B6CA8; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
 @media (max-width: 768px) {
   .admin-content { padding: 16px; }
@@ -185,6 +193,14 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
   .report-container { padding: 20px; }
   .form-row { grid-template-columns: 1fr; }
 }
+
+/* PRINT STYLES */
+@media print {
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+  .print-area { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; border: none; padding: 0; }
+  .admin-top-bar, .admin-drawer, .filter-tabs, .btn-sm, .admin-hamburger { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -193,7 +209,7 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
 <script type="text/babel" data-presets="react">
-const { useState, useEffect, useMemo } = React;
+const { useState, useEffect, useMemo, useRef } = React;
 
 /* ─── FIREBASE ─── */
 const firebaseConfig = {
@@ -241,6 +257,45 @@ const toDate = (raw) => { if (!raw) return null; if (raw.toDate) return raw.toDa
 const dateStr = (raw) => { const d = toDate(raw); return d ? d.toISOString().split('T')[0] : ''; };
 const todayStr = () => new Date().toISOString().split('T')[0];
 const addDays = (dateStr, n) => { const d = new Date(dateStr); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; };
+
+/* ─── CHART COMPONENT ─── */
+function DoughnutChart({ data, labels, colors }) {
+  const canvasRef = useRef(null);
+  const chartRef = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const ctx = canvasRef.current.getContext('2d');
+    
+    // Destroy previous instance
+    if (chartRef.current) chartRef.current.destroy();
+
+    chartRef.current = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: colors,
+          borderWidth: 0,
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+          legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11, family: 'Inter' } } }
+        }
+      }
+    });
+
+    return () => { if (chartRef.current) chartRef.current.destroy(); };
+  }, [data, labels, colors]);
+
+  return <canvas ref={canvasRef} />;
+}
 
 /* ─── APP ─── */
 function App() {
@@ -717,6 +772,15 @@ function AdminPortal({ onExit }) {
   const [modal, setModal] = useState(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // TOASTS STATE
+  const [toasts, setToasts] = useState([]);
+  const showToast = (message, type = 'success') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+  };
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(async (u) => {
@@ -773,7 +837,29 @@ function AdminPortal({ onExit }) {
   };
   const handleLogout = () => auth.signOut();
 
-  /* ═══ PERIOD FILTER ═══ */
+  const exportToCSV = (data, filename, headers) => {
+    if (!data || !data.length) return showToast("No data to export.", "error");
+    const csvRows = [];
+    csvRows.push(headers.join(','));
+    for (const row of data) {
+      const values = headers.map(header => {
+        const val = row[header] !== undefined && row[header] !== null ? row[header] : '';
+        return `"${String(val).replace(/"/g, '""')}"`;
+      });
+      csvRows.push(values.join(','));
+    }
+    const csvString = csvRows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${filename}_${todayStr()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`${filename} exported successfully!`, 'success');
+  };
+
   const filterByPeriod = (items, dateField = 'date') => {
     if (period === 'all') return items;
     const now = new Date();
@@ -791,12 +877,19 @@ function AdminPortal({ onExit }) {
     });
   };
 
-  const filteredLedger = useMemo(() => filterByPeriod(ledger, 'date'), [ledger, period]);
-  const filteredInvoices = useMemo(() => filterByPeriod(invoices, 'issueDate'), [invoices, period]);
-  const filteredPayments = useMemo(() => filterByPeriod(payments, 'submittedAt'), [payments, period]);
+  const applySearch = (items, fields) => {
+    if (!searchTerm) return items;
+    const lowerSearch = searchTerm.toLowerCase();
+    return items.filter(item => fields.some(f => String(item[f] || '').toLowerCase().includes(lowerSearch)));
+  };
+
+  const filteredLedger = useMemo(() => applySearch(filterByPeriod(ledger, 'date'), ['desc', 'category', 'reference']), [ledger, period, searchTerm]);
+  const filteredInvoices = useMemo(() => applySearch(filterByPeriod(invoices, 'issueDate'), ['invoiceNo', 'client', 'status']), [invoices, period, searchTerm]);
+  const filteredPayments = useMemo(() => applySearch(filterByPeriod(payments, 'submittedAt'), ['clientName', 'clientEmail', 'serviceTitle']), [payments, period, searchTerm]);
+  const filteredClients = useMemo(() => applySearch(clients, ['name', 'email', 'package']), [clients, searchTerm]);
+  
   const periodLabel = PERIOD_LABELS[period];
 
-  /* ═══ AUTO CALCULATIONS ═══ */
   const calc = useMemo(() => {
     const income = filteredLedger.filter(l => l.type === 'Income');
     const expense = filteredLedger.filter(l => l.type === 'Expense');
@@ -838,7 +931,7 @@ function AdminPortal({ onExit }) {
     });
 
     const pkgPrice = { 'Financial Starter': 1000, 'Business Control': 2000, 'Growth & Financial Planning': 4000 };
-    const activeClients = clients.filter(c => (c.status || 'Active') === 'Active');
+    const activeClients = filteredClients.filter(c => (c.status || 'Active') === 'Active');
     const mrr = activeClients.reduce((s, c) => s + (pkgPrice[c.package] || 0), 0);
 
     return {
@@ -846,9 +939,9 @@ function AdminPortal({ onExit }) {
       incomeByCategory, expenseByCategory,
       cashflow, cfOperating, cfInvesting, cfFinancing, netCashflow,
       commencementCollected, totalRevenue,
-      invMetrics, mrr, activeClients: activeClients.length, totalClients: clients.length
+      invMetrics, mrr, activeClients: activeClients.length, totalClients: filteredClients.length
     };
-  }, [filteredLedger, filteredInvoices, filteredPayments, clients]);
+  }, [filteredLedger, filteredInvoices, filteredPayments, filteredClients]);
 
   const pendingPayments = payments.filter(p => p.status === 'under_review' || !p.status);
 
@@ -925,9 +1018,11 @@ function AdminPortal({ onExit }) {
           await db.collection('se_payments').doc(data.id).update(data);
         }
       }
+      showToast('Record saved successfully.', 'success');
       closeModal();
     } catch (err) {
       setFormError(err.message);
+      showToast('Failed to save record.', 'error');
     } finally {
       setSaving(false);
     }
@@ -935,17 +1030,23 @@ function AdminPortal({ onExit }) {
 
   const handleDelete = async (collection, id) => {
     if (!window.confirm('Delete this record permanently? This cannot be undone.')) return;
-    try { await db.collection(collection).doc(id).delete(); }
-    catch (err) { alert('Failed to delete: ' + err.message); }
+    try { 
+      await db.collection(collection).doc(id).delete(); 
+      showToast('Record deleted.', 'info');
+    }
+    catch (err) { showToast('Failed to delete: ' + err.message, 'error'); }
   };
 
   const handleVerifyPayment = async (payment) => {
     if (!window.confirm('Verify this payment and add client to active portfolio?')) return;
     try {
+      // 1. Update Payment Status
       await db.collection('se_payments').doc(payment.id).update({
         status: 'approved',
         verifiedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
+
+      // 2. Add Client if not exists
       const exists = clients.find(c => (c.email || '').toLowerCase() === (payment.clientEmail || '').toLowerCase());
       if (!exists) {
         await db.collection('se_clients').add({
@@ -957,12 +1058,31 @@ function AdminPortal({ onExit }) {
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
       }
-    } catch (err) { alert('Failed to verify: ' + err.message); }
+
+      // 3. AUTO-GENERATE INVOICE
+      await db.collection('se_invoices').add({
+        invoiceNo: nextInvoiceNo(invoices),
+        client: payment.clientName,
+        description: `Onboarding: ${payment.serviceTitle}`,
+        issueDate: todayStr(),
+        dueDate: addDays(todayStr(), 30),
+        amount: num(payment.amount),
+        status: 'Pending',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      showToast('Payment verified, client added, and invoice generated.', 'success');
+    } catch (err) { 
+      showToast('Failed to verify: ' + err.message, 'error'); 
+    }
   };
 
   const handleMarkInvoicePaid = async (inv) => {
-    try { await db.collection('se_invoices').doc(inv.id).update({ status: 'Paid' }); }
-    catch (err) { alert('Failed: ' + err.message); }
+    try { 
+      await db.collection('se_invoices').doc(inv.id).update({ status: 'Paid' }); 
+      showToast('Invoice marked as Paid.', 'success');
+    }
+    catch (err) { showToast('Failed: ' + err.message, 'error'); }
   };
 
   if (authLoading) {
@@ -993,6 +1113,16 @@ function AdminPortal({ onExit }) {
 
   return (
     <div className="admin-layout fadein">
+      {/* TOASTS */}
+      <div className="toast-container">
+        {toasts.map(t => (
+          <div key={t.id} className={`toast ${t.type}`}>
+            <i className={`fas ${t.type === 'success' ? 'fa-check-circle' : t.type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}`} style={{ color: t.type === 'success' ? '#1E7B3C' : t.type === 'error' ? '#B8564F' : '#1B6CA8' }}></i>
+            {t.message}
+          </div>
+        ))}
+      </div>
+
       <div className="admin-top-bar">
         <div style={{ display:'flex', alignItems:'center', gap:16 }}>
           <button className="admin-hamburger" onClick={() => setIsDrawerOpen(true)}>
@@ -1024,18 +1154,18 @@ function AdminPortal({ onExit }) {
 
         <nav style={{ flex:1, overflowY:'auto' }}>
           <div className="admin-nav-section">Overview</div>
-          <div className={`admin-nav-item ${activeTab==='overview'?'active':''}`} onClick={() => { setActiveTab('overview'); setIsDrawerOpen(false); }}><i className="fas fa-chart-pie"></i> Dashboard</div>
+          <div className={`admin-nav-item ${activeTab==='overview'?'active':''}`} onClick={() => { setActiveTab('overview'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-chart-pie"></i> Dashboard</div>
 
           <div className="admin-nav-section" style={{ color:'#F5A623' }}>Client Operations</div>
-          <div className={`admin-nav-item ${activeTab==='onboarding'?'active':''}`} onClick={() => { setActiveTab('onboarding'); setIsDrawerOpen(false); }}>
+          <div className={`admin-nav-item ${activeTab==='onboarding'?'active':''}`} onClick={() => { setActiveTab('onboarding'); setIsDrawerOpen(false); setSearchTerm(''); }}>
             <i className="fas fa-money-check-alt"></i> Onboarding Queue {pendingPayments.length > 0 && <span style={{ background:'#B8564F', color:'#fff', borderRadius:99, padding:'2px 8px', fontSize:10, marginLeft:'auto' }}>{pendingPayments.length}</span>}
           </div>
-          <div className={`admin-nav-item ${activeTab==='portfolio'?'active':''}`} onClick={() => { setActiveTab('portfolio'); setIsDrawerOpen(false); }}><i className="fas fa-users"></i> Client Portfolio</div>
+          <div className={`admin-nav-item ${activeTab==='portfolio'?'active':''}`} onClick={() => { setActiveTab('portfolio'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-users"></i> Client Portfolio</div>
 
           <div className="admin-nav-section" style={{ color:'#4CB050' }}>Company Finance</div>
-          <div className={`admin-nav-item ${activeTab==='ledger'?'active':''}`} onClick={() => { setActiveTab('ledger'); setIsDrawerOpen(false); }}><i className="fas fa-book"></i> Company Ledger</div>
-          <div className={`admin-nav-item ${activeTab==='invoices'?'active':''}`} onClick={() => { setActiveTab('invoices'); setIsDrawerOpen(false); }}><i className="fas fa-file-invoice"></i> Invoicing</div>
-          <div className={`admin-nav-item ${activeTab==='statements'?'active':''}`} onClick={() => { setActiveTab('statements'); setIsDrawerOpen(false); }}><i className="fas fa-file-signature"></i> Financial Statements</div>
+          <div className={`admin-nav-item ${activeTab==='ledger'?'active':''}`} onClick={() => { setActiveTab('ledger'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-book"></i> Company Ledger</div>
+          <div className={`admin-nav-item ${activeTab==='invoices'?'active':''}`} onClick={() => { setActiveTab('invoices'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-file-invoice"></i> Invoicing</div>
+          <div className={`admin-nav-item ${activeTab==='statements'?'active':''}`} onClick={() => { setActiveTab('statements'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-file-signature"></i> Financial Statements</div>
         </nav>
 
         <div style={{ padding:24, borderTop:'1px solid rgba(255,255,255,0.1)' }}>
@@ -1046,12 +1176,28 @@ function AdminPortal({ onExit }) {
       </aside>
 
       <main className="admin-content">
+        
+        {/* GLOBAL FILTER & SEARCH BAR */}
         {activeTab !== 'statements' && (
-          <div className="filter-tabs">
-            <span style={{ fontSize:11, fontWeight:800, color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em', marginRight:8 }}>Period:</span>
-            {Object.entries(PERIOD_LABELS).map(([k, label]) => (
-              <button key={k} className={`filter-tab ${period===k?'active':''}`} onClick={() => setPeriod(k)}>{label}</button>
-            ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
+            <div className="filter-tabs" style={{ marginBottom: 0 }}>
+              <span style={{ fontSize:11, fontWeight:800, color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em', marginRight:8 }}>Period:</span>
+              {Object.entries(PERIOD_LABELS).map(([k, label]) => (
+                <button key={k} className={`filter-tab ${period===k?'active':''}`} onClick={() => setPeriod(k)}>{label}</button>
+              ))}
+            </div>
+            
+            <div style={{ position: 'relative', width: '100%', maxWidth: 300 }}>
+              <i className="fas fa-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }}></i>
+              <input 
+                type="text" 
+                placeholder="Search records..." 
+                className="form-input" 
+                style={{ paddingLeft: 36, borderRadius: 20 }}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </div>
         )}
 
@@ -1108,6 +1254,34 @@ function AdminPortal({ onExit }) {
               </div>
             </div>
 
+            {/* CHARTS ROW */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))', gap:20, marginBottom:32 }}>
+              <div className="admin-card">
+                <h3 style={{ fontSize:14, fontWeight:800, color:'#0A1F12', marginBottom:16, marginTop:0 }}>Income Breakdown</h3>
+                <div className="chart-container">
+                  {Object.keys(calc.incomeByCategory).length > 0 ? (
+                    <DoughnutChart 
+                      data={Object.values(calc.incomeByCategory)} 
+                      labels={Object.keys(calc.incomeByCategory)} 
+                      colors={['#1E7B3C', '#4CB050', '#F5A623', '#E8730F']} 
+                    />
+                  ) : <div className="empty-state" style={{ padding: 20 }}>No income recorded</div>}
+                </div>
+              </div>
+              <div className="admin-card">
+                <h3 style={{ fontSize:14, fontWeight:800, color:'#0A1F12', marginBottom:16, marginTop:0 }}>Expense Breakdown</h3>
+                <div className="chart-container">
+                  {Object.keys(calc.expenseByCategory).length > 0 ? (
+                    <DoughnutChart 
+                      data={Object.values(calc.expenseByCategory)} 
+                      labels={Object.keys(calc.expenseByCategory)} 
+                      colors={['#B8564F', '#E8730F', '#1B6CA8', '#64748B', '#94A3B8']} 
+                    />
+                  ) : <div className="empty-state" style={{ padding: 20 }}>No expenses recorded</div>}
+                </div>
+              </div>
+            </div>
+
             <div className="admin-card">
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
                 <h2 style={{ fontSize:16, fontWeight:800, color:'#0A1F12', margin:0 }}>Recent Payments</h2>
@@ -1117,7 +1291,7 @@ function AdminPortal({ onExit }) {
                 <table className="admin-table">
                   <thead><tr><th>Client</th><th>Service</th><th>Amount</th><th>Status</th></tr></thead>
                   <tbody>
-                    {payments.slice(0,5).map(p => (
+                    {filteredPayments.slice(0,5).map(p => (
                       <tr key={p.id}>
                         <td style={{ fontWeight:700 }}>{p.clientName || 'Unknown'}</td>
                         <td>{p.serviceTitle || 'N/A'}</td>
@@ -1125,7 +1299,7 @@ function AdminPortal({ onExit }) {
                         <td><span className={`status-pill ${p.status==='approved'?'active':'pending'}`}>{p.status==='approved'?'Active':'Under Review'}</span></td>
                       </tr>
                     ))}
-                    {payments.length === 0 && <tr><td colSpan="4" className="empty-state">No payments recorded yet.</td></tr>}
+                    {filteredPayments.length === 0 && <tr><td colSpan="4" className="empty-state">No payments recorded yet.</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -1147,7 +1321,7 @@ function AdminPortal({ onExit }) {
               {loadingData ? (
                 <div className="empty-state"><i className="fas fa-circle-notch fa-spin" style={{ color:'#E8730F', fontSize:24 }}></i></div>
               ) : filteredPayments.length === 0 ? (
-                <div className="empty-state"><i className="fas fa-check-circle" style={{ fontSize:32, color:'#1E7B3C', marginBottom:12, display:'block' }}></i>No payments in this period.</div>
+                <div className="empty-state"><i className="fas fa-check-circle" style={{ fontSize:32, color:'#1E7B3C', marginBottom:12, display:'block' }}></i>No payments found.</div>
               ) : (
                 <div style={{ overflowX:'auto' }}>
                   <table className="admin-table">
@@ -1162,7 +1336,7 @@ function AdminPortal({ onExit }) {
                           <td><span className={`status-pill ${p.status==='approved'?'active':'pending'}`}>{p.status==='approved'?'Active':'Under Review'}</span></td>
                           <td>
                             <div style={{ display:'flex', gap:6 }}>
-                              {p.status !== 'approved' && <button onClick={() => handleVerifyPayment(p)} className="btn-sm btn-add" title="Verify"><i className="fas fa-check"></i></button>}
+                              {p.status !== 'approved' && <button onClick={() => handleVerifyPayment(p)} className="btn-sm btn-add" title="Verify & Generate Invoice"><i className="fas fa-check"></i></button>}
                               <button onClick={() => openEdit('payment', p)} className="btn-sm btn-edit" title="Edit"><i className="fas fa-pen"></i></button>
                               <button onClick={() => handleDelete('se_payments', p.id)} className="btn-sm btn-del" title="Delete"><i className="fas fa-trash"></i></button>
                             </div>
@@ -1184,7 +1358,10 @@ function AdminPortal({ onExit }) {
                 <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Client Portfolio</h1>
                 <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{calc.activeClients} active · MRR: <strong>{fmtK(calc.mrr)}</strong></p>
               </div>
-              <button onClick={() => openAdd('client')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Client</button>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button onClick={() => exportToCSV(filteredClients, 'Clients', ['name','email','phone','package','status'])} className="btn-sm" style={{ background: '#E2E8F0', color: '#1E293B' }}><i className="fas fa-file-export"></i> Export CSV</button>
+                <button onClick={() => openAdd('client')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Client</button>
+              </div>
             </div>
 
             <div className="admin-card">
@@ -1192,7 +1369,7 @@ function AdminPortal({ onExit }) {
                 <table className="admin-table">
                   <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Package</th><th>Status</th><th>Actions</th></tr></thead>
                   <tbody>
-                    {clients.map(c => (
+                    {filteredClients.map(c => (
                       <tr key={c.id}>
                         <td style={{ fontWeight:700 }}>{c.name}</td>
                         <td>{c.email}</td>
@@ -1207,7 +1384,7 @@ function AdminPortal({ onExit }) {
                         </td>
                       </tr>
                     ))}
-                    {clients.length === 0 && <tr><td colSpan="6" className="empty-state">No clients yet. Add one or verify a payment to auto-create.</td></tr>}
+                    {filteredClients.length === 0 && <tr><td colSpan="6" className="empty-state">No clients found.</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -1222,7 +1399,10 @@ function AdminPortal({ onExit }) {
                 <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Company Ledger</h1>
                 <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{periodLabel} · {filteredLedger.length} entries · Net: <strong style={{ color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtK(calc.netProfit)}</strong></p>
               </div>
-              <button onClick={() => openAdd('ledger')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Entry</button>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button onClick={() => exportToCSV(filteredLedger, 'Ledger', ['date','type','category','desc','amount','reference'])} className="btn-sm" style={{ background: '#E2E8F0', color: '#1E293B' }}><i className="fas fa-file-export"></i> Export CSV</button>
+                <button onClick={() => openAdd('ledger')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Entry</button>
+              </div>
             </div>
 
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:16, marginBottom:24 }}>
@@ -1265,7 +1445,7 @@ function AdminPortal({ onExit }) {
                         </td>
                       </tr>
                     ))}
-                    {filteredLedger.length === 0 && <tr><td colSpan="7" className="empty-state">No ledger entries for this period. Click "Add Entry" to create one.</td></tr>}
+                    {filteredLedger.length === 0 && <tr><td colSpan="7" className="empty-state">No ledger entries found.</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -1280,7 +1460,10 @@ function AdminPortal({ onExit }) {
                 <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Invoicing</h1>
                 <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{periodLabel} · {calc.invMetrics.count} invoices · Total: <strong>{fmtK(calc.invMetrics.total)}</strong></p>
               </div>
-              <button onClick={() => openAdd('invoice')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Create Invoice</button>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button onClick={() => exportToCSV(filteredInvoices, 'Invoices', ['invoiceNo','client','issueDate','dueDate','amount','status'])} className="btn-sm" style={{ background: '#E2E8F0', color: '#1E293B' }}><i className="fas fa-file-export"></i> Export CSV</button>
+                <button onClick={() => openAdd('invoice')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Create Invoice</button>
+              </div>
             </div>
 
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:16, marginBottom:24 }}>
@@ -1324,7 +1507,7 @@ function AdminPortal({ onExit }) {
                         </tr>
                       );
                     })}
-                    {filteredInvoices.length === 0 && <tr><td colSpan="7" className="empty-state">No invoices for this period. Click "Create Invoice" to add one.</td></tr>}
+                    {filteredInvoices.length === 0 && <tr><td colSpan="7" className="empty-state">No invoices found.</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -1336,10 +1519,13 @@ function AdminPortal({ onExit }) {
           <div className="fadein">
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
               <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Financial Statements</h1>
-              <div className="filter-tabs" style={{ marginBottom:0 }}>
-                {Object.entries(PERIOD_LABELS).map(([k, label]) => (
-                  <button key={k} className={`filter-tab ${period===k?'active':''}`} onClick={() => setPeriod(k)}>{label}</button>
-                ))}
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button onClick={() => window.print()} className="btn-sm" style={{ background: '#1B6CA8', color: '#fff' }}><i className="fas fa-print"></i> Print / Save PDF</button>
+                <div className="filter-tabs" style={{ marginBottom:0 }}>
+                  {Object.entries(PERIOD_LABELS).map(([k, label]) => (
+                    <button key={k} className={`filter-tab ${period===k?'active':''}`} onClick={() => setPeriod(k)}>{label}</button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -1351,7 +1537,7 @@ function AdminPortal({ onExit }) {
               ))}
             </div>
 
-            <div className="report-container">
+            <div className="report-container print-area">
               <div className="report-header">
                 <h2 className="report-title">StartEasy Zambia</h2>
                 <p className="report-subtitle">
