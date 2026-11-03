@@ -138,6 +138,16 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .auth-input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; margin-bottom: 16px; font-family: inherit; }
 .auth-input:focus { outline: none; border-color: #E8730F; box-shadow: 0 0 0 3px rgba(232,115,15,0.1); }
 
+/* Financial Statements Styling */
+.report-container { background: #fff; border: 1px solid #E2E8F0; border-radius: 8px; padding: 40px; max-width: 800px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.03); font-family: 'Consolas', 'Courier New', monospace; }
+.report-header { text-align: center; margin-bottom: 32px; border-bottom: 2px solid #0A1F12; padding-bottom: 16px; }
+.report-title { font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 800; color: #0A1F12; margin: 0 0 8px 0; }
+.report-subtitle { font-size: 14px; color: #666; margin: 0; }
+.report-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
+.report-row.total { border-top: 2px solid #333; border-bottom: 4px double #333; font-weight: 800; font-size: 15px; margin-top: 8px; padding: 12px 0; }
+.report-row.section-title { font-weight: 800; text-transform: uppercase; margin-top: 24px; border-bottom: 1px solid #ccc; color: #0A1F12; }
+.report-indent { padding-left: 24px; }
+
 @media (max-width: 768px) {
   .admin-content { padding: 16px; }
   .admin-top-bar { padding: 12px 16px; }
@@ -146,6 +156,7 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
   .el .eh .dt, .el .eh .mt { text-align: left; } 
   .el .sign { grid-template-columns: 1fr; gap: 24px; }
   .modal-body { padding: 16px; }
+  .report-container { padding: 20px; }
 }
 </style>
 </head>
@@ -530,6 +541,7 @@ function AdminPortal({ onExit }) {
   // Navigation State
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview'); 
+  const [statementTab, setStatementTab] = useState('income'); // income, balance, cashflow
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(async (u) => {
@@ -714,6 +726,12 @@ function AdminPortal({ onExit }) {
           </div>
           <div className={`admin-nav-item ${activeTab === 'invoices' ? 'active' : ''}`} onClick={() => { setActiveTab('invoices'); setIsDrawerOpen(false); }}>
             <i className="fas fa-file-invoice"></i> Invoicing
+          </div>
+          <div className={`admin-nav-item ${activeTab === 'statements' ? 'active' : ''}`} onClick={() => { setActiveTab('statements'); setIsDrawerOpen(false); }}>
+            <i className="fas fa-file-signature"></i> Financial Statements
+          </div>
+          <div className={`admin-nav-item ${activeTab === 'management' ? 'active' : ''}`} onClick={() => { setActiveTab('management'); setIsDrawerOpen(false); }}>
+            <i className="fas fa-chart-bar"></i> Management Accounts
           </div>
 
           <div className="admin-nav-section">Administration</div>
@@ -1011,6 +1029,171 @@ function AdminPortal({ onExit }) {
                         </td>
                       </tr>
                     ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─── FINANCIAL STATEMENTS TAB ─── */}
+        {activeTab === 'statements' && (
+          <div className="fadein">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', margin: 0 }}>Financial Statements</h1>
+              <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }}><i className="fas fa-download"></i> Export PDF</button>
+            </div>
+
+            {/* Statement Tabs */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
+              {[['income', 'Income Statement'], ['balance', 'Balance Sheet'], ['cashflow', 'Cash Flow']].map(([k, label]) => (
+                <button key={k} onClick={() => setStatementTab(k)} style={{ padding: '10px 20px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', border: statementTab === k ? 'none' : '1px solid #E2E8F0', background: statementTab === k ? '#0A1F12' : '#fff', color: statementTab === k ? '#fff' : '#64748B' }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div className="report-container">
+              <div className="report-header">
+                <h2 className="report-title">StartEasy Zambia</h2>
+                <p className="report-subtitle">
+                  {statementTab === 'income' ? 'Income Statement (Profit & Loss)' : statementTab === 'balance' ? 'Statement of Financial Position (Balance Sheet)' : 'Statement of Cash Flows'} <br/>
+                  For the Month Ending 30 November 2026
+                </p>
+              </div>
+
+              {statementTab === 'income' && (
+                <div>
+                  <div className="report-row section-title">Revenue</div>
+                  <div className="report-row report-indent"><span>Client Subscriptions & Retainers</span><span>K45,000</span></div>
+                  <div className="report-row report-indent"><span>One-Time Advisory Projects</span><span>K15,000</span></div>
+                  <div className="report-row total"><span>Total Revenue</span><span>K60,000</span></div>
+
+                  <div className="report-row section-title">Cost of Sales</div>
+                  <div className="report-row report-indent"><span>Contractor Payments</span><span>(K10,000)</span></div>
+                  <div className="report-row total"><span>Gross Profit</span><span>K50,000</span></div>
+
+                  <div className="report-row section-title">Operating Expenses</div>
+                  <div className="report-row report-indent"><span>Salaries & Wages</span><span>(K15,000)</span></div>
+                  <div className="report-row report-indent"><span>Software & Subscriptions</span><span>(K2,500)</span></div>
+                  <div className="report-row report-indent"><span>Marketing & Advertising</span><span>(K3,000)</span></div>
+                  <div className="report-row report-indent"><span>Rent & Utilities</span><span>(K4,500)</span></div>
+                  <div className="report-row report-indent"><span>Professional Fees (Legal, Audit)</span><span>(K2,000)</span></div>
+                  <div className="report-row total"><span>Total Operating Expenses</span><span>(K27,000)</span></div>
+
+                  <div className="report-row total" style={{ fontSize: 18, color: '#1E7B3C' }}><span>Net Income (Profit)</span><span>K23,000</span></div>
+                </div>
+              )}
+
+              {statementTab === 'balance' && (
+                <div>
+                  <div className="report-row section-title">Assets</div>
+                  <div className="report-row report-indent"><span>Current Assets</span><span></span></div>
+                  <div className="report-row report-indent" style={{ paddingLeft: 48 }}><span>Cash at Bank</span><span>K35,000</span></div>
+                  <div className="report-row report-indent" style={{ paddingLeft: 48 }}><span>Accounts Receivable</span><span>K12,000</span></div>
+                  <div className="report-row report-indent"><span>Fixed Assets</span><span></span></div>
+                  <div className="report-row report-indent" style={{ paddingLeft: 48 }}><span>Computer Equipment (Net)</span><span>K18,000</span></div>
+                  <div className="report-row total"><span>Total Assets</span><span>K65,000</span></div>
+
+                  <div className="report-row section-title">Liabilities</div>
+                  <div className="report-row report-indent"><span>Current Liabilities</span><span></span></div>
+                  <div className="report-row report-indent" style={{ paddingLeft: 48 }}><span>Accounts Payable</span><span>K8,000</span></div>
+                  <div className="report-row report-indent" style={{ paddingLeft: 48 }}><span>Tax Payable (ZRA)</span><span>K7,000</span></div>
+                  <div className="report-row total"><span>Total Liabilities</span><span>K15,000</span></div>
+
+                  <div className="report-row section-title">Equity</div>
+                  <div className="report-row report-indent"><span>Owner's Capital</span><span>K27,000</span></div>
+                  <div className="report-row report-indent"><span>Retained Earnings</span><span>K23,000</span></div>
+                  <div className="report-row total"><span>Total Equity</span><span>K50,000</span></div>
+
+                  <div className="report-row total" style={{ borderTop: '2px solid #333', borderBottom: '4px double #333', fontSize: 16 }}><span>Total Liabilities & Equity</span><span>K65,000</span></div>
+                </div>
+              )}
+
+              {statementTab === 'cashflow' && (
+                <div>
+                  <div className="report-row section-title">Operating Activities</div>
+                  <div className="report-row report-indent"><span>Net Income</span><span>K23,000</span></div>
+                  <div className="report-row report-indent"><span>Adjustments (Depreciation)</span><span>K2,000</span></div>
+                  <div className="report-row report-indent"><span>Changes in Working Capital</span><span>(K5,000)</span></div>
+                  <div className="report-row total"><span>Net Cash from Operating Activities</span><span>K20,000</span></div>
+
+                  <div className="report-row section-title">Investing Activities</div>
+                  <div className="report-row report-indent"><span>Purchase of Equipment</span><span>(K10,000)</span></div>
+                  <div className="report-row total"><span>Net Cash used in Investing Activities</span><span>(K10,000)</span></div>
+
+                  <div className="report-row section-title">Financing Activities</div>
+                  <div className="report-row report-indent"><span>Capital Injection</span><span>K15,000</span></div>
+                  <div className="report-row report-indent"><span>Loan Proceeds</span><span>K10,000</span></div>
+                  <div className="report-row total"><span>Net Cash from Financing Activities</span><span>K25,000</span></div>
+
+                  <div className="report-row total" style={{ fontSize: 18, color: '#1E7B3C' }}><span>Net Increase in Cash</span><span>K35,000</span></div>
+                  <div className="report-row report-indent" style={{ marginTop: 12, borderTop: '1px solid #ccc', paddingTop: 12 }}><span>Cash at Beginning of Period</span><span>K0</span></div>
+                  <div className="report-row total" style={{ fontSize: 16 }}><span>Cash at End of Period</span><span>K35,000</span></div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ─── MANAGEMENT ACCOUNTS TAB ─── */}
+        {activeTab === 'management' && (
+          <div className="fadein">
+            <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', marginBottom: 24 }}>Management Accounts</h1>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, marginBottom: 32 }}>
+              <div className="admin-card" style={{ borderTop: '4px solid #1E7B3C' }}>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Gross Margin</div>
+                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#0A1F12' }}>83.3%</div>
+                <div style={{ fontSize: 12, color: '#1E7B3C', marginTop: 8, fontWeight: 600 }}><i className="fas fa-arrow-up"></i> Up 2.1% from last month</div>
+              </div>
+              <div className="admin-card" style={{ borderTop: '4px solid #E8730F' }}>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Operating Cash Runway</div>
+                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#0A1F12' }}>4.5 Months</div>
+                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8, fontWeight: 600 }}>Based on current burn rate</div>
+              </div>
+              <div className="admin-card" style={{ borderTop: '4px solid #1B6CA8' }}>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Customer Acquisition Cost</div>
+                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#0A1F12' }}>K450</div>
+                <div style={{ fontSize: 12, color: '#B8564F', marginTop: 8, fontWeight: 600 }}><i className="fas fa-arrow-up"></i> Up 5% (Ad spend increased)</div>
+              </div>
+            </div>
+
+            <div className="admin-card">
+              <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0A1F12', marginBottom: 20 }}>Budget Variance Analysis (Top 3 Variances)</h2>
+              <div style={{ overflowX: 'auto' }}>
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Budget</th>
+                      <th>Actual</th>
+                      <th>Variance</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ fontWeight: 700 }}>Software Subscriptions</td>
+                      <td>K1,500</td>
+                      <td>K2,500</td>
+                      <td style={{ color: '#B8564F', fontWeight: 700 }}>+ K1,000 (Overspent)</td>
+                      <td><span className="status-pill pending" style={{ background: '#FFE8E5', color: '#B8564F' }}>Action Needed</span></td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 700 }}>Client Revenue</td>
+                      <td>K50,000</td>
+                      <td>K60,000</td>
+                      <td style={{ color: '#1E7B3C', fontWeight: 700 }}>+ K10,000 (Overperformed)</td>
+                      <td><span className="status-pill active">On Track</span></td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 700 }}>Marketing & Ads</td>
+                      <td>K5,000</td>
+                      <td>K3,000</td>
+                      <td style={{ color: '#1E7B3C', fontWeight: 700 }}>- K2,000 (Underspent)</td>
+                      <td><span className="status-pill active">On Track</span></td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
