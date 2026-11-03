@@ -376,7 +376,7 @@ function App() {
   return (
     <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', width:'100%' }}>
       
-      {/* UPDATED HEADER */}
+      {/* HEADER EXACTLY LIKE DIRECTORY */}
       <header className="site-header">
         <div className="header-content">
           <div style={{ display:'flex', alignItems:'center', gap:12, minWidth:0 }}>
@@ -695,6 +695,7 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
                 <option value="Business Control">Business Control — K2,000</option>
                 <option value="Growth & Financial Planning">Growth & Financial Planning — K4,000</option>
                 <option value="Directory Service">Directory Service</option>
+                <option value="Venture Service">Venture Service</option>
               </select>
             </div>
             <div className="form-group">
@@ -728,6 +729,7 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
               <option value="">— Select —</option>
               {PACKAGES.map(p => <option key={p.id} value={p.title}>{p.title} — {p.price}</option>)}
               <option value="Directory Service">Directory Service (Manual)</option>
+              <option value="Venture Service">Venture Service (Manual)</option>
             </select>
           </div>
           <div className="form-row">
@@ -968,6 +970,12 @@ function AdminPortal({ onExit }) {
     });
   };
 
+  const isPackagePayment = (title) => {
+      if (!title) return false;
+      const t = title.toLowerCase();
+      return t.includes('financial starter') || t.includes('business control') || t.includes('growth & financial planning');
+  };
+
   const periodLedger = useMemo(() => filterByPeriod(ledger, 'date'), [ledger, period]);
   const periodInvoices = useMemo(() => filterByPeriod(invoices, 'issueDate'), [invoices, period]);
   const periodPayments = useMemo(() => filterByPeriod(payments, 'submittedAt'), [payments, period]);
@@ -1006,16 +1014,14 @@ function AdminPortal({ onExit }) {
     const cfFinancing = cashflow.financing.in - cashflow.financing.out;
     const netCashflow = cfOperating + cfInvesting + cfFinancing;
 
-    // ─── DIRECTORY LOGIC INTEGRATION ───
     const approvedPmts = periodPayments.filter(p => p.status === 'approved');
-    const dirPmts = approvedPmts.filter(p => p.serviceCode && p.serviceCode.startsWith('DIR-'));
-    const finPmts = approvedPmts.filter(p => !p.serviceCode || !p.serviceCode.startsWith('DIR-'));
+    const finPmts = approvedPmts.filter(p => isPackagePayment(p.serviceTitle));
+    const dirPmts = approvedPmts.filter(p => !isPackagePayment(p.serviceTitle));
     
-    // Directory payments are 100% revenue. Financial packages are 50% commencement.
-    const dirCollected = dirPmts.reduce((s, p) => s + num(p.amount), 0);
     const finCollected = finPmts.reduce((s, p) => s + num(p.amount) / 2, 0);
-    const commencementCollected = finCollected + dirCollected;
+    const dirCollected = dirPmts.reduce((s, p) => s + num(p.amount), 0);
     
+    const commencementCollected = finCollected + dirCollected;
     const totalRevenue = totalIncome + commencementCollected;
 
     const invMetrics = { total:0, paid:0, pending:0, overdue:0, count:0 };
@@ -1157,15 +1163,15 @@ function AdminPortal({ onExit }) {
         });
       }
 
-      const isDir = payment.serviceCode && payment.serviceCode.startsWith('DIR-');
-      const expectedAmt = isDir ? num(payment.amount) : num(payment.amount) / 2;
+      const isPkg = isPackagePayment(payment.serviceTitle);
+      const expectedAmt = isPkg ? num(payment.amount) / 2 : num(payment.amount);
 
       // AUTO-LEDGER ENTRY
       await db.collection('se_ledger').add({
         date: todayStr(),
         type: 'Income',
-        category: isDir ? 'Other Income' : 'Commencement Fees',
-        desc: `${isDir ? 'Directory' : 'Financial'} Payment: ${payment.serviceTitle} — ${payment.clientName}`,
+        category: isPkg ? 'Commencement Fees' : 'Service Fees',
+        desc: `${isPkg ? 'Financial' : 'Direct'} Payment: ${payment.serviceTitle} — ${payment.clientName}`,
         amount: expectedAmt,
         reference: payment.ref || payment.id,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1449,8 +1455,8 @@ function AdminPortal({ onExit }) {
                       <thead><tr><th>Client</th><th>Service</th><th>Total Fee</th><th>Verify Amount</th><th>Status</th><th>Actions</th></tr></thead>
                       <tbody>
                         {filteredPayments.map(p => {
-                          const isDir = p.serviceCode && p.serviceCode.startsWith('DIR-');
-                          const expectedAmt = isDir ? num(p.amount) : num(p.amount) / 2;
+                          const isPkg = isPackagePayment(p.serviceTitle);
+                          const expectedAmt = isPkg ? num(p.amount) / 2 : num(p.amount);
                           return (
                             <tr key={p.id}>
                               <td><div style={{ fontWeight:700 }}>{p.clientName || 'Unknown'}</div><div style={{ fontSize:11, color:'rgba(10,31,18,0.5)' }}>{p.clientEmail}</div></td>
@@ -1682,7 +1688,7 @@ function AdminPortal({ onExit }) {
                     <div className="report-row section-title">Revenue</div>
                     <div className="report-row report-indent"><span>Ledger Income</span><span>{fmtK(calc.totalIncome)}</span></div>
                     <div className="report-row report-indent"><span>Verified Financial Commencements (50%)</span><span>{fmtK(calc.finCollected)}</span></div>
-                    <div className="report-row report-indent"><span>Directory Service Fees (100%)</span><span>{fmtK(calc.dirCollected)}</span></div>
+                    <div className="report-row report-indent"><span>Venture & Directory Service Fees (100%)</span><span>{fmtK(calc.dirCollected)}</span></div>
                     <div className="report-row total"><span>Total Revenue</span><span>{fmtK(calc.totalRevenue)}</span></div>
 
                     <div className="report-row section-title">Income Breakdown by Category</div>
