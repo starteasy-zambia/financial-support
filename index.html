@@ -133,7 +133,7 @@ const PACKAGES = [
   {
     id: 'starter',
     title: 'Financial Starter',
-    price: 'K750 – K1,250',
+    price: 'K1,000', // Fixed amount
     audience: 'For sole traders, startups and microbusinesses.',
     desc: 'Establishing clean financial records and a basic cash position.',
     features: ['Income and expense recording','Sales and purchase tracking','Invoice preparation and payment register','Monthly income and expense summary','Basic cash position report'],
@@ -143,7 +143,7 @@ const PACKAGES = [
   {
     id: 'control',
     title: 'Business Control',
-    price: 'K1,500 – K2,500',
+    price: 'K2,000', // Fixed amount
     audience: 'For active SMEs with regular transactions.',
     popular: true,
     desc: 'Taking full control of cash flow, budgets, and monthly performance.',
@@ -154,7 +154,7 @@ const PACKAGES = [
   {
     id: 'growth',
     title: 'Growth & Financial Planning',
-    price: 'K3,000 – K5,000',
+    price: 'K4,000', // Fixed amount
     audience: 'For growing SMEs and businesses preparing to expand.',
     desc: 'Forecasting, funding readiness, and strategic financial planning.',
     features: ['Everything in Business Control, plus:','Rolling cash-flow forecasts','Quarterly financial planning','Growth budgets and financial scenarios','Financial performance analysis','Funding-readiness assessment','Preparation of financial info for funders'],
@@ -225,10 +225,25 @@ function App() {
     }, 100);
   };
 
-  const getFeeDisplay = (item) => {
-    if (item.id && item.features.length > 2) return `${item.price} / month`;
-    return item.price;
+  // Helper to extract number and calculate 50%
+  const getFeeBreakdown = (priceStr) => {
+    if (!priceStr || !priceStr.includes('K')) return { total: priceStr, commencement: priceStr, balance: 'N/A' };
+    const numMatch = priceStr.match(/[\d,]+/);
+    if (!numMatch) return { total: priceStr, commencement: priceStr, balance: 'N/A' };
+    
+    const rawNum = parseInt(numMatch[0].replace(/,/g, ''), 10);
+    const half = rawNum / 2;
+    
+    const format = (n) => `K${n.toLocaleString()}`;
+    
+    return {
+      total: priceStr,
+      commencement: format(half),
+      balance: format(half)
+    };
   };
+
+  const fees = selectedItem ? getFeeBreakdown(selectedItem.price) : { total: '', commencement: '', balance: '' };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
@@ -489,12 +504,20 @@ function App() {
                   
                   <div className="feebox">
                     <div className="row">
-                      <span className="l">{selectedItem.features.length > 2 ? 'Monthly Fee' : 'Service Fee'}</span>
-                      <span className="v">{selectedItem.price}</span>
+                      <span className="l">Total Service Fee</span>
+                      <span className="v">{fees.total}</span>
+                    </div>
+                    <div className="row">
+                      <span className="l">Commencement Fee (50%)</span>
+                      <span className="v">{fees.commencement}</span>
+                    </div>
+                    <div className="row">
+                      <span className="l">Balance (50% due on delivery)</span>
+                      <span className="v">{fees.balance}</span>
                     </div>
                     <div className="total">
-                      <span className="tl">{selectedItem.features.length > 2 ? 'First month due on acceptance' : 'Service fee due on acceptance'}</span>
-                      <span className="tv">{selectedItem.price}</span>
+                      <span className="tl">Due on acceptance</span>
+                      <span className="tv">{fees.commencement}</span>
                     </div>
                   </div>
                   
@@ -505,6 +528,7 @@ function App() {
                     <li><strong>No Employment Relationship:</strong> This Agreement does not create an employer-employee relationship. The Company operates as an independent contractor.</li>
                     <li><strong>Confidentiality:</strong> The Company will have access to sensitive financial data. We will never disclose this information to third parties.</li>
                     <li><strong>Limitation of Liability:</strong> The Company provides administrative and management support. We are not a licensed accounting or audit firm. We do not provide legal or tax advisory services.</li>
+                    <li><strong>Payment Terms:</strong> The commencement fee (50%) is due upon acceptance to initiate work. The balance (50%) is due upon delivery of the agreed deliverables.</li>
                     <li><strong>Termination:</strong> Either party may terminate this agreement with 30 days written notice.</li>
                   </ul>
 
@@ -564,7 +588,7 @@ function App() {
                   </div>
                   <h2 className="serif" style={{ fontSize: 24, color: '#0A1F12', marginBottom: 12 }}>Agreement Executed!</h2>
                   <p style={{ fontSize: 14, color: 'rgba(10,31,18,0.7)', marginBottom: 24, lineHeight: 1.6 }}>
-                    Your engagement proposal is now locked and awaiting payment. Please select a payment method below and send the transaction reference to our officer on WhatsApp.
+                    Your engagement proposal is now locked and awaiting the <strong>Commencement Fee of {fees.commencement}</strong>. Please select a payment method below and send the transaction reference to our officer on WhatsApp.
                   </p>
                   
                   <div style={{ textAlign: 'left', marginBottom: 24 }}>
@@ -583,7 +607,7 @@ function App() {
                     </div>
                   </div>
 
-                  <a href={waUrl(`*EXECUTED ENGAGEMENT PROPOSAL*\n\n*Client:* ${form.name}\n*Email:* ${form.email}\n*Phone:* ${form.phone || 'N/A'}\n\n*Service:* ${selectedItem.title}\n*Price:* ${selectedItem.price}\n\nI have executed the agreement. Here is my payment proof:`)} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'flex', width: '100%', marginBottom: 12, background: '#25D366', boxShadow: '0 10px 26px rgba(37,211,102,.32)', justifyContent: 'center', padding: '16px' }}>
+                  <a href={waUrl(`*EXECUTED ENGAGEMENT PROPOSAL*\n\n*Client:* ${form.name}\n*Email:* ${form.email}\n*Phone:* ${form.phone || 'N/A'}\n\n*Service:* ${selectedItem.title}\n*Commencement Fee Due:* ${fees.commencement}\n\nI have executed the agreement. Here is my payment proof:`)} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'flex', width: '100%', marginBottom: 12, background: '#25D366', boxShadow: '0 10px 26px rgba(37,211,102,.32)', justifyContent: 'center', padding: '16px' }}>
                     <i className="fab fa-whatsapp" style={{ fontSize: 18 }}></i> Send Payment Proof on WhatsApp
                   </a>
                   <button onClick={closeEngagement} style={{ background: 'none', border: 'none', color: '#666', textDecoration: 'underline', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Close and return</button>
