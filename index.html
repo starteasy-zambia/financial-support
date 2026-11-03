@@ -6,6 +6,8 @@
 <title>Financial Support & Management | StartEasy Zambia</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- ADDED: html2pdf for direct PDF downloads -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700;1,800&display=swap" rel="stylesheet">
@@ -190,16 +192,6 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
   .modal-body { padding: 16px; }
   .report-container { padding: 20px; }
   .form-row { grid-template-columns: 1fr; }
-}
-
-/* PRINT STYLES */
-@media print {
-  body { visibility: hidden; background: white; }
-  .print-area { visibility: visible; position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; box-shadow: none; border: none; }
-  .print-area * { visibility: visible; }
-  .admin-top-bar, .admin-drawer, .filter-tabs, .btn-sm, .admin-hamburger, .admin-drawer-overlay { display: none !important; }
-  .admin-content { padding: 0 !important; margin: 0 !important; }
-  .admin-layout { display: block !important; }
 }
 </style>
 </head>
@@ -835,7 +827,28 @@ function AdminPortal({ onExit }) {
   };
   const handleLogout = () => auth.signOut();
 
-  // ─── EXPORT TO CSV ───
+  // ─── DIRECT PDF DOWNLOAD (html2pdf) ───
+  const downloadPDF = () => {
+    const element = document.getElementById('print-area');
+    if (!element) return;
+    
+    // Temporarily hide action buttons inside the print area if any
+    showToast('Generating PDF...', 'info');
+
+    const opt = {
+      margin:       0.5,
+      filename:     `StartEasy_Statement_${todayStr()}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    
+    window.html2pdf().set(opt).from(element).save().then(() => {
+      showToast('PDF Downloaded successfully!', 'success');
+    });
+  };
+
+  // ─── CSV EXPORT ───
   const exportToCSV = (data, filename, headers) => {
     if (!data || !data.length) return showToast("No data to export.", "error");
     
@@ -854,7 +867,6 @@ function AdminPortal({ onExit }) {
     const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     
-    // Fallback download method
     const a = document.createElement("a");
     a.href = url;
     a.download = `${filename}_${todayStr()}.csv`;
@@ -884,10 +896,16 @@ function AdminPortal({ onExit }) {
     });
   };
 
-  const applySearch = (items, fields) => {
+  // ─── BULLETPROOF GLOBAL SEARCH ───
+  const applySearch = (items) => {
     if (!searchTerm) return items;
     const lowerSearch = searchTerm.toLowerCase();
-    return items.filter(item => fields.some(f => String(item[f] || '').toLowerCase().includes(lowerSearch)));
+    return items.filter(item => {
+      // Check ALL stringified values in the object (name, amount, date, status, etc.)
+      return Object.values(item).some(val => 
+        String(val || '').toLowerCase().includes(lowerSearch)
+      );
+    });
   };
 
   // Separate Period Data (for calculations) from Search Data (for tables)
@@ -895,10 +913,10 @@ function AdminPortal({ onExit }) {
   const periodInvoices = useMemo(() => filterByPeriod(invoices, 'issueDate'), [invoices, period]);
   const periodPayments = useMemo(() => filterByPeriod(payments, 'submittedAt'), [payments, period]);
 
-  const filteredLedger = useMemo(() => applySearch(periodLedger, ['desc', 'category', 'reference']), [periodLedger, searchTerm]);
-  const filteredInvoices = useMemo(() => applySearch(periodInvoices, ['invoiceNo', 'client', 'status']), [periodInvoices, searchTerm]);
-  const filteredPayments = useMemo(() => applySearch(periodPayments, ['clientName', 'clientEmail', 'serviceTitle']), [periodPayments, searchTerm]);
-  const filteredClients = useMemo(() => applySearch(clients, ['name', 'email', 'package']), [clients, searchTerm]);
+  const filteredLedger = useMemo(() => applySearch(periodLedger), [periodLedger, searchTerm]);
+  const filteredInvoices = useMemo(() => applySearch(periodInvoices), [periodInvoices, searchTerm]);
+  const filteredPayments = useMemo(() => applySearch(periodPayments), [periodPayments, searchTerm]);
+  const filteredClients = useMemo(() => applySearch(clients), [clients, searchTerm]);
   
   const periodLabel = PERIOD_LABELS[period];
 
@@ -1071,7 +1089,6 @@ function AdminPortal({ onExit }) {
         });
       }
 
-      // AUTO-GENERATE INVOICE (Safe Timestamp Invoice No)
       await db.collection('se_invoices').add({
         invoiceNo: `INV-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
         client: payment.clientName || 'Unknown',
@@ -1191,7 +1208,7 @@ function AdminPortal({ onExit }) {
         
         {/* GLOBAL FILTER & SEARCH BAR */}
         {activeTab !== 'statements' && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
             <div className="filter-tabs" style={{ marginBottom: 0 }}>
               <span style={{ fontSize:11, fontWeight:800, color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em', marginRight:8 }}>Period:</span>
               {Object.entries(PERIOD_LABELS).map(([k, label]) => (
@@ -1199,23 +1216,31 @@ function AdminPortal({ onExit }) {
               ))}
             </div>
             
-            <div style={{ position: 'relative', width: '100%', maxWidth: 300 }}>
-              <i className="fas fa-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }}></i>
-              <input 
-                type="text" 
-                placeholder="Search records..." 
-                className="form-input" 
-                style={{ paddingLeft: 36, paddingRight: searchTerm ? 36 : 12, borderRadius: 20 }}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            <div style={{ width: '100%', maxWidth: 350 }}>
+              <div style={{ position: 'relative', width: '100%' }}>
+                <i className="fas fa-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }}></i>
+                <input 
+                  type="text" 
+                  placeholder="Search all records (name, amount, date)..." 
+                  className="form-input" 
+                  style={{ paddingLeft: 36, paddingRight: searchTerm ? 36 : 12, borderRadius: 20 }}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <i 
+                    className="fas fa-times" 
+                    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', cursor: 'pointer' }}
+                    onClick={() => setSearchTerm('')}
+                    title="Clear search"
+                  ></i>
+                )}
+              </div>
+              {/* SEARCH RESULT COUNTER */}
               {searchTerm && (
-                <i 
-                  className="fas fa-times" 
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', cursor: 'pointer' }}
-                  onClick={() => setSearchTerm('')}
-                  title="Clear search"
-                ></i>
+                <div style={{ fontSize: 11, color: '#E8730F', marginTop: 4, paddingLeft: 8, fontWeight: 600 }}>
+                  Found {activeTab === 'ledger' ? filteredLedger.length : activeTab === 'invoices' ? filteredInvoices.length : activeTab === 'portfolio' ? filteredClients.length : filteredPayments.length} results for "{searchTerm}"
+                </div>
               )}
             </div>
           </div>
@@ -1532,7 +1557,8 @@ function AdminPortal({ onExit }) {
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
               <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Financial Statements</h1>
               <div style={{ display: 'flex', gap: 12 }}>
-                <button onClick={() => window.print()} className="btn-sm" style={{ background: '#1B6CA8', color: '#fff' }}><i className="fas fa-print"></i> Print / Save PDF</button>
+                {/* DIRECT DOWNLOAD BUTTON */}
+                <button onClick={downloadPDF} className="btn-sm" style={{ background: '#1B6CA8', color: '#fff' }}><i className="fas fa-download"></i> Download PDF</button>
                 <div className="filter-tabs" style={{ marginBottom:0 }}>
                   {Object.entries(PERIOD_LABELS).map(([k, label]) => (
                     <button key={k} className={`filter-tab ${period===k?'active':''}`} onClick={() => setPeriod(k)}>{label}</button>
@@ -1549,7 +1575,8 @@ function AdminPortal({ onExit }) {
               ))}
             </div>
 
-            <div className="report-container print-area">
+            {/* Added id="print-area" for html2pdf targeting */}
+            <div id="print-area" className="report-container">
               <div className="report-header">
                 <h2 className="report-title">StartEasy Zambia</h2>
                 <p className="report-subtitle">
