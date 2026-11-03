@@ -170,8 +170,6 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .kpi-trend { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 99px; display: inline-block; }
 .kpi-trend.up { background: #D1FAE5; color: #065F46; }
 .kpi-trend.down { background: #FFE8E5; color: #B8564F; }
-.balance-badge { font-family: 'Consolas', monospace; font-weight: 700; color: #0A1F12; }
-.balance-badge.neg { color: #B8564F; }
 .chart-container { position: relative; height: 220px; width: 100%; }
 
 /* Toasts */
@@ -281,25 +279,18 @@ function DoughnutChart({ chartData, type }) {
       type: 'doughnut',
       data: {
         labels: labels,
-        datasets: [{
-          data: data,
-          backgroundColor: colors,
-          borderWidth: 0,
-          hoverOffset: 4
-        }]
+        datasets: [{ data: data, backgroundColor: colors, borderWidth: 0, hoverOffset: 4 }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         cutout: '70%',
-        plugins: {
-          legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11, family: 'Inter' } } }
-        }
+        plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11, family: 'Inter' } } } }
       }
     });
 
     return () => { if (chartRef.current) chartRef.current.destroy(); };
-  }, [chartData, type]); // Stable dependencies
+  }, [chartData, type]);
 
   return <canvas ref={canvasRef} />;
 }
@@ -844,31 +835,36 @@ function AdminPortal({ onExit }) {
   };
   const handleLogout = () => auth.signOut();
 
+  // ─── EXPORT TO CSV ───
   const exportToCSV = (data, filename, headers) => {
     if (!data || !data.length) return showToast("No data to export.", "error");
-    try {
-      const csvRows = [];
-      csvRows.push(headers.join(','));
-      for (const row of data) {
-        const values = headers.map(header => {
-          const val = row[header] !== undefined && row[header] !== null ? row[header] : '';
-          return `"${String(val).replace(/"/g, '""')}"`;
-        });
-        csvRows.push(values.join(','));
-      }
-      const csvString = csvRows.join('\n');
-      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", `${filename}_${todayStr()}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showToast(`${filename} exported successfully!`, 'success');
-    } catch (err) {
-      showToast("Failed to export CSV.", "error");
+    
+    const csvRows = [];
+    csvRows.push(headers.join(','));
+    
+    for (const row of data) {
+      const values = headers.map(header => {
+        const val = row[header] !== undefined && row[header] !== null ? row[header] : '';
+        return `"${String(val).replace(/"/g, '""')}"`;
+      });
+      csvRows.push(values.join(','));
     }
+    
+    const csvString = csvRows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    // Fallback download method
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${filename}_${todayStr()}.csv`;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast(`${filename} exported successfully!`, 'success');
   };
 
   const filterByPeriod = (items, dateField = 'date') => {
@@ -894,7 +890,7 @@ function AdminPortal({ onExit }) {
     return items.filter(item => fields.some(f => String(item[f] || '').toLowerCase().includes(lowerSearch)));
   };
 
-  // ═══ CRITICAL FIX: Separate period calculation data from search-filtered table data ═══
+  // Separate Period Data (for calculations) from Search Data (for tables)
   const periodLedger = useMemo(() => filterByPeriod(ledger, 'date'), [ledger, period]);
   const periodInvoices = useMemo(() => filterByPeriod(invoices, 'issueDate'), [invoices, period]);
   const periodPayments = useMemo(() => filterByPeriod(payments, 'submittedAt'), [payments, period]);
@@ -906,7 +902,7 @@ function AdminPortal({ onExit }) {
   
   const periodLabel = PERIOD_LABELS[period];
 
-  // Calculations use Period Data, NOT Search Filtered Data
+  // Calculations strictly use Period Data (KPIs do not drop to zero when searching)
   const calc = useMemo(() => {
     const income = periodLedger.filter(l => l.type === 'Income');
     const expense = periodLedger.filter(l => l.type === 'Expense');
@@ -948,7 +944,7 @@ function AdminPortal({ onExit }) {
     });
 
     const pkgPrice = { 'Financial Starter': 1000, 'Business Control': 2000, 'Growth & Financial Planning': 4000 };
-    const activeClients = clients.filter(c => (c.status || 'Active') === 'Active'); // Always calc MRR on all clients
+    const activeClients = clients.filter(c => (c.status || 'Active') === 'Active');
     const mrr = activeClients.reduce((s, c) => s + (pkgPrice[c.package] || 0), 0);
 
     return {
@@ -1209,10 +1205,18 @@ function AdminPortal({ onExit }) {
                 type="text" 
                 placeholder="Search records..." 
                 className="form-input" 
-                style={{ paddingLeft: 36, borderRadius: 20 }}
+                style={{ paddingLeft: 36, paddingRight: searchTerm ? 36 : 12, borderRadius: 20 }}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+              {searchTerm && (
+                <i 
+                  className="fas fa-times" 
+                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', cursor: 'pointer' }}
+                  onClick={() => setSearchTerm('')}
+                  title="Clear search"
+                ></i>
+              )}
             </div>
           </div>
         )}
