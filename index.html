@@ -175,8 +175,8 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .chart-container { position: relative; height: 220px; width: 100%; }
 
 /* Toasts */
-.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-.toast { background: #0A1F12; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideIn 0.3s ease; }
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.toast { background: #0A1F12; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideIn 0.3s ease; pointer-events: auto; }
 .toast.success { border-left: 4px solid #1E7B3C; }
 .toast.error { border-left: 4px solid #B8564F; }
 .toast.info { border-left: 4px solid #1B6CA8; }
@@ -196,10 +196,12 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 
 /* PRINT STYLES */
 @media print {
-  body * { visibility: hidden; }
-  .print-area, .print-area * { visibility: visible; }
-  .print-area { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; border: none; padding: 0; }
-  .admin-top-bar, .admin-drawer, .filter-tabs, .btn-sm, .admin-hamburger { display: none !important; }
+  body { visibility: hidden; background: white; }
+  .print-area { visibility: visible; position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; box-shadow: none; border: none; }
+  .print-area * { visibility: visible; }
+  .admin-top-bar, .admin-drawer, .filter-tabs, .btn-sm, .admin-hamburger, .admin-drawer-overlay { display: none !important; }
+  .admin-content { padding: 0 !important; margin: 0 !important; }
+  .admin-layout { display: block !important; }
 }
 </style>
 </head>
@@ -259,16 +261,21 @@ const todayStr = () => new Date().toISOString().split('T')[0];
 const addDays = (dateStr, n) => { const d = new Date(dateStr); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; };
 
 /* ─── CHART COMPONENT ─── */
-function DoughnutChart({ data, labels, colors }) {
+function DoughnutChart({ chartData, type }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
-    const ctx = canvasRef.current.getContext('2d');
+    if (!canvasRef.current || !window.Chart || !chartData || Object.keys(chartData).length === 0) return;
     
-    // Destroy previous instance
+    const ctx = canvasRef.current.getContext('2d');
     if (chartRef.current) chartRef.current.destroy();
+    
+    const labels = Object.keys(chartData);
+    const data = Object.values(chartData);
+    const colors = type === 'income' 
+      ? ['#1E7B3C', '#4CB050', '#F5A623', '#E8730F', '#1B6CA8'] 
+      : ['#B8564F', '#E8730F', '#1B6CA8', '#64748B', '#94A3B8'];
 
     chartRef.current = new Chart(ctx, {
       type: 'doughnut',
@@ -292,7 +299,7 @@ function DoughnutChart({ data, labels, colors }) {
     });
 
     return () => { if (chartRef.current) chartRef.current.destroy(); };
-  }, [data, labels, colors]);
+  }, [chartData, type]); // Stable dependencies
 
   return <canvas ref={canvasRef} />;
 }
@@ -551,7 +558,7 @@ function App() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   FORM MODAL (shared for ledger / invoice / client / payment)
+   FORM MODAL
    ═══════════════════════════════════════════════════════════════════ */
 function FormModal({ modal, onClose, onSave, saving, error, clients }) {
   const [data, setData] = useState(modal.data);
@@ -839,25 +846,29 @@ function AdminPortal({ onExit }) {
 
   const exportToCSV = (data, filename, headers) => {
     if (!data || !data.length) return showToast("No data to export.", "error");
-    const csvRows = [];
-    csvRows.push(headers.join(','));
-    for (const row of data) {
-      const values = headers.map(header => {
-        const val = row[header] !== undefined && row[header] !== null ? row[header] : '';
-        return `"${String(val).replace(/"/g, '""')}"`;
-      });
-      csvRows.push(values.join(','));
+    try {
+      const csvRows = [];
+      csvRows.push(headers.join(','));
+      for (const row of data) {
+        const values = headers.map(header => {
+          const val = row[header] !== undefined && row[header] !== null ? row[header] : '';
+          return `"${String(val).replace(/"/g, '""')}"`;
+        });
+        csvRows.push(values.join(','));
+      }
+      const csvString = csvRows.join('\n');
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `${filename}_${todayStr()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`${filename} exported successfully!`, 'success');
+    } catch (err) {
+      showToast("Failed to export CSV.", "error");
     }
-    const csvString = csvRows.join('\n');
-    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `${filename}_${todayStr()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast(`${filename} exported successfully!`, 'success');
   };
 
   const filterByPeriod = (items, dateField = 'date') => {
@@ -883,16 +894,22 @@ function AdminPortal({ onExit }) {
     return items.filter(item => fields.some(f => String(item[f] || '').toLowerCase().includes(lowerSearch)));
   };
 
-  const filteredLedger = useMemo(() => applySearch(filterByPeriod(ledger, 'date'), ['desc', 'category', 'reference']), [ledger, period, searchTerm]);
-  const filteredInvoices = useMemo(() => applySearch(filterByPeriod(invoices, 'issueDate'), ['invoiceNo', 'client', 'status']), [invoices, period, searchTerm]);
-  const filteredPayments = useMemo(() => applySearch(filterByPeriod(payments, 'submittedAt'), ['clientName', 'clientEmail', 'serviceTitle']), [payments, period, searchTerm]);
+  // ═══ CRITICAL FIX: Separate period calculation data from search-filtered table data ═══
+  const periodLedger = useMemo(() => filterByPeriod(ledger, 'date'), [ledger, period]);
+  const periodInvoices = useMemo(() => filterByPeriod(invoices, 'issueDate'), [invoices, period]);
+  const periodPayments = useMemo(() => filterByPeriod(payments, 'submittedAt'), [payments, period]);
+
+  const filteredLedger = useMemo(() => applySearch(periodLedger, ['desc', 'category', 'reference']), [periodLedger, searchTerm]);
+  const filteredInvoices = useMemo(() => applySearch(periodInvoices, ['invoiceNo', 'client', 'status']), [periodInvoices, searchTerm]);
+  const filteredPayments = useMemo(() => applySearch(periodPayments, ['clientName', 'clientEmail', 'serviceTitle']), [periodPayments, searchTerm]);
   const filteredClients = useMemo(() => applySearch(clients, ['name', 'email', 'package']), [clients, searchTerm]);
   
   const periodLabel = PERIOD_LABELS[period];
 
+  // Calculations use Period Data, NOT Search Filtered Data
   const calc = useMemo(() => {
-    const income = filteredLedger.filter(l => l.type === 'Income');
-    const expense = filteredLedger.filter(l => l.type === 'Expense');
+    const income = periodLedger.filter(l => l.type === 'Income');
+    const expense = periodLedger.filter(l => l.type === 'Expense');
     const totalIncome = income.reduce((s, l) => s + num(l.amount), 0);
     const totalExpense = expense.reduce((s, l) => s + num(l.amount), 0);
     const netProfit = totalIncome - totalExpense;
@@ -905,7 +922,7 @@ function AdminPortal({ onExit }) {
     expense.forEach(l => { const c = l.category || 'Other'; expenseByCategory[c] = (expenseByCategory[c] || 0) + num(l.amount); });
 
     const cashflow = { operating: { in: 0, out: 0 }, investing: { in: 0, out: 0 }, financing: { in: 0, out: 0 } };
-    filteredLedger.forEach(l => {
+    periodLedger.forEach(l => {
       const cls = CASHFLOW_CLASS[l.category] || 'operating';
       const v = num(l.amount);
       if (l.type === 'Income') cashflow[cls].in += v;
@@ -916,12 +933,12 @@ function AdminPortal({ onExit }) {
     const cfFinancing = cashflow.financing.in - cashflow.financing.out;
     const netCashflow = cfOperating + cfInvesting + cfFinancing;
 
-    const approvedPmts = filteredPayments.filter(p => p.status === 'approved');
+    const approvedPmts = periodPayments.filter(p => p.status === 'approved');
     const commencementCollected = approvedPmts.reduce((s, p) => s + num(p.amount) / 2, 0);
     const totalRevenue = totalIncome + commencementCollected;
 
     const invMetrics = { total:0, paid:0, pending:0, overdue:0, count:0 };
-    filteredInvoices.forEach(inv => {
+    periodInvoices.forEach(inv => {
       const amt = num(inv.amount);
       invMetrics.total += amt; invMetrics.count += 1;
       const st = getInvoiceStatus(inv);
@@ -931,7 +948,7 @@ function AdminPortal({ onExit }) {
     });
 
     const pkgPrice = { 'Financial Starter': 1000, 'Business Control': 2000, 'Growth & Financial Planning': 4000 };
-    const activeClients = filteredClients.filter(c => (c.status || 'Active') === 'Active');
+    const activeClients = clients.filter(c => (c.status || 'Active') === 'Active'); // Always calc MRR on all clients
     const mrr = activeClients.reduce((s, c) => s + (pkgPrice[c.package] || 0), 0);
 
     return {
@@ -939,9 +956,9 @@ function AdminPortal({ onExit }) {
       incomeByCategory, expenseByCategory,
       cashflow, cfOperating, cfInvesting, cfFinancing, netCashflow,
       commencementCollected, totalRevenue,
-      invMetrics, mrr, activeClients: activeClients.length, totalClients: filteredClients.length
+      invMetrics, mrr, activeClients: activeClients.length, totalClients: clients.length
     };
-  }, [filteredLedger, filteredInvoices, filteredPayments, filteredClients]);
+  }, [periodLedger, periodInvoices, periodPayments, clients]);
 
   const pendingPayments = payments.filter(p => p.status === 'under_review' || !p.status);
 
@@ -951,6 +968,7 @@ function AdminPortal({ onExit }) {
     if (!due) return 'Pending';
     return due < new Date() ? 'Overdue' : 'Pending';
   };
+  
   const nextInvoiceNo = (list) => {
     const year = new Date().getFullYear();
     const maxNum = list.filter(i => (i.invoiceNo || '').startsWith(`INV-${year}-`))
@@ -1040,13 +1058,11 @@ function AdminPortal({ onExit }) {
   const handleVerifyPayment = async (payment) => {
     if (!window.confirm('Verify this payment and add client to active portfolio?')) return;
     try {
-      // 1. Update Payment Status
       await db.collection('se_payments').doc(payment.id).update({
         status: 'approved',
         verifiedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // 2. Add Client if not exists
       const exists = clients.find(c => (c.email || '').toLowerCase() === (payment.clientEmail || '').toLowerCase());
       if (!exists) {
         await db.collection('se_clients').add({
@@ -1059,11 +1075,11 @@ function AdminPortal({ onExit }) {
         });
       }
 
-      // 3. AUTO-GENERATE INVOICE
+      // AUTO-GENERATE INVOICE (Safe Timestamp Invoice No)
       await db.collection('se_invoices').add({
-        invoiceNo: nextInvoiceNo(invoices),
-        client: payment.clientName,
-        description: `Onboarding: ${payment.serviceTitle}`,
+        invoiceNo: `INV-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
+        client: payment.clientName || 'Unknown',
+        description: `Onboarding: ${payment.serviceTitle || 'Package'}`,
         issueDate: todayStr(),
         dueDate: addDays(todayStr(), 30),
         amount: num(payment.amount),
@@ -1260,11 +1276,7 @@ function AdminPortal({ onExit }) {
                 <h3 style={{ fontSize:14, fontWeight:800, color:'#0A1F12', marginBottom:16, marginTop:0 }}>Income Breakdown</h3>
                 <div className="chart-container">
                   {Object.keys(calc.incomeByCategory).length > 0 ? (
-                    <DoughnutChart 
-                      data={Object.values(calc.incomeByCategory)} 
-                      labels={Object.keys(calc.incomeByCategory)} 
-                      colors={['#1E7B3C', '#4CB050', '#F5A623', '#E8730F']} 
-                    />
+                    <DoughnutChart chartData={calc.incomeByCategory} type="income" />
                   ) : <div className="empty-state" style={{ padding: 20 }}>No income recorded</div>}
                 </div>
               </div>
@@ -1272,11 +1284,7 @@ function AdminPortal({ onExit }) {
                 <h3 style={{ fontSize:14, fontWeight:800, color:'#0A1F12', marginBottom:16, marginTop:0 }}>Expense Breakdown</h3>
                 <div className="chart-container">
                   {Object.keys(calc.expenseByCategory).length > 0 ? (
-                    <DoughnutChart 
-                      data={Object.values(calc.expenseByCategory)} 
-                      labels={Object.keys(calc.expenseByCategory)} 
-                      colors={['#B8564F', '#E8730F', '#1B6CA8', '#64748B', '#94A3B8']} 
-                    />
+                    <DoughnutChart chartData={calc.expenseByCategory} type="expense" />
                   ) : <div className="empty-state" style={{ padding: 20 }}>No expenses recorded</div>}
                 </div>
               </div>
