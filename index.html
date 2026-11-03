@@ -148,7 +148,7 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .report-row.section-title { font-weight: 800; text-transform: uppercase; margin-top: 24px; border-bottom: 1px solid #ccc; color: #0A1F12; }
 .report-indent { padding-left: 24px; }
 
-/* NEW: Form + Filter styles */
+/* Form + Filter styles */
 .filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
 .filter-tab { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; border: 1px solid #E2E8F0; background: #fff; color: #64748B; transition: all .15s; }
 .filter-tab:hover { border-color: #E8730F; color: #E8730F; }
@@ -220,13 +220,11 @@ const PACKAGES = [
   { id:'growth', title:'Growth & Financial Planning', price:'K4,000', audience:'For growing SMEs and businesses preparing to expand.', desc:'Forecasting, funding readiness, and strategic financial planning.', features:['Everything in Business Control, plus:','Rolling cash-flow forecasts','Quarterly financial planning','Growth budgets and financial scenarios','Financial performance analysis','Funding-readiness assessment','Preparation of financial info for funders'], outcome:'More informed growth decisions and better-organised financial information.', timeline:'Ongoing monthly' }
 ];
 
-/* Categories used for smart accounting classification */
 const LEDGER_CATEGORIES = {
   Income: ['Service Fees','Commencement Fees','Consulting Fees','Other Income'],
   Expense: ['Salaries & Wages','Rent','Utilities','Marketing','Travel','Equipment','Software','Professional Fees','Bank Charges','Other']
 };
 
-/* Cash-flow classification (Operating / Investing / Financing) */
 const CASHFLOW_CLASS = {
   'Service Fees':'operating','Commencement Fees':'operating','Consulting Fees':'operating','Other Income':'operating',
   'Salaries & Wages':'operating','Rent':'operating','Utilities':'operating','Marketing':'operating',
@@ -800,7 +798,6 @@ function AdminPortal({ onExit }) {
 
   /* ═══ AUTO CALCULATIONS ═══ */
   const calc = useMemo(() => {
-    // Ledger metrics
     const income = filteredLedger.filter(l => l.type === 'Income');
     const expense = filteredLedger.filter(l => l.type === 'Expense');
     const totalIncome = income.reduce((s, l) => s + num(l.amount), 0);
@@ -809,13 +806,11 @@ function AdminPortal({ onExit }) {
     const profitMargin = totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0;
     const expenseRatio = totalIncome > 0 ? (totalExpense / totalIncome) * 100 : 0;
 
-    // Category breakdowns
     const incomeByCategory = {};
     income.forEach(l => { const c = l.category || 'Other Income'; incomeByCategory[c] = (incomeByCategory[c] || 0) + num(l.amount); });
     const expenseByCategory = {};
     expense.forEach(l => { const c = l.category || 'Other'; expenseByCategory[c] = (expenseByCategory[c] || 0) + num(l.amount); });
 
-    // Cash-flow classification
     const cashflow = { operating: { in: 0, out: 0 }, investing: { in: 0, out: 0 }, financing: { in: 0, out: 0 } };
     filteredLedger.forEach(l => {
       const cls = CASHFLOW_CLASS[l.category] || 'operating';
@@ -828,14 +823,10 @@ function AdminPortal({ onExit }) {
     const cfFinancing = cashflow.financing.in - cashflow.financing.out;
     const netCashflow = cfOperating + cfInvesting + cfFinancing;
 
-    // Approved commencements (as revenue)
     const approvedPmts = filteredPayments.filter(p => p.status === 'approved');
     const commencementCollected = approvedPmts.reduce((s, p) => s + num(p.amount) / 2, 0);
-
-    // Total revenue = ledger income + commencement halves
     const totalRevenue = totalIncome + commencementCollected;
 
-    // Invoices
     const invMetrics = { total:0, paid:0, pending:0, overdue:0, count:0 };
     filteredInvoices.forEach(inv => {
       const amt = num(inv.amount);
@@ -846,7 +837,6 @@ function AdminPortal({ onExit }) {
       else invMetrics.pending += amt;
     });
 
-    // Client MRR
     const pkgPrice = { 'Financial Starter': 1000, 'Business Control': 2000, 'Growth & Financial Planning': 4000 };
     const activeClients = clients.filter(c => (c.status || 'Active') === 'Active');
     const mrr = activeClients.reduce((s, c) => s + (pkgPrice[c.package] || 0), 0);
@@ -856,14 +846,12 @@ function AdminPortal({ onExit }) {
       incomeByCategory, expenseByCategory,
       cashflow, cfOperating, cfInvesting, cfFinancing, netCashflow,
       commencementCollected, totalRevenue,
-      invMetrics, mrr, activeClients: activeClients.length,
-      totalClients: clients.length
+      invMetrics, mrr, activeClients: activeClients.length, totalClients: clients.length
     };
   }, [filteredLedger, filteredInvoices, filteredPayments, clients]);
 
   const pendingPayments = payments.filter(p => p.status === 'under_review' || !p.status);
 
-  /* ═══ HELPERS ═══ */
   const getInvoiceStatus = (inv) => {
     if (inv.status === 'Paid') return 'Paid';
     const due = toDate(inv.dueDate);
@@ -877,7 +865,6 @@ function AdminPortal({ onExit }) {
     return `INV-${year}-${String(maxNum + 1).padStart(4, '0')}`;
   };
 
-  /* ═══ MODAL CRUD ═══ */
   const openAdd = (type) => {
     const today = todayStr();
     let data = {};
@@ -959,7 +946,6 @@ function AdminPortal({ onExit }) {
         status: 'approved',
         verifiedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      // Auto-create client record if not exists
       const exists = clients.find(c => (c.email || '').toLowerCase() === (payment.clientEmail || '').toLowerCase());
       if (!exists) {
         await db.collection('se_clients').add({
@@ -979,7 +965,6 @@ function AdminPortal({ onExit }) {
     catch (err) { alert('Failed: ' + err.message); }
   };
 
-  /* ═══ RENDER AUTH ═══ */
   if (authLoading) {
     return <div className="auth-gate"><i className="fas fa-circle-notch fa-spin" style={{ color:'#F5A623', fontSize:32 }}></i></div>;
   }
@@ -1006,7 +991,6 @@ function AdminPortal({ onExit }) {
     );
   }
 
-  /* ═══ RENDER DASHBOARD ═══ */
   return (
     <div className="admin-layout fadein">
       <div className="admin-top-bar">
@@ -1062,7 +1046,6 @@ function AdminPortal({ onExit }) {
       </aside>
 
       <main className="admin-content">
-        {/* PERIOD FILTER (global) */}
         {activeTab !== 'statements' && (
           <div className="filter-tabs">
             <span style={{ fontSize:11, fontWeight:800, color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em', marginRight:8 }}>Period:</span>
@@ -1072,7 +1055,6 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
-        {/* ─── OVERVIEW ─── */}
         {activeTab === 'overview' && (
           <div className="fadein">
             <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', marginBottom:8 }}>Finance Dashboard</h1>
@@ -1151,7 +1133,6 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
-        {/* ─── ONBOARDING ─── */}
         {activeTab === 'onboarding' && (
           <div className="fadein">
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24 }}>
@@ -1196,7 +1177,6 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
-        {/* ─── PORTFOLIO ─── */}
         {activeTab === 'portfolio' && (
           <div className="fadein">
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24 }}>
@@ -1235,7 +1215,6 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
-        {/* ─── LEDGER ─── */}
         {activeTab === 'ledger' && (
           <div className="fadein">
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
@@ -1246,7 +1225,6 @@ function AdminPortal({ onExit }) {
               <button onClick={() => openAdd('ledger')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Entry</button>
             </div>
 
-            {/* Summary cards */}
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:16, marginBottom:24 }}>
               <div className="admin-card" style={{ padding:16 }}>
                 <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Total Income</div>
@@ -1295,7 +1273,6 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
-        {/* ─── INVOICES ─── */}
         {activeTab === 'invoices' && (
           <div className="fadein">
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
@@ -1355,7 +1332,6 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
-        {/* ─── STATEMENTS ─── */}
         {activeTab === 'statements' && (
           <div className="fadein">
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
@@ -1473,7 +1449,6 @@ function AdminPortal({ onExit }) {
         )}
       </main>
 
-      {/* FORM MODAL */}
       {modal && (
         <FormModal
           modal={modal}
