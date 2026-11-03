@@ -34,9 +34,6 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .logo-text-sub { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.5); font-weight: 700; }
 .logo-text-main { font-size: 15px; font-weight: 700; color: #fff; }
 .menu-toggle { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; padding: 4px; transition: transform 0.2s; }
-.nav-menu { position: absolute; top: 72px; right: 24px; background: #fff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 250px; overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(10,31,18,0.1); z-index: 100; }
-.nav-item { padding: 14px 20px; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: #0A1F12; text-decoration: none; border-bottom: 1px solid #eee; transition: all 0.2s; cursor: pointer; }
-.nav-item:hover { background: #F5FAF6; padding-left: 24px; }
 
 /* Buttons */
 .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; border-radius: 9px; cursor: pointer; font-family: inherit; font-weight: 700; transition: all .2s; background: linear-gradient(135deg,#E8730F,#F5A623); color: #fff; padding: 14px 28px; font-size: 14.5px; text-decoration: none; box-shadow: 0 10px 26px rgba(232,115,15,.32); }
@@ -530,7 +527,25 @@ function AdminPortal({ onExit }) {
       .orderBy('submittedAt', 'desc')
       .limit(50)
       .onSnapshot(snap => {
-        setPayments(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const rawPayments = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // --- FILTER OUT THE FAKE / TEST DATA ---
+        const filteredPayments = rawPayments.filter(p => {
+          const email = (p.clientEmail || '').toLowerCase();
+          const name = (p.clientName || '').toLowerCase();
+          const service = (p.serviceTitle || '').toLowerCase();
+          
+          const blacklistedEmails = ['naisainga@gmail.com', 'lewismwaba@gmail.com', 'moneyard2@gmail.com'];
+          const blacklistedNames = ['lewis mwaba', 'mwaba lewis', 'katongo mercy'];
+          
+          if (blacklistedEmails.includes(email)) return false;
+          if (blacklistedNames.includes(name)) return false;
+          if (service.includes('buyer access subscription')) return false;
+          
+          return true;
+        });
+
+        setPayments(filteredPayments);
         setLoadingData(false);
       }, err => {
         console.error("Error fetching payments:", err);
@@ -730,6 +745,11 @@ function AdminPortal({ onExit }) {
                         </td>
                       </tr>
                     ))}
+                    {payments.length === 0 && (
+                      <tr>
+                        <td colSpan="4" style={{ textAlign: 'center', padding: 40, color: 'rgba(10,31,18,0.5)' }}>No real submissions yet.</td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -741,7 +761,6 @@ function AdminPortal({ onExit }) {
           <div className="fadein">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
               <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', margin: 0 }}>Payment Verification Queue</h1>
-              <span style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)' }}>Live records from <code style={{ background: '#F5FAF6', padding: '2px 6px', borderRadius: 4 }}>se_payments</code></span>
             </div>
             
             <div className="admin-card">
@@ -750,7 +769,7 @@ function AdminPortal({ onExit }) {
               ) : payments.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(10,31,18,0.5)', fontSize: 14 }}>
                   <i className="fas fa-check-circle" style={{ fontSize: 32, color: '#1E7B3C', marginBottom: 12, display: 'block' }}></i>
-                  No payments found in the database.
+                  No real payments found in the database.
                 </div>
               ) : (
                 <div style={{ overflowX: 'auto' }}>
