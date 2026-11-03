@@ -36,6 +36,12 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .logo-text-main { font-size: 15px; font-weight: 700; color: #fff; }
 .menu-toggle { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; padding: 4px; transition: transform 0.2s; }
 
+/* Mobile Menu Dropdown */
+.mobile-menu-dropdown { position: absolute; top: 72px; left: 0; right: 0; background: #0A1F12; border-bottom: 1px solid rgba(245,166,35,.2); padding: 16px 24px; display: flex; flex-direction: column; gap: 8px; z-index: 99; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: slideDown 0.2s ease; }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+.mobile-menu-dropdown a, .mobile-menu-dropdown button { color: #fff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 16px; background: rgba(255,255,255,.05); border-radius: 8px; text-align: left; border: 1px solid rgba(255,255,255,.05); display: flex; align-items: center; gap: 12px; cursor: pointer; font-family: inherit; width: 100%; transition: all .2s; }
+.mobile-menu-dropdown a:hover, .mobile-menu-dropdown button:hover { background: rgba(232,115,15,.15); border-color: rgba(232,115,15,.3); color: #F5A623; }
+
 /* Buttons */
 .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; border-radius: 9px; cursor: pointer; font-family: inherit; font-weight: 700; transition: all .2s; background: linear-gradient(135deg,#E8730F,#F5A623); color: #fff; padding: 14px 28px; font-size: 14.5px; text-decoration: none; box-shadow: 0 10px 26px rgba(232,115,15,.32); }
 .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 16px 34px rgba(232,115,15,.45); }
@@ -329,6 +335,7 @@ function App() {
   const [error, setError] = useState('');
   const [flowStep, setFlowStep] = useState('draft');
   const [orientation, setOrientation] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // NEW STATE
 
   useEffect(() => {
     document.body.style.overflow = selectedItem ? 'hidden' : '';
@@ -376,11 +383,11 @@ function App() {
   return (
     <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', width:'100%' }}>
       
-      {/* HEADER EXACTLY LIKE DIRECTORY */}
+      {/* UPDATED HEADER WITH FUNCTIONAL MENU BUTTON */}
       <header className="site-header">
         <div className="header-content">
           <div style={{ display:'flex', alignItems:'center', gap:12, minWidth:0 }}>
-            <a href="#" className="logo-group" onClick={(e)=>{e.preventDefault(); window.scrollTo({top:0, behavior:'smooth'});}} title="Back to home">
+            <a href="#" className="logo-group" onClick={(e)=>{e.preventDefault(); window.scrollTo({top:0, behavior:'smooth'}); setMobileMenuOpen(false);}} title="Back to home">
               <BrandLogo size={38} showDirectoryLabel={true} />
             </a>
             <a href={MAIN_PLATFORM_URL} style={{ display:'inline-flex', alignItems:'center', gap:7, padding:'9px 13px', background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', borderRadius:'9px', fontSize:'12px', fontWeight:'800', textDecoration:'none', boxShadow:'0 8px 18px -8px rgba(232,115,15,.6)', whiteSpace:'nowrap', flexShrink:0 }}>
@@ -390,9 +397,23 @@ function App() {
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
             <a href="#contact" className="btn-primary hidden sm:inline-flex" style={{ padding:'10px 20px', fontSize:13 }}>Get Started</a>
-            <button className="menu-toggle"><i className="fas fa-bars"></i></button>
+            <button className="menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              <i className={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
+            </button>
           </div>
         </div>
+
+        {/* MOBILE DROPDOWN MENU */}
+        {mobileMenuOpen && (
+          <div className="mobile-menu-dropdown">
+            <a href="#home" onClick={() => setMobileMenuOpen(false)}><i className="fas fa-home" style={{width:16}}></i> Home</a>
+            <a href="#packages" onClick={() => setMobileMenuOpen(false)}><i className="fas fa-box-open" style={{width:16}}></i> Packages</a>
+            <a href="#contact" onClick={() => setMobileMenuOpen(false)}><i className="fas fa-envelope" style={{width:16}}></i> Contact</a>
+            <button onClick={() => { setMobileMenuOpen(false); setView('admin'); }}>
+              <i className="fas fa-lock" style={{width:16}}></i> Admin Portal
+            </button>
+          </div>
+        )}
       </header>
 
       <main style={{ flex:1, background:'#F5FAF6', width:'100%' }}>
