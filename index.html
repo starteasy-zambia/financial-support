@@ -113,11 +113,13 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .admin-layout { display: flex; flex-direction: column; min-height: 100vh; background: #F8FAFC; }
 .admin-top-bar { background: #fff; border-bottom: 1px solid #E2E8F0; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 30; }
 .admin-hamburger { background: none; border: none; font-size: 20px; color: #0A1F12; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 700; font-family: inherit; }
-.admin-drawer { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: #0A1F12; color: #fff; z-index: 50; transform: translateX(-100%); transition: transform 0.3s ease; display: flex; flex-direction: column; box-shadow: 4px 0 24px rgba(0,0,0,0.1); }
+.admin-drawer { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #0A1F12; color: #fff; z-index: 50; transform: translateX(-100%); transition: transform 0.3s ease; display: flex; flex-direction: column; box-shadow: 4px 0 24px rgba(0,0,0,0.1); }
 .admin-drawer.open { transform: translateX(0); }
 .admin-drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
 .admin-drawer-overlay.open { opacity: 1; pointer-events: auto; }
-.admin-nav-item { padding: 16px 24px; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+.admin-nav-section { padding: 24px 24px 8px; font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); border-top: 1px solid rgba(255,255,255,0.05); }
+.admin-nav-section:first-child { border-top: none; }
+.admin-nav-item { padding: 12px 24px; display: flex; align-items: center; gap: 12px; font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
 .admin-nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
 .admin-nav-item.active { background: rgba(245,166,35,0.1); color: #F5A623; border-left-color: #F5A623; }
 .admin-content { padding: 32px; flex: 1; width: 100%; max-width: 1400px; margin: 0 auto; }
@@ -201,6 +203,34 @@ const PACKAGES = [
 const PROJECTS = [
   "Business budget preparation", "Cash-flow forecast", "Financial records clean-up", 
   "Financial performance review", "Invoice management setup", "Funding-readiness preparation", "Business financial plan"
+];
+
+// Mock Data for Admin System
+const MOCK_CLIENTS = [
+  { id: 'c1', name: 'Tech Innovators Ltd', email: 'hello@techinnovators.zm', package: 'Business Control', assignedTo: 'Carol Kambole', status: 'Active', nextDeliverable: 'Month-End Report (Due 5th)' },
+  { id: 'c2', name: 'Lusaka Retail Hub', email: 'info@lusakaretail.zm', package: 'Financial Starter', assignedTo: 'Support Team', status: 'Active', nextDeliverable: 'Monthly Income Summary (Due 3rd)' },
+  { id: 'c3', name: 'Green Farms Agro', email: 'contact@greenfarms.zm', package: 'Growth & Financial Planning', assignedTo: 'Carol Kambole', status: 'Active', nextDeliverable: 'Q3 Cashflow Forecast (Due 10th)' },
+];
+
+const MOCK_CLIENT_TASKS = [
+  { id: 't1', client: 'Tech Innovators Ltd', task: 'Prepare October Month-End Management Report', assignedTo: 'Carol', deadline: '2026-11-05', status: 'In Progress', priority: 'High' },
+  { id: 't2', client: 'Lusaka Retail Hub', task: 'Reconcile Bank Statements for October', assignedTo: 'Support', deadline: '2026-11-03', status: 'Overdue', priority: 'Critical' },
+  { id: 't3', client: 'Green Farms Agro', task: 'Update 12-Month Rolling Cashflow Forecast', assignedTo: 'Carol', deadline: '2026-11-10', status: 'Not Started', priority: 'Medium' },
+  { id: 't4', client: 'Copperbelt Mining', task: 'Draft Business Plan for Bank Loan', assignedTo: 'Carol', deadline: '2026-11-15', status: 'In Progress', priority: 'High' },
+];
+
+const MOCK_COMPANY_LEDGER = [
+  { id: 'l1', date: '2026-11-01', desc: 'Payment from Tech Innovators (Commencement)', type: 'Income', amount: 1000, category: 'Client Revenue' },
+  { id: 'l2', date: '2026-11-01', desc: 'Payment from Lusaka Retail Hub (Commencement)', type: 'Income', amount: 500, category: 'Client Revenue' },
+  { id: 'l3', date: '2026-11-01', desc: 'Office Internet Subscription', type: 'Expense', amount: 450, category: 'Utilities' },
+  { id: 'l4', date: '2026-11-02', desc: 'Software Licenses (QuickBooks)', type: 'Expense', amount: 1200, category: 'Software' },
+  { id: 'l5', date: '2026-11-03', desc: 'Staff Transport Allowance', type: 'Expense', amount: 800, category: 'Payroll' },
+];
+
+const MOCK_INVOICES = [
+  { id: 'inv1', client: 'Tech Innovators Ltd', invoiceNo: 'INV-2026-001', amount: 2000, issueDate: '2026-11-01', dueDate: '2026-11-05', status: 'Paid' },
+  { id: 'inv2', client: 'Lusaka Retail Hub', invoiceNo: 'INV-2026-002', amount: 1000, issueDate: '2026-11-01', dueDate: '2026-11-05', status: 'Paid' },
+  { id: 'inv3', client: 'Green Farms Agro', invoiceNo: 'INV-2026-003', amount: 4000, issueDate: '2026-11-01', dueDate: '2026-11-05', status: 'Pending' },
 ];
 
 function App() {
@@ -484,7 +514,7 @@ function App() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   ADMIN PORTAL COMPONENT (SECURE, LIVE, RESPONSIVE)
+   ADMIN PORTAL COMPONENT (EXPANDED ACCOUNTING & FINANCE SYSTEM)
    ═══════════════════════════════════════════════════════════════════════ */
 function AdminPortal({ onExit }) {
   const [user, setUser] = useState(null);
@@ -499,7 +529,7 @@ function AdminPortal({ onExit }) {
   
   // Navigation State
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('overview'); 
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(async (u) => {
@@ -528,23 +558,18 @@ function AdminPortal({ onExit }) {
       .limit(50)
       .onSnapshot(snap => {
         const rawPayments = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        // --- FILTER OUT THE FAKE / TEST DATA ---
+        // Filter out spam/test data
         const filteredPayments = rawPayments.filter(p => {
           const email = (p.clientEmail || '').toLowerCase();
           const name = (p.clientName || '').toLowerCase();
           const service = (p.serviceTitle || '').toLowerCase();
-          
           const blacklistedEmails = ['naisainga@gmail.com', 'lewismwaba@gmail.com', 'moneyard2@gmail.com'];
           const blacklistedNames = ['lewis mwaba', 'mwaba lewis', 'katongo mercy'];
-          
           if (blacklistedEmails.includes(email)) return false;
           if (blacklistedNames.includes(name)) return false;
           if (service.includes('buyer access subscription')) return false;
-          
           return true;
         });
-
         setPayments(filteredPayments);
         setLoadingData(false);
       }, err => {
@@ -568,7 +593,6 @@ function AdminPortal({ onExit }) {
 
   const handleLogout = () => {
     auth.signOut();
-    // onExit() will be called by the auth listener if needed, but we can force it here too
   };
 
   const handleVerify = async (paymentId) => {
@@ -577,7 +601,7 @@ function AdminPortal({ onExit }) {
         status: 'approved',
         verifiedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      alert('Payment verified and client is now active.');
+      alert('Payment verified. Client has been added to the active portfolio.');
     } catch (err) {
       alert('Failed to verify: ' + err.message);
     }
@@ -640,7 +664,7 @@ function AdminPortal({ onExit }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <button className="admin-hamburger" onClick={() => setIsDrawerOpen(true)}>
             <i className="fas fa-bars"></i>
-            <span className="hidden sm:inline">Finance Admin</span>
+            <span className="hidden sm:inline">StartEasy Finance</span>
           </button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -660,25 +684,41 @@ function AdminPortal({ onExit }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div className="logo-mark" style={{ width: 32, height: 32, fontSize: 16 }}>S</div>
             <div>
-              <div style={{ fontSize: 8, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>Finance System</div>
+              <div style={{ fontSize: 8, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>Accounting & Finance</div>
               <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>StartEasy Zambia</div>
             </div>
           </div>
           <button onClick={() => setIsDrawerOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 18 }}><i className="fas fa-times"></i></button>
         </div>
 
-        <nav style={{ flex: 1, paddingTop: 16 }}>
+        <nav style={{ flex: 1, overflowY: 'auto' }}>
+          <div className="admin-nav-section">Overview</div>
           <div className={`admin-nav-item ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => { setActiveTab('overview'); setIsDrawerOpen(false); }}>
-            <i className="fas fa-chart-pie"></i> Dashboard Overview
+            <i className="fas fa-chart-pie"></i> Dashboard
           </div>
-          <div className={`admin-nav-item ${activeTab === 'queue' ? 'active' : ''}`} onClick={() => { setActiveTab('queue'); setIsDrawerOpen(false); }}>
-            <i className="fas fa-money-check-alt"></i> Payment Queue ({pendingPayments.length})
+
+          <div className="admin-nav-section" style={{ color: '#F5A623' }}>External Client Operations</div>
+          <div className={`admin-nav-item ${activeTab === 'onboarding' ? 'active' : ''}`} onClick={() => { setActiveTab('onboarding'); setIsDrawerOpen(false); }}>
+            <i className="fas fa-money-check-alt"></i> Onboarding Queue {pendingPayments.length > 0 && <span style={{ background: '#B8564F', color: '#fff', borderRadius: 99, padding: '2px 8px', fontSize: 10, marginLeft: 'auto' }}>{pendingPayments.length}</span>}
           </div>
-          <div className={`admin-nav-item ${activeTab === 'clients' ? 'active' : ''}`} onClick={() => { setActiveTab('clients'); setIsDrawerOpen(false); }}>
-            <i className="fas fa-users"></i> Active Clients
+          <div className={`admin-nav-item ${activeTab === 'portfolio' ? 'active' : ''}`} onClick={() => { setActiveTab('portfolio'); setIsDrawerOpen(false); }}>
+            <i className="fas fa-users"></i> Client Portfolio
+          </div>
+          <div className={`admin-nav-item ${activeTab === 'delivery' ? 'active' : ''}`} onClick={() => { setActiveTab('delivery'); setIsDrawerOpen(false); }}>
+            <i className="fas fa-tasks"></i> Service Delivery
+          </div>
+
+          <div className="admin-nav-section" style={{ color: '#4CB050' }}>Internal Company Finance</div>
+          <div className={`admin-nav-item ${activeTab === 'ledger' ? 'active' : ''}`} onClick={() => { setActiveTab('ledger'); setIsDrawerOpen(false); }}>
+            <i className="fas fa-book"></i> Company Ledger
           </div>
           <div className={`admin-nav-item ${activeTab === 'invoices' ? 'active' : ''}`} onClick={() => { setActiveTab('invoices'); setIsDrawerOpen(false); }}>
-            <i className="fas fa-file-invoice"></i> Invoices
+            <i className="fas fa-file-invoice"></i> Invoicing
+          </div>
+
+          <div className="admin-nav-section">Administration</div>
+          <div className={`admin-nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => { setActiveTab('settings'); setIsDrawerOpen(false); }}>
+            <i className="fas fa-cog"></i> Settings
           </div>
         </nav>
 
@@ -692,36 +732,31 @@ function AdminPortal({ onExit }) {
       {/* Main Content Area */}
       <main className="admin-content">
         
+        {/* ─── OVERVIEW TAB ─── */}
         {activeTab === 'overview' && (
           <div className="fadein">
-            <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', marginBottom: 24 }}>Financial Overview</h1>
+            <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', marginBottom: 24 }}>Finance Dashboard</h1>
             
-            {/* KPIs */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 20, marginBottom: 32 }}>
               <div className="admin-card">
                 <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Verified Commencement Fees</div>
                 <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#1E7B3C' }}>K{totalCollected.toLocaleString()}</div>
-                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8 }}>From all approved clients</div>
+                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8 }}>From approved clients</div>
               </div>
               <div className="admin-card">
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Pending Verifications</div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Pending Onboarding</div>
                 <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#E8730F' }}>{pendingPayments.length}</div>
-                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8 }}>Awaiting manual check</div>
+                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8 }}>Awaiting verification</div>
               </div>
               <div className="admin-card">
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Total Submissions</div>
-                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#0A1F12' }}>{payments.length}</div>
-                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8 }}>All time (last 50)</div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Active Clients</div>
+                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#0A1F12' }}>{MOCK_CLIENTS.length}</div>
+                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8 }}>Currently on retainers</div>
               </div>
             </div>
 
-            {/* Recent Queue Preview */}
             <div className="admin-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0A1F12', margin: 0 }}>Recent Submissions</h2>
-                <button onClick={() => setActiveTab('queue')} style={{ background: 'none', border: 'none', color: '#E8730F', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>View All →</button>
-              </div>
-              
+              <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0A1F12', marginBottom: 20 }}>Recent Onboarding Submissions</h2>
               <div style={{ overflowX: 'auto' }}>
                 <table className="admin-table">
                   <thead>
@@ -746,9 +781,7 @@ function AdminPortal({ onExit }) {
                       </tr>
                     ))}
                     {payments.length === 0 && (
-                      <tr>
-                        <td colSpan="4" style={{ textAlign: 'center', padding: 40, color: 'rgba(10,31,18,0.5)' }}>No real submissions yet.</td>
-                      </tr>
+                      <tr><td colSpan="4" style={{ textAlign: 'center', padding: 40, color: 'rgba(10,31,18,0.5)' }}>No real submissions yet.</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -757,10 +790,11 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
-        {activeTab === 'queue' && (
+        {/* ─── ONBOARDING QUEUE TAB ─── */}
+        {activeTab === 'onboarding' && (
           <div className="fadein">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', margin: 0 }}>Payment Verification Queue</h1>
+              <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', margin: 0 }}>Onboarding Queue</h1>
             </div>
             
             <div className="admin-card">
@@ -769,7 +803,7 @@ function AdminPortal({ onExit }) {
               ) : payments.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(10,31,18,0.5)', fontSize: 14 }}>
                   <i className="fas fa-check-circle" style={{ fontSize: 32, color: '#1E7B3C', marginBottom: 12, display: 'block' }}></i>
-                  No real payments found in the database.
+                  No payments found in the database.
                 </div>
               ) : (
                 <div style={{ overflowX: 'auto' }}>
@@ -803,7 +837,7 @@ function AdminPortal({ onExit }) {
                             <div style={{ display: 'flex', gap: 8 }}>
                               {p.status !== 'approved' && (
                                 <button onClick={() => handleVerify(p.id)} style={{ background: '#1E7B3C', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
-                                  Verify
+                                  Verify & Onboard
                                 </button>
                               )}
                               <button onClick={() => handleDelete(p.id)} style={{ background: '#FFE8E5', color: '#B8564F', border: 'none', padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' }} title="Delete Record">
@@ -821,20 +855,175 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
-        {/* Placeholders for other tabs */}
-        {activeTab === 'clients' && (
-          <div className="fadein" style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(10,31,18,0.5)' }}>
-            <i className="fas fa-users" style={{ fontSize: 48, marginBottom: 16, color: '#CBD5E1' }}></i>
-            <h2 className="serif" style={{ fontSize: 24, color: '#0A1F12', marginBottom: 8 }}>Active Clients Directory</h2>
-            <p>This module is connected to the live database. Active records will appear here.</p>
+        {/* ─── CLIENT PORTFOLIO TAB ─── */}
+        {activeTab === 'portfolio' && (
+          <div className="fadein">
+            <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', marginBottom: 24 }}>Client Portfolio</h1>
+            <div className="admin-card">
+              <div style={{ overflowX: 'auto' }}>
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Client Name</th>
+                      <th>Active Package</th>
+                      <th>Assigned Officer</th>
+                      <th>Next Deliverable</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {MOCK_CLIENTS.map(c => (
+                      <tr key={c.id}>
+                        <td>
+                          <div style={{ fontWeight: 700 }}>{c.name}</div>
+                          <div style={{ fontSize: 11, color: 'rgba(10,31,18,0.5)' }}>{c.email}</div>
+                        </td>
+                        <td style={{ fontWeight: 600, color: '#1B6CA8' }}>{c.package}</td>
+                        <td>{c.assignedTo}</td>
+                        <td style={{ fontSize: 12, color: 'rgba(10,31,18,0.7)' }}>{c.nextDeliverable}</td>
+                        <td><span className="status-pill active">{c.status}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
 
+        {/* ─── SERVICE DELIVERY TAB ─── */}
+        {activeTab === 'delivery' && (
+          <div className="fadein">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', margin: 0 }}>Service Delivery Tasks</h1>
+              <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }}><i className="fas fa-plus"></i> Assign Task</button>
+            </div>
+            <div className="admin-card">
+              <div style={{ overflowX: 'auto' }}>
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Client</th>
+                      <th>Task Description</th>
+                      <th>Assigned To</th>
+                      <th>Deadline</th>
+                      <th>Priority</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {MOCK_CLIENT_TASKS.map(t => (
+                      <tr key={t.id}>
+                        <td style={{ fontWeight: 700 }}>{t.client}</td>
+                        <td>{t.task}</td>
+                        <td>{t.assignedTo}</td>
+                        <td style={{ whiteSpace: 'nowrap' }}>{t.deadline}</td>
+                        <td>
+                          <span style={{ fontSize: 11, fontWeight: 800, color: t.priority === 'Critical' ? '#B8564F' : t.priority === 'High' ? '#E8730F' : '#1B6CA8' }}>
+                            {t.priority.toUpperCase()}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`status-pill ${t.status === 'In Progress' ? 'pending' : t.status === 'Overdue' ? 'active' : ''}`} style={{ background: t.status === 'Overdue' ? '#FFE8E5' : '', color: t.status === 'Overdue' ? '#B8564F' : '' }}>
+                            {t.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─── COMPANY LEDGER TAB ─── */}
+        {activeTab === 'ledger' && (
+          <div className="fadein">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', margin: 0 }}>Company Ledger</h1>
+              <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }}><i className="fas fa-plus"></i> Record Transaction</button>
+            </div>
+            <div className="admin-card">
+              <div style={{ overflowX: 'auto' }}>
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Description</th>
+                      <th>Category</th>
+                      <th>Type</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {MOCK_COMPANY_LEDGER.map(t => (
+                      <tr key={t.id}>
+                        <td style={{ whiteSpace: 'nowrap' }}>{t.date}</td>
+                        <td style={{ fontWeight: 600 }}>{t.desc}</td>
+                        <td><span style={{ fontSize: 11, background: '#F1F5F9', padding: '2px 8px', borderRadius: 4, fontWeight: 600 }}>{t.category}</span></td>
+                        <td>
+                          <span style={{ fontSize: 11, fontWeight: 800, color: t.type === 'Income' ? '#1E7B3C' : '#B8564F' }}>
+                            {t.type.toUpperCase()}
+                          </span>
+                        </td>
+                        <td style={{ fontWeight: 800, color: t.type === 'Income' ? '#1E7B3C' : '#0A1F12' }}>
+                          {t.type === 'Income' ? '+' : '-'} K{t.amount.toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─── INVOICES TAB ─── */}
         {activeTab === 'invoices' && (
+          <div className="fadein">
+            <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', marginBottom: 24 }}>Invoicing</h1>
+            <div className="admin-card">
+              <div style={{ overflowX: 'auto' }}>
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Invoice No</th>
+                      <th>Client</th>
+                      <th>Issue Date</th>
+                      <th>Due Date</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {MOCK_INVOICES.map(inv => (
+                      <tr key={inv.id}>
+                        <td style={{ fontWeight: 700, fontFamily: 'monospace' }}>{inv.invoiceNo}</td>
+                        <td>{inv.client}</td>
+                        <td>{inv.issueDate}</td>
+                        <td>{inv.dueDate}</td>
+                        <td style={{ fontWeight: 700 }}>K{inv.amount.toLocaleString()}</td>
+                        <td>
+                          <span className={`status-pill ${inv.status === 'Paid' ? 'active' : 'pending'}`}>
+                            {inv.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─── SETTINGS TAB ─── */}
+        {activeTab === 'settings' && (
           <div className="fadein" style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(10,31,18,0.5)' }}>
-            <i className="fas fa-file-invoice" style={{ fontSize: 48, marginBottom: 16, color: '#CBD5E1' }}></i>
-            <h2 className="serif" style={{ fontSize: 24, color: '#0A1F12', marginBottom: 8 }}>Invoice Management</h2>
-            <p>Generate and send monthly invoices to active clients here.</p>
+            <i className="fas fa-cog" style={{ fontSize: 48, marginBottom: 16, color: '#CBD5E1' }}></i>
+            <h2 className="serif" style={{ fontSize: 24, color: '#0A1F12', marginBottom: 8 }}>System Settings</h2>
+            <p>Manage user roles, permissions, and system configurations.</p>
           </div>
         )}
 
