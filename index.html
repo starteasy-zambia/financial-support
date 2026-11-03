@@ -54,9 +54,6 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 
 /* Timeline */
 .step-number { width: 48px; height: 48px; border-radius: 50%; background: #0A1F12; color: #F5A623; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; margin-bottom: 16px; flex-shrink: 0; }
-
-/* Warning Box */
-.warning-box { background: #FFF9E6; border-left: 4px solid #E8730F; padding: 24px; border-radius: 0 12px 12px 0; }
 </style>
 </head>
 <body>
@@ -293,50 +290,6 @@ function FinancialServicePage() {
                   <li><i className="fas fa-check-circle"></i> A short financial observations and recommendations summary</li>
                 </ul>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Team & Compliance */}
-        <section className="section-padding" style={{ background: '#fff' }}>
-          <div className="container">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 48 }}>
-              
-              <div>
-                <h2 className="serif" style={{ fontSize: 28, color: '#0A1F12', marginBottom: 20 }}>Our Delivery Team</h2>
-                <p style={{ fontSize: 15, color: 'rgba(10,31,18,0.7)', lineHeight: 1.6, marginBottom: 24 }}>
-                  We build a small delivery function supported by appropriately qualified professionals.
-                </p>
-                <ul className="check-list">
-                  <li><i className="fas fa-user-tie" style={{ color: '#0A1F12' }}></i> <strong>Financial Support Officer:</strong> Recordkeeping, invoices, reconciliations.</li>
-                  <li><i className="fas fa-user-tie" style={{ color: '#0A1F12' }}></i> <strong>Management Accountant:</strong> Budgets, cash-flow forecasts, management reporting.</li>
-                  <li><i className="fas fa-user-tie" style={{ color: '#0A1F12' }}></i> <strong>Client Support Officer:</strong> Onboarding, document collection, renewals.</li>
-                  <li><i className="fas fa-user-tie" style={{ color: '#0A1F12' }}></i> <strong>External Professional:</strong> Licensed accounting/tax professional for specialist sign-off.</li>
-                </ul>
-              </div>
-
-              <div>
-                <h2 className="serif" style={{ fontSize: 28, color: '#0A1F12', marginBottom: 20 }}>Regulatory Distinction (ZICA)</h2>
-                <div className="warning-box">
-                  <p style={{ fontSize: 14, color: 'rgba(10,31,18,0.8)', lineHeight: 1.6, margin: 0 }}>
-                    There is a regulatory distinction to observe in Zambia. ZICA's published guidance distinguishes basic bookkeeping and internal management-support work from certain forms of public accountancy practice. Work involving reports or financial information relied upon by third parties, as well as certain tax and banking engagements, can fall within regulated practice.
-                  </p>
-                </div>
-                <p style={{ fontSize: 15, color: 'rgba(10,31,18,0.7)', lineHeight: 1.6, marginTop: 20, marginBottom: 12 }}>
-                  For this reason, StartEasy initially <strong>avoids advertising</strong>:
-                </p>
-                <ul style={{ paddingLeft: 20, margin: 0, fontSize: 14, color: 'rgba(10,31,18,0.7)', lineHeight: 1.6 }}>
-                  <li>Auditing and assurance.</li>
-                  <li>Certified financial statements.</li>
-                  <li>Independent audit opinions.</li>
-                  <li>Tax representation or advisory without professional authority.</li>
-                  <li>Guaranteed funding approval.</li>
-                </ul>
-                <p style={{ fontSize: 14, color: 'rgba(10,31,18,0.7)', lineHeight: 1.6, marginTop: 16 }}>
-                  We offer financial record organisation, internal management support, and funding-document preparation within our authorised scope, using qualified partners where necessary.
-                </p>
-              </div>
-
             </div>
           </div>
         </section>
