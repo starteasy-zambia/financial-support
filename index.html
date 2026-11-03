@@ -70,13 +70,13 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .check-list li { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: 14px; color: rgba(10,31,18,0.8); line-height: 1.5; }
 .check-list li i { color: #1E7B3C; margin-top: 3px; font-size: 14px; }
 
-/* Modal Overlay - Fix to show right in front of the user */
+/* Modal Overlay */
 .modal-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: flex-start; justify-content: center; padding: 20px 10px; background: rgba(10,31,18,0.92); backdrop-filter: blur(4px); overflow-y: auto; }
 .modal-content { background: #F5FAF6; border-radius: 12px; width: 100%; max-width: 56rem; box-shadow: 0 30px 80px rgba(0,0,0,.5); margin: auto; }
 .modal-header { background: #0A1F12; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(245,166,35,.15); border-radius: 12px 12px 0 0; }
 .modal-body { padding: 24px 16px; }
 
-/* Legal Document */
+/* Legal Document / Letter */
 .el { background:#fff; border:1px solid #D0D0D0; border-radius:8px; padding:40px 50px; font-size:13.5px; line-height:1.8; color:#222; box-shadow: 0 10px 30px rgba(0,0,0,.05); width: 100%; margin: 0 auto; overflow-wrap: break-word; }
 .el .eh{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:18px;border-bottom:3px solid #0A1F12;margin-bottom:24px;flex-wrap:wrap}
 .el .eh .brand{font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:800;color:#0A1F12;letter-spacing:1px}
@@ -335,7 +335,7 @@ function App() {
   const [error, setError] = useState('');
   const [flowStep, setFlowStep] = useState('draft');
   const [orientation, setOrientation] = useState(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // NEW STATE
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = selectedItem ? 'hidden' : '';
@@ -383,7 +383,7 @@ function App() {
   return (
     <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', width:'100%' }}>
       
-      {/* UPDATED HEADER WITH FUNCTIONAL MENU BUTTON */}
+      {/* HEADER */}
       <header className="site-header">
         <div className="header-content">
           <div style={{ display:'flex', alignItems:'center', gap:12, minWidth:0 }}>
@@ -502,7 +502,7 @@ function App() {
             <div className="modal-header">
               <div style={{ display:'flex', alignItems:'center', gap:12 }}>
                 <span style={{ width:8, height:8, borderRadius:'50%', background:'#F5A623' }}></span>
-                <span style={{ fontSize:11, letterSpacing:'.2em', textTransform:'uppercase', fontWeight:700, color:'#F5A623' }}>{flowStep==='draft'?'Draft Engagement Proposal':'Executed Engagement Agreement'}</span>
+                <span style={{ fontSize:11, letterSpacing:'.2em', textTransform:'uppercase', fontWeight:700, color:'#F5A623' }}>{flowStep==='draft'?'Draft Engagement Letter & Agreement':'Executed Engagement Agreement'}</span>
               </div>
               <button onClick={closeEngagement} style={{ background:'none', border:'none', color:'rgba(255,255,255,.5)', cursor:'pointer', padding:8 }}><i className="fas fa-times" style={{ fontSize:18 }}></i></button>
             </div>
@@ -511,15 +511,29 @@ function App() {
                 {flowStep==='payment' && <div style={{ position:'absolute', top:'30%', left:'50%', transform:'translate(-50%, -50%) rotate(-30deg)', fontSize:80, fontWeight:900, color:'rgba(30,123,60,0.08)', pointerEvents:'none', zIndex:0, whiteSpace:'nowrap', fontFamily:'Playfair Display' }}>EXECUTED</div>}
                 <div className="eh" style={{ position:'relative', zIndex:1 }}>
                   <div><div className="brand">Start<em>Easy Zambia</em></div><div className="sub">Financial Support Engagement</div></div>
-                  <div><div className="dt">AGREEMENT OF ENGAGEMENT</div><div className="mt">{new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}<br/>Ref: SE-FIN-{new Date().getFullYear()}-{Math.floor(Math.random()*9000)+1000}</div></div>
+                  <div><div className="dt">ENGAGEMENT LETTER</div><div className="mt">{new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}<br/>Ref: SE-FIN-{new Date().getFullYear()}-{Math.floor(Math.random()*9000)+1000}</div></div>
                 </div>
                 <div style={{ position:'relative', zIndex:1 }}>
-                  <p>This Agreement of Engagement (the "Agreement") is entered into by and between <strong>StartEasy Zambia</strong> (the "Company") and the undersigned Client (the "Client").</p>
-                  <h4>1. Scope of Service</h4>
+                  
+                  {/* Formal Letter Header */}
+                  <div style={{ marginBottom: 24, paddingBottom: 16, borderBottom: '1px dashed #eee' }}>
+                    <p style={{ margin: '0 0 8px', fontSize: 13.5, color: '#666' }}><strong>To:</strong></p>
+                    <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700, color: '#0A1F12' }}>{form.name || '[Client Name]'}</p>
+                    <p style={{ margin: '0 0 4px', fontSize: 13, color: '#555' }}>{form.business || '[Business Name]'}</p>
+                    <p style={{ margin: '0', fontSize: 13, color: '#555' }}>{form.email || '[Client Email]'}</p>
+                  </div>
+
+                  <p style={{ marginBottom: 20, fontSize: 14 }}>Dear <strong>{form.name || '[Client Name]'}</strong>,</p>
+                  
+                  <p>Thank you for choosing StartEasy Zambia. We are pleased to submit this formal Engagement Letter and Agreement for your consideration.</p>
+                  <p>This document outlines the scope of services, compensation, and terms under which we will provide the <strong>{selectedItem.title}</strong> service to you and your business.</p>
+
+                  <h4 style={{ marginTop: 32 }}>1. Scope of Service</h4>
                   <p>The Company hereby agrees to provide the following financial support service: <strong>{selectedItem.title}</strong>.</p>
                   <p>{selectedItem.desc || "Dedicated execution of the requested financial task."}</p>
                   <p><strong>Specifically, the Company will deliver:</strong></p>
                   <ul>{selectedItem.features.map((f,i) => <li key={i}>{f}</li>)}</ul>
+                  
                   <h4>2. Compensation</h4>
                   <p>In consideration of the services rendered, the Client shall pay the Company the following fee:</p>
                   <div className="feebox">
@@ -529,6 +543,7 @@ function App() {
                     <div className="total"><span className="tl">Due on acceptance</span><span className="tv">{fees.commencement}</span></div>
                   </div>
                   <p style={{ fontSize:11.5, color:'#666', fontStyle:'italic', marginTop:8 }}>All amounts are StartEasy service fees for work only. They are separate from and do not include any government or regulator fee.</p>
+                  
                   <h4>3. Terms and Conditions</h4>
                   <ul>
                     <li><strong>No Employment Relationship:</strong> This Agreement does not create an employer-employee relationship. The Company operates as an independent contractor.</li>
@@ -537,15 +552,10 @@ function App() {
                     <li><strong>Payment Terms:</strong> The commencement fee (50%) is due upon acceptance to initiate work. The balance (50%) is due upon delivery of the agreed deliverables.</li>
                     <li><strong>Termination:</strong> Either party may terminate this agreement with 30 days written notice.</li>
                   </ul>
-                  <h4>4. Client Details</h4>
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginTop:'10px', width:'100%' }}>
-                    <span><strong>Full Name:</strong><br/><input className="doc-input-line" value={form.name} onChange={e => setForm({...form, name:e.target.value})} disabled={flowStep!=='draft'} /></span>
-                    <span><strong>Email Address:</strong><br/><input className="doc-input-line" type="email" value={form.email} onChange={e => setForm({...form, email:e.target.value})} disabled={flowStep!=='draft'} /></span>
-                    <span><strong>Phone Number:</strong><br/><input className="doc-input-line" value={form.phone} onChange={e => setForm({...form, phone:e.target.value})} disabled={flowStep!=='draft'} /></span>
-                    <span><strong>Physical Location:</strong><br/><input className="doc-input-line" value={form.location} onChange={e => setForm({...form, location:e.target.value})} disabled={flowStep!=='draft'} /></span>
-                  </div>
-                  <h4>5. Acceptance and Signature</h4>
-                  <p>By signing below, the Client acknowledges that they have read, understood, and agree to be bound by the terms of this Agreement.</p>
+
+                  <h4>4. Acceptance and Signature</h4>
+                  <p>By signing below, the Client acknowledges that they have read, understood, and agree to be bound by the terms of this Agreement. Please complete your details in the box below to execute.</p>
+                  
                   <div className="sign">
                     <div><div className="sigval" style={{ color:'#1B6CA8' }}>{SIGNATORY_NAME}</div><div className="lbl">{SIGNATORY_TITLE}</div></div>
                     <div><div className="sigval" style={{ color:'#E8730F' }}>{form.name || '_________________________'}</div><div className="lbl">For the Client</div></div>
@@ -555,9 +565,20 @@ function App() {
 
               {flowStep==='draft' ? (
                 <div style={{ marginTop:24, background:'#fff', padding:24, borderRadius:12, border:'1px solid #eee' }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 16, color: '#0A1F12' }}>Sign & Execute</h3>
+                  
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom: 16 }}>
+                    <div><label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: '#666', marginBottom: 4, display: 'block' }}>Full Name *</label><input className="form-input" value={form.name} onChange={e => setForm({...form, name:e.target.value})} placeholder="Your full name" /></div>
+                    <div><label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: '#666', marginBottom: 4, display: 'block' }}>Email Address *</label><input className="form-input" type="email" value={form.email} onChange={e => setForm({...form, email:e.target.value})} placeholder="you@company.com" /></div>
+                  </div>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom: 20 }}>
+                    <div><label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: '#666', marginBottom: 4, display: 'block' }}>Business Name</label><input className="form-input" value={form.business} onChange={e => setForm({...form, business:e.target.value})} placeholder="If applicable" /></div>
+                    <div><label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: '#666', marginBottom: 4, display: 'block' }}>Phone Number</label><input className="form-input" value={form.phone} onChange={e => setForm({...form, phone:e.target.value})} placeholder="+260..." /></div>
+                  </div>
+
                   <label style={{ display:'flex', gap:12, alignItems:'flex-start', fontSize:13, color:'rgba(10,31,18,.85)', cursor:'pointer', lineHeight:1.6 }}>
                     <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ width:20, height:20, accentColor:'#E8730F', flexShrink:0, marginTop:2 }} />
-                    <span>I have read, understood, and agree to the terms of this engagement proposal. I confirm that I am authorized to sign on behalf of my business.</span>
+                    <span>I have read, understood, and agree to the terms of this engagement letter. I confirm that I am authorized to sign on behalf of my business.</span>
                   </label>
                   {error && <div style={{ background:'#FFE8E5', color:'#B8564F', padding:12, borderRadius:6, marginTop:16, fontSize:13, fontWeight:600 }}>{error}</div>}
                   <div style={{ display:'flex', flexDirection:'column', gap:12, marginTop:20 }}>
@@ -569,7 +590,7 @@ function App() {
                 <div className="success-box fadein">
                   <div style={{ width:64, height:64, borderRadius:'50%', background:'#EAF7EE', color:'#1E7B3C', display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, margin:'0 auto 24px' }}><i className="fas fa-check-circle"></i></div>
                   <h2 className="serif" style={{ fontSize:24, color:'#0A1F12', marginBottom:12 }}>Agreement Executed!</h2>
-                  <p style={{ fontSize:14, color:'rgba(10,31,18,0.7)', marginBottom:24, lineHeight:1.6 }}>Your engagement proposal is now locked and awaiting the <strong>Commencement Fee of {fees.commencement}</strong>. Please select a payment method below and send the transaction reference to our officer on WhatsApp.</p>
+                  <p style={{ fontSize:14, color:'rgba(10,31,18,0.7)', marginBottom:24, lineHeight:1.6 }}>Your engagement letter is now locked and awaiting the <strong>Commencement Fee of {fees.commencement}</strong>. Please select a payment method below and send the transaction reference to our officer on WhatsApp.</p>
                   <div style={{ textAlign:'left', marginBottom:24 }}>
                     <div className="method-card">
                       <div className="method-header"><i className="fas fa-mobile-alt"></i> Airtel Money / MTN MoMo</div>
