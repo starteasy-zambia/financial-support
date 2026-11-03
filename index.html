@@ -68,11 +68,11 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 /* Modal */
 .modal-overlay { position: fixed; inset: 0; z-index: 200; display: flex; align-items: flex-start; justify-content: center; padding: 20px 10px; background: rgba(10,31,18,0.92); backdrop-filter: blur(4px); overflow-y: auto; }
 .modal-content { background: #F5FAF6; border-radius: 12px; width: 100%; max-width: 64rem; box-shadow: 0 30px 80px rgba(0,0,0,.5); margin: auto; }
-.modal-header { background: #0A1F12; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(245,166,35,.15); border-radius: 12px 12px 0 0; }
-.modal-body { padding: 24px; }
+.modal-header { background: #0A1F12; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(245,166,35,.15); border-radius: 12px 12px 0 0; }
+.modal-body { padding: 24px 16px; }
 
 /* Legal Document Styling */
-.el { background:#fff; border:1px solid #D0D0D0; border-radius:8px; padding:32px; font-size:13.5px; line-height:1.8; color:#222; box-shadow: 0 10px 40px rgba(0,0,0,.08); width: 100%; margin: 0 auto; }
+.el { background:#fff; border:1px solid #D0D0D0; border-radius:8px; padding:32px 24px; font-size:13.5px; line-height:1.8; color:#222; box-shadow: 0 10px 40px rgba(0,0,0,.08); width: 100%; margin: 0 auto; }
 .el .eh{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:18px;border-bottom:3px solid #0A1F12;margin-bottom:24px;flex-wrap:wrap}
 .el .eh .brand{font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:800;color:#0A1F12;letter-spacing:1px}
 .el .eh .brand em{font-style:normal;color:#E8730F}
@@ -85,22 +85,25 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .el ul{margin:0 0 18px;padding-left:24px}
 .el li{margin-bottom:12px;font-size:13px; text-align: justify;}
 .el .highlight-box{background:#F9FBFA; border-left:4px solid #E8730F; padding:18px; margin-bottom:24px; font-size:13.5px; font-weight:500;}
-.el .sign{margin-top:36px;padding-top:24px;border-top:1px solid #E0E0E0;display:grid;grid-template-columns:1fr;gap:32px; width: 100%;}
+
+/* Signature Block */
+.el .sign{margin-top:40px;padding-top:24px;border-top:1px solid #E0E0E0;display:grid;grid-template-columns:1fr;gap:32px; width: 100%;}
 .el .sign .sigval{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:#0A1F12;letter-spacing:.04em;font-style:italic;padding-bottom:8px;border-bottom:1px solid #333;margin-bottom:10px;min-height:40px; word-break: break-word;}
 .el .sign .lbl{font-size:11px;color:#666;font-weight:600; text-transform:uppercase; letter-spacing:0.05em; line-height: 1.5;}
 
-.doc-input-line { border-bottom: 1px dashed #999; padding: 0 4px; font-family: inherit; font-size:14px; color: var(--forest); background: #F9FBFA; border-top: none; border-left: none; border-right: none; width: 100%; margin-top: 4px; padding: 10px; transition: all 0.2s;}
-.doc-input-line:focus { background: #fff; border-bottom: 2px solid var(--orange); outline: none; box-shadow: 0 4px 6px -6px rgba(232,115,15,0.5); }
-
-.inp { width: 100%; background: #fff; border: 1px solid rgba(10,31,18,.15); border-radius: 8px; padding: 12px 16px; font-size: 14px; color: #0A1F12; font-family: inherit; transition: all .2s; }
-.inp:focus { outline: none; border-color: #E8730F; box-shadow: 0 0 0 3px rgba(232,115,15,.1); }
+/* Form Inputs */
+.form-label { display: block; font-size: 11px; font-weight: 800; color: #444; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+.form-control { width: 100%; background: #F9FBFA; border: 1px solid #D0D0D0; border-radius: 6px; padding: 12px 14px; font-size: 14px; color: #0A1F12; font-family: inherit; transition: all .2s; outline: none; }
+.form-control:focus { background: #fff; border-color: #E8730F; box-shadow: 0 0 0 3px rgba(232,115,15,.1); }
 
 /* Mobile Adjustments */
-@media (max-width: 640px) {
-  .el { padding: 24px 20px; }
-  .el .eh { flex-direction: column; gap: 12px; }
-  .el .eh .dt { text-align: left; }
-  .modal-body { padding: 16px; }
+@media (min-width: 640px) {
+  .el { padding: 48px 56px; }
+  .el .eh { flex-direction: row; }
+  .el .eh .dt { text-align: right; }
+  .modal-body { padding: 32px; }
+  .el .sign { grid-template-columns: 1fr 1fr; gap: 40px; }
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 }
 </style>
 </head>
@@ -524,23 +527,30 @@ function App() {
                       <li><strong>Termination:</strong> Either party may terminate this agreement with 30 days written notice.</li>
                     </ul>
 
-                    <h4>4. Client Details & Execution</h4>
-                    <p>By signing below, the Client acknowledges that they have read, understood, and agree to be bound by the terms of this Agreement.</p>
+                    <h4>4. Client Information</h4>
+                    <p>The Client must complete the following information before executing this agreement.</p>
                     
-                    <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr', marginTop: 20, marginBottom: 20 }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#666', textTransform: 'uppercase', marginBottom: 6 }}>Full Name</label>
-                        <input type="text" className="inp doc-input-line" value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Enter full name" />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#666', textTransform: 'uppercase', marginBottom: 6 }}>Email Address</label>
-                        <input type="email" className="inp doc-input-line" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="you@company.com" />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#666', textTransform: 'uppercase', marginBottom: 6 }}>Phone Number</label>
-                        <input type="tel" className="inp doc-input-line" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+260..." />
+                    <div style={{ background: '#F9FBFA', padding: 24, borderRadius: 8, border: '1px solid #eee', marginTop: 16, marginBottom: 24 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <div>
+                          <label className="form-label">Full Legal Name</label>
+                          <input type="text" className="form-control" value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="e.g. John Banda" />
+                        </div>
+                        <div className="form-grid-2">
+                          <div>
+                            <label className="form-label">Email Address</label>
+                            <input type="email" className="form-control" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="you@company.com" />
+                          </div>
+                          <div>
+                            <label className="form-label">Phone Number</label>
+                            <input type="tel" className="form-control" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+260..." />
+                          </div>
+                        </div>
                       </div>
                     </div>
+
+                    <h4>5. Signatures</h4>
+                    <p>By signing below, the parties acknowledge that they have read, understood, and agree to be bound by the terms of this Agreement.</p>
 
                     <div className="sign">
                       <div>
@@ -559,7 +569,7 @@ function App() {
                     <label style={{ display: 'flex', gap: 12, alignItems: 'flex-start', cursor: 'pointer', marginBottom: 20 }}>
                       <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ width: 20, height: 20, accentColor: '#E8730F', marginTop: 2, flexShrink: 0 }} />
                       <span style={{ fontSize: 13, color: 'rgba(10,31,18,0.8)', lineHeight: 1.5, fontWeight: 600 }}>
-                        I have read, understood, and agree to the terms of this engagement proposal. I confirm that I am authorized to sign on behalf of my business.
+                        I confirm that the information provided in Section 4 is accurate, and I agree to the terms of this engagement proposal.
                       </span>
                     </label>
 
@@ -567,7 +577,7 @@ function App() {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                       <button onClick={handleProceed} className="btn-primary" style={{ width: '100%', padding: '16px' }}>
-                        <i className="fas fa-check-circle"></i> Execute Agreement
+                        <i className="fas fa-file-signature"></i> Execute Agreement
                       </button>
                       <button onClick={closeEngagement} style={{ width: '100%', padding: '16px', background: '#fff', border: '1px solid #ccc', borderRadius: 9, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
                     </div>
@@ -576,13 +586,13 @@ function App() {
               ) : (
                 <div style={{ textAlign: 'center', padding: '40px 20px', background: '#fff', borderRadius: 12 }}>
                   <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#EAF7EE', color: '#1E7B3C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, margin: '0 auto 24px' }}>
-                    <i className="fas fa-file-signature"></i>
+                    <i className="fas fa-check-circle"></i>
                   </div>
                   <h2 className="serif" style={{ fontSize: 24, color: '#0A1F12', marginBottom: 12 }}>Agreement Executed!</h2>
                   <p style={{ fontSize: 14, color: 'rgba(10,31,18,0.7)', marginBottom: 24, lineHeight: 1.6 }}>
                     Your engagement proposal has been generated. Please send the confirmation to our officer on WhatsApp to finalize your booking and receive payment instructions.
                   </p>
-                  <a href={waUrl(`*SIGNED ENGAGEMENT PROPOSAL*\n\n*Client:* ${form.name}\n*Email:* ${form.email}\n*Phone:* ${form.phone || 'N/A'}\n\n*Service:* ${selectedItem.title}\n*Price:* ${selectedItem.price}\n\nI have read, understood, and agreed to the terms of this engagement. Please confirm my booking.`)} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'flex', width: '100%', marginBottom: 12, background: '#25D366', boxShadow: '0 10px 26px rgba(37,211,102,.32)', justifyContent: 'center' }}>
+                  <a href={waUrl(`*SIGNED ENGAGEMENT PROPOSAL*\n\n*Client Name:* ${form.name}\n*Email:* ${form.email}\n*Phone:* ${form.phone || 'N/A'}\n\n*Service:* ${selectedItem.title}\n*Price:* ${selectedItem.price}\n\nI have read, understood, and agreed to the terms of this engagement. Please confirm my booking.`)} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'flex', width: '100%', marginBottom: 12, background: '#25D366', boxShadow: '0 10px 26px rgba(37,211,102,.32)', justifyContent: 'center' }}>
                     <i className="fab fa-whatsapp"></i> Send to Officer
                   </a>
                   <button onClick={closeEngagement} style={{ background: 'none', border: 'none', color: '#666', textDecoration: 'underline', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Close and return</button>
