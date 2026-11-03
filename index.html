@@ -31,7 +31,7 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .site-header { position: sticky; top: 0; z-index: 100; background: rgba(10,31,18,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(245,166,35,.1); width: 100%; }
 .header-content { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 72px; padding: 0 24px; }
 .logo-group { display: flex; align-items: center; gap: 12px; cursor: pointer; text-decoration: none; }
-.logo-mark { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg,#E8730F,#F5A623); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; font-family: 'Playfair Display', serif; }
+.logo-mark { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg,#E8730F,#F5A623); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; font-family: 'Playfair Display', serif; flex-shrink:0;}
 .logo-text-sub { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.5); font-weight: 700; }
 .logo-text-main { font-size: 15px; font-weight: 700; color: #fff; }
 .menu-toggle { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; padding: 4px; transition: transform 0.2s; }
@@ -232,6 +232,7 @@ const WHATSAPP_NUMBER = '260762499581';
 const waUrl = (msg) => `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
 const SIGNATORY_NAME = 'Carol Kambole';
 const SIGNATORY_TITLE = 'Co-founder & Director of Finance & Administration, StartEasy Zambia';
+const MAIN_PLATFORM_URL = 'https://www.starteasyzambia.com';
 
 const PACKAGES = [
   { id:'starter', title:'Financial Starter', price:'K1,000', audience:'For sole traders, startups and microbusinesses.', desc:'Establishing clean financial records and a basic cash position.', features:['Income and expense recording','Sales and purchase tracking','Invoice preparation and payment register','Monthly income and expense summary','Basic cash position report'], outcome:'Organised financial records and a clearer picture of where the money goes.', timeline:'Ongoing monthly' },
@@ -260,6 +261,27 @@ const toDate = (raw) => { if (!raw) return null; if (raw.toDate) return raw.toDa
 const dateStr = (raw) => { const d = toDate(raw); return d ? d.toISOString().split('T')[0] : ''; };
 const todayStr = () => new Date().toISOString().split('T')[0];
 const addDays = (dateStr, n) => { const d = new Date(dateStr); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; };
+
+/* ─── BRAND LOGO COMPONENT ─── */
+function BrandLogo({ size = 38, showDirectoryLabel = false }){
+  const [imgError, setImgError] = useState(false);
+  if (!imgError) {
+    return <img src="Logo2.png" alt="StartEasy" onError={() => setImgError(true)} style={{ height: size, maxWidth: size * 5, width: 'auto', objectFit: 'contain', flexShrink: 0, display: 'block' }} />;
+  }
+  return (
+    <span style={{ display:'inline-flex', alignItems:'center', gap:10 }}>
+      <span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:size,height:size,borderRadius:'50%',background:'#fff',boxShadow:'0 4px 12px -4px rgba(10,31,18,.5)',flexShrink:0}}>
+        <span className="serif" style={{fontSize:size*0.5,fontWeight:800,color:'#0A1F12',lineHeight:1}}>S<span style={{color:'#E8730F'}}>E</span></span>
+      </span>
+      {showDirectoryLabel && (
+        <span style={{ textAlign:'left', lineHeight:1 }}>
+          <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Financial</span>
+          <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
+        </span>
+      )}
+    </span>
+  );
+}
 
 /* ─── CHART COMPONENT ─── */
 function DoughnutChart({ chartData, type }) {
@@ -353,15 +375,19 @@ function App() {
 
   return (
     <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', width:'100%' }}>
+      
+      {/* UPDATED HEADER */}
       <header className="site-header">
         <div className="header-content">
-          <a href="#" className="logo-group">
-            <div className="logo-mark">S</div>
-            <div>
-              <div className="logo-text-sub">Business Support</div>
-              <div className="logo-text-main">StartEasy Zambia</div>
-            </div>
-          </a>
+          <div style={{ display:'flex', alignItems:'center', gap:12, minWidth:0 }}>
+            <a href="#" className="logo-group" onClick={(e)=>{e.preventDefault(); window.scrollTo({top:0, behavior:'smooth'});}} title="Back to home">
+              <BrandLogo size={38} showDirectoryLabel={true} />
+            </a>
+            <a href={MAIN_PLATFORM_URL} style={{ display:'inline-flex', alignItems:'center', gap:7, padding:'9px 13px', background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', borderRadius:'9px', fontSize:'12px', fontWeight:'800', textDecoration:'none', boxShadow:'0 8px 18px -8px rgba(232,115,15,.6)', whiteSpace:'nowrap', flexShrink:0 }}>
+              <i className="fas fa-arrow-left" style={{ fontSize:11 }}></i>
+              <span>Back to Platform</span>
+            </a>
+          </div>
           <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
             <a href="#contact" className="btn-primary hidden sm:inline-flex" style={{ padding:'10px 20px', fontSize:13 }}>Get Started</a>
             <button className="menu-toggle"><i className="fas fa-bars"></i></button>
@@ -668,6 +694,7 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
                 <option value="Financial Starter">Financial Starter — K1,000</option>
                 <option value="Business Control">Business Control — K2,000</option>
                 <option value="Growth & Financial Planning">Growth & Financial Planning — K4,000</option>
+                <option value="Directory Service">Directory Service</option>
               </select>
             </div>
             <div className="form-group">
@@ -700,6 +727,7 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
             <select className="form-input" value={data.serviceTitle || ''} onChange={e => set('serviceTitle', e.target.value)} required>
               <option value="">— Select —</option>
               {PACKAGES.map(p => <option key={p.id} value={p.title}>{p.title} — {p.price}</option>)}
+              <option value="Directory Service">Directory Service (Manual)</option>
             </select>
           </div>
           <div className="form-row">
@@ -876,15 +904,12 @@ function AdminPortal({ onExit }) {
     setTimeout(() => {
       try {
         const csvRows = [];
-        // Headers
         csvRows.push(headers.join(','));
         
-        // Data rows
         for (const row of data) {
           const values = headers.map(header => {
             let val = row[header];
             if (val === undefined || val === null) val = '';
-            // Escape quotes and wrap in quotes to prevent Excel formatting errors
             return `"${String(val).replace(/"/g, '""')}"`;
           });
           csvRows.push(values.join(','));
@@ -893,8 +918,7 @@ function AdminPortal({ onExit }) {
         const csvString = csvRows.join('\n');
         const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
         
-        // Fallback for iOS/Safari & standard desktop
-        if (navigator.msSaveBlob) { // IE 10+
+        if (navigator.msSaveBlob) {
           navigator.msSaveBlob(blob, `${filename}_${todayStr()}.csv`);
         } else {
           const url = URL.createObjectURL(blob);
@@ -914,7 +938,7 @@ function AdminPortal({ onExit }) {
       } finally {
         setIsExporting(false);
       }
-    }, 500); // Slight delay for UI feedback
+    }, 500);
   };
 
   const filterByPeriod = (items, dateField = 'date') => {
@@ -934,7 +958,6 @@ function AdminPortal({ onExit }) {
     });
   };
 
-  // ─── GLOBAL SEARCH (ALL FIELDS) ───
   const applySearch = (items) => {
     if (!searchTerm) return items;
     const lowerSearch = searchTerm.toLowerCase();
@@ -956,6 +979,7 @@ function AdminPortal({ onExit }) {
   
   const periodLabel = PERIOD_LABELS[period];
 
+  // Calculations strictly use Period Data
   const calc = useMemo(() => {
     const income = periodLedger.filter(l => l.type === 'Income');
     const expense = periodLedger.filter(l => l.type === 'Expense');
@@ -982,8 +1006,16 @@ function AdminPortal({ onExit }) {
     const cfFinancing = cashflow.financing.in - cashflow.financing.out;
     const netCashflow = cfOperating + cfInvesting + cfFinancing;
 
+    // ─── DIRECTORY LOGIC INTEGRATION ───
     const approvedPmts = periodPayments.filter(p => p.status === 'approved');
-    const commencementCollected = approvedPmts.reduce((s, p) => s + num(p.amount) / 2, 0);
+    const dirPmts = approvedPmts.filter(p => p.serviceCode && p.serviceCode.startsWith('DIR-'));
+    const finPmts = approvedPmts.filter(p => !p.serviceCode || !p.serviceCode.startsWith('DIR-'));
+    
+    // Directory payments are 100% revenue. Financial packages are 50% commencement.
+    const dirCollected = dirPmts.reduce((s, p) => s + num(p.amount), 0);
+    const finCollected = finPmts.reduce((s, p) => s + num(p.amount) / 2, 0);
+    const commencementCollected = finCollected + dirCollected;
+    
     const totalRevenue = totalIncome + commencementCollected;
 
     const invMetrics = { total:0, paid:0, pending:0, overdue:0, count:0 };
@@ -1004,7 +1036,7 @@ function AdminPortal({ onExit }) {
       totalIncome, totalExpense, netProfit, profitMargin, expenseRatio,
       incomeByCategory, expenseByCategory,
       cashflow, cfOperating, cfInvesting, cfFinancing, netCashflow,
-      commencementCollected, totalRevenue,
+      commencementCollected, totalRevenue, dirCollected, finCollected,
       invMetrics, mrr, activeClients: activeClients.length, totalClients: clients.length
     };
   }, [periodLedger, periodInvoices, periodPayments, clients]);
@@ -1104,6 +1136,7 @@ function AdminPortal({ onExit }) {
     catch (err) { showToast('Failed to delete: ' + err.message, 'error'); }
   };
 
+  // ─── VERIFY PAYMENT & CONNECT TO ACCOUNTING ───
   const handleVerifyPayment = async (payment) => {
     if (!window.confirm('Verify this payment and add client to active portfolio?')) return;
     try {
@@ -1124,18 +1157,33 @@ function AdminPortal({ onExit }) {
         });
       }
 
-      await db.collection('se_invoices').add({
-        invoiceNo: `INV-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
-        client: payment.clientName || 'Unknown',
-        description: `Onboarding: ${payment.serviceTitle || 'Package'}`,
-        issueDate: todayStr(),
-        dueDate: addDays(todayStr(), 30),
-        amount: num(payment.amount),
-        status: 'Pending',
+      const isDir = payment.serviceCode && payment.serviceCode.startsWith('DIR-');
+      const expectedAmt = isDir ? num(payment.amount) : num(payment.amount) / 2;
+
+      // AUTO-LEDGER ENTRY
+      await db.collection('se_ledger').add({
+        date: todayStr(),
+        type: 'Income',
+        category: isDir ? 'Other Income' : 'Commencement Fees',
+        desc: `${isDir ? 'Directory' : 'Financial'} Payment: ${payment.serviceTitle} — ${payment.clientName}`,
+        amount: expectedAmt,
+        reference: payment.ref || payment.id,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      showToast('Payment verified, client added, and invoice generated.', 'success');
+      // AUTO-GENERATE INVOICE
+      await db.collection('se_invoices').add({
+        invoiceNo: `INV-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
+        client: payment.clientName || 'Unknown',
+        description: `${payment.serviceTitle || 'Package'}`,
+        issueDate: todayStr(),
+        dueDate: addDays(todayStr(), 30),
+        amount: expectedAmt,
+        status: 'Paid',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      showToast('Payment verified, ledger updated, invoice generated.', 'success');
     } catch (err) { 
       showToast('Failed to verify: ' + err.message, 'error'); 
     }
@@ -1291,7 +1339,7 @@ function AdminPortal({ onExit }) {
                 <div className="admin-card">
                   <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Gross Revenue</div>
                   <div className="serif" style={{ fontSize:30, fontWeight:800, color:'#1E7B3C' }}>{fmtK(calc.totalRevenue)}</div>
-                  <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Ledger + Verified Commencements</div>
+                  <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Ledger + Verified Payments</div>
                 </div>
                 <div className="admin-card">
                   <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Net Profit</div>
@@ -1398,24 +1446,28 @@ function AdminPortal({ onExit }) {
                 ) : (
                   <div style={{ overflowX:'auto' }}>
                     <table className="admin-table">
-                      <thead><tr><th>Client</th><th>Service</th><th>Total Fee</th><th>Commencement (50%)</th><th>Status</th><th>Actions</th></tr></thead>
+                      <thead><tr><th>Client</th><th>Service</th><th>Total Fee</th><th>Verify Amount</th><th>Status</th><th>Actions</th></tr></thead>
                       <tbody>
-                        {filteredPayments.map(p => (
-                          <tr key={p.id}>
-                            <td><div style={{ fontWeight:700 }}>{p.clientName || 'Unknown'}</div><div style={{ fontSize:11, color:'rgba(10,31,18,0.5)' }}>{p.clientEmail}</div></td>
-                            <td>{p.serviceTitle || 'N/A'}</td>
-                            <td style={{ fontWeight:700 }}>{p.amount || 'N/A'}</td>
-                            <td style={{ fontWeight:800, color:'#E8730F' }}>{fmtK(num(p.amount) / 2)}</td>
-                            <td><span className={`status-pill ${p.status==='approved'?'active':'pending'}`}>{p.status==='approved'?'Active':'Under Review'}</span></td>
-                            <td>
-                              <div style={{ display:'flex', gap:6 }}>
-                                {p.status !== 'approved' && <button onClick={() => handleVerifyPayment(p)} className="btn-sm btn-add" title="Verify & Generate Invoice"><i className="fas fa-check"></i></button>}
-                                <button onClick={() => openEdit('payment', p)} className="btn-sm btn-edit" title="Edit"><i className="fas fa-pen"></i></button>
-                                <button onClick={() => handleDelete('se_payments', p.id)} className="btn-sm btn-del" title="Delete"><i className="fas fa-trash"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                        {filteredPayments.map(p => {
+                          const isDir = p.serviceCode && p.serviceCode.startsWith('DIR-');
+                          const expectedAmt = isDir ? num(p.amount) : num(p.amount) / 2;
+                          return (
+                            <tr key={p.id}>
+                              <td><div style={{ fontWeight:700 }}>{p.clientName || 'Unknown'}</div><div style={{ fontSize:11, color:'rgba(10,31,18,0.5)' }}>{p.clientEmail}</div></td>
+                              <td>{p.serviceTitle || 'N/A'}</td>
+                              <td style={{ fontWeight:700 }}>{p.amount || 'N/A'}</td>
+                              <td style={{ fontWeight:800, color:'#E8730F' }}>{fmtK(expectedAmt)}</td>
+                              <td><span className={`status-pill ${p.status==='approved'?'active':'pending'}`}>{p.status==='approved'?'Active':'Under Review'}</span></td>
+                              <td>
+                                <div style={{ display:'flex', gap:6 }}>
+                                  {p.status !== 'approved' && <button onClick={() => handleVerifyPayment(p)} className="btn-sm btn-add" title="Verify & Sync to Ledger"><i className="fas fa-check"></i></button>}
+                                  <button onClick={() => openEdit('payment', p)} className="btn-sm btn-edit" title="Edit"><i className="fas fa-pen"></i></button>
+                                  <button onClick={() => handleDelete('se_payments', p.id)} className="btn-sm btn-del" title="Delete"><i className="fas fa-trash"></i></button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -1616,7 +1668,6 @@ function AdminPortal({ onExit }) {
                 ))}
               </div>
 
-              {/* Added id="print-area" for html2pdf targeting */}
               <div id="print-area" className="report-container">
                 <div className="report-header">
                   <h2 className="report-title">StartEasy Zambia</h2>
@@ -1630,7 +1681,8 @@ function AdminPortal({ onExit }) {
                   <div>
                     <div className="report-row section-title">Revenue</div>
                     <div className="report-row report-indent"><span>Ledger Income</span><span>{fmtK(calc.totalIncome)}</span></div>
-                    <div className="report-row report-indent"><span>Verified Commencement Fees</span><span>{fmtK(calc.commencementCollected)}</span></div>
+                    <div className="report-row report-indent"><span>Verified Financial Commencements (50%)</span><span>{fmtK(calc.finCollected)}</span></div>
+                    <div className="report-row report-indent"><span>Directory Service Fees (100%)</span><span>{fmtK(calc.dirCollected)}</span></div>
                     <div className="report-row total"><span>Total Revenue</span><span>{fmtK(calc.totalRevenue)}</span></div>
 
                     <div className="report-row section-title">Income Breakdown by Category</div>
