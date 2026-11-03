@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700;1,800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -63,15 +62,13 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .check-list li { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: 14px; color: rgba(10,31,18,0.8); line-height: 1.5; }
 .check-list li i { color: #1E7B3C; margin-top: 3px; font-size: 14px; }
 
-.step-number { width: 48px; height: 48px; border-radius: 50%; background: #0A1F12; color: #F5A623; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; margin-bottom: 16px; flex-shrink: 0; font-family: 'Playfair Display', Georgia, serif; }
-
 /* Modal */
 .modal-overlay { position: fixed; inset: 0; z-index: 200; display: flex; align-items: flex-start; justify-content: center; padding: 20px 10px; background: rgba(10,31,18,0.92); backdrop-filter: blur(4px); overflow-y: auto; }
 .modal-content { background: #F5FAF6; border-radius: 12px; width: 100%; max-width: 56rem; box-shadow: 0 30px 80px rgba(0,0,0,.5); margin: auto; }
 .modal-header { background: #0A1F12; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(245,166,35,.15); border-radius: 12px 12px 0 0; }
 .modal-body { padding: 24px 16px; }
 
-/* EXACT ORIGINAL LEGAL DOCUMENT STYLING */
+/* Legal Document */
 .el { background:#fff; border:1px solid #D0D0D0; border-radius:8px; padding:40px 50px; font-size:13.5px; line-height:1.8; color:#222; box-shadow: 0 10px 30px rgba(0,0,0,.05); width: 100%; margin: 0 auto; overflow-wrap: break-word; }
 .el .eh{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:18px;border-bottom:3px solid #0A1F12;margin-bottom:24px;flex-wrap:wrap}
 .el .eh .brand{font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:800;color:#0A1F12;letter-spacing:1px}
@@ -109,7 +106,7 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .method-row .l { color: #666; font-weight: 600; }
 .method-row .v { font-family: Consolas, monospace; font-weight: 700; color: #0A1F12; }
 
-/* ─── PROFESSIONAL ADMIN PORTAL ─── */
+/* ─── ADMIN ─── */
 .admin-layout { display: flex; flex-direction: column; min-height: 100vh; background: #F8FAFC; }
 .admin-top-bar { background: #fff; border-bottom: 1px solid #E2E8F0; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 30; }
 .admin-hamburger { background: none; border: none; font-size: 20px; color: #0A1F12; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 700; font-family: inherit; }
@@ -128,9 +125,11 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .admin-table th { text-align: left; padding: 16px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; font-weight: 700; color: #64748B; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; white-space: nowrap; }
 .admin-table td { padding: 16px; border-bottom: 1px solid #F1F5F9; color: #1E293B; font-weight: 500; vertical-align: middle; }
 .admin-table tr:hover { background: #F8FAFC; }
-.status-pill { padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
+.status-pill { padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; display: inline-block; }
 .status-pill.pending { background: #FEF3C7; color: #92400E; }
 .status-pill.active { background: #D1FAE5; color: #065F46; }
+.status-pill.overdue { background: #FFE8E5; color: #B8564F; }
+.status-pill.paused { background: #E2E8F0; color: #475569; }
 .empty-state { text-align: center; padding: 40px 20px; color: #94A3B8; font-size: 14px; }
 
 /* Auth Gate */
@@ -139,7 +138,7 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .auth-input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; margin-bottom: 16px; font-family: inherit; }
 .auth-input:focus { outline: none; border-color: #E8730F; box-shadow: 0 0 0 3px rgba(232,115,15,0.1); }
 
-/* Financial Statements Styling */
+/* Reports */
 .report-container { background: #fff; border: 1px solid #E2E8F0; border-radius: 8px; padding: 40px; max-width: 800px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.03); font-family: 'Consolas', 'Courier New', monospace; }
 .report-header { text-align: center; margin-bottom: 32px; border-bottom: 2px solid #0A1F12; padding-bottom: 16px; }
 .report-title { font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 800; color: #0A1F12; margin: 0 0 8px 0; }
@@ -148,6 +147,32 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .report-row.total { border-top: 2px solid #333; border-bottom: 4px double #333; font-weight: 800; font-size: 15px; margin-top: 8px; padding: 12px 0; }
 .report-row.section-title { font-weight: 800; text-transform: uppercase; margin-top: 24px; border-bottom: 1px solid #ccc; color: #0A1F12; }
 .report-indent { padding-left: 24px; }
+
+/* NEW: Form + Filter styles */
+.filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+.filter-tab { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; border: 1px solid #E2E8F0; background: #fff; color: #64748B; transition: all .15s; }
+.filter-tab:hover { border-color: #E8730F; color: #E8730F; }
+.filter-tab.active { background: #0A1F12; color: #fff; border-color: #0A1F12; }
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 11px; font-weight: 800; color: #0A1F12; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+.form-input { width: 100%; padding: 11px 12px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff; color: #0A1F12; transition: all .15s; }
+.form-input:focus { outline: none; border-color: #E8730F; box-shadow: 0 0 0 3px rgba(232,115,15,0.1); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.btn-sm { padding: 8px 14px; font-size: 12px; border-radius: 6px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-sm:hover { opacity: 0.85; }
+.btn-add { background: #1E7B3C; color: #fff; }
+.btn-edit { background: #F5A623; color: #fff; }
+.btn-del { background: #FFE8E5; color: #B8564F; }
+.modal-form-overlay { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(10,31,18,0.9); backdrop-filter: blur(4px); overflow-y: auto; }
+.modal-form { background: #fff; border-radius: 12px; width: 100%; max-width: 520px; padding: 28px; max-height: 92vh; overflow-y: auto; margin: auto; box-shadow: 0 30px 80px rgba(0,0,0,.4); }
+.modal-form h3 { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; color: #0A1F12; margin: 0; }
+.kpi-trend { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 99px; display: inline-block; }
+.kpi-trend.up { background: #D1FAE5; color: #065F46; }
+.kpi-trend.down { background: #FFE8E5; color: #B8564F; }
+.balance-badge { font-family: 'Consolas', monospace; font-weight: 700; color: #0A1F12; }
+.balance-badge.neg { color: #B8564F; }
+.cat-bar { height: 8px; border-radius: 4px; background: #F1F5F9; overflow: hidden; margin-top: 4px; }
+.cat-bar-fill { height: 100%; background: linear-gradient(90deg,#E8730F,#F5A623); }
 
 @media (max-width: 768px) {
   .admin-content { padding: 16px; }
@@ -158,6 +183,7 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
   .el .sign { grid-template-columns: 1fr; gap: 24px; }
   .modal-body { padding: 16px; }
   .report-container { padding: 20px; }
+  .form-row { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -167,9 +193,9 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
 <script type="text/babel" data-presets="react">
-const { useState, useEffect } = React;
+const { useState, useEffect, useMemo } = React;
 
-// ─── FIREBASE INIT ───────────────────────────────────────────────────────
+/* ─── FIREBASE ─── */
 const firebaseConfig = {
   apiKey: "AIzaSyDdEyxvsd2RjgKVYTGYJfYUB_637lV3n5I",
   authDomain: "starteasy-zambia.firebaseapp.com",
@@ -178,73 +204,67 @@ const firebaseConfig = {
   messagingSenderId: "54136399237",
   appId: "1:54136399237:web:2f9f2d7f86bfdfb4be50ec"
 };
-
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ─── CONSTANTS ───────────────────────────────────────────────────────────
+/* ─── CONSTANTS ─── */
 const WHATSAPP_NUMBER = '260762499581';
 const waUrl = (msg) => `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
 const SIGNATORY_NAME = 'Carol Kambole';
 const SIGNATORY_TITLE = 'Co-founder & Director of Finance & Administration, StartEasy Zambia';
 
 const PACKAGES = [
-  {
-    id: 'starter', title: 'Financial Starter', price: 'K1,000', audience: 'For sole traders, startups and microbusinesses.',
-    desc: 'Establishing clean financial records and a basic cash position.',
-    features: ['Income and expense recording','Sales and purchase tracking','Invoice preparation and payment register','Monthly income and expense summary','Basic cash position report'],
-    outcome: 'Organised financial records and a clearer picture of where the money goes.', timeline: 'Ongoing monthly'
-  },
-  {
-    id: 'control', title: 'Business Control', price: 'K2,000', audience: 'For active SMEs with regular transactions.', popular: true,
-    desc: 'Taking full control of cash flow, budgets, and monthly performance.',
-    features: ['Everything in Starter, plus:','Monthly budget preparation','Cash-flow monitoring','Receivables and payables tracking','Monthly management report','Budget-versus-actual review','Monthly financial review meeting'],
-    outcome: 'Better control over cash flow, expenses and business performance.', timeline: 'Ongoing monthly'
-  },
-  {
-    id: 'growth', title: 'Growth & Financial Planning', price: 'K4,000', audience: 'For growing SMEs and businesses preparing to expand.',
-    desc: 'Forecasting, funding readiness, and strategic financial planning.',
-    features: ['Everything in Business Control, plus:','Rolling cash-flow forecasts','Quarterly financial planning','Growth budgets and financial scenarios','Financial performance analysis','Funding-readiness assessment','Preparation of financial info for funders'],
-    outcome: 'More informed growth decisions and better-organised financial information.', timeline: 'Ongoing monthly'
-  }
+  { id:'starter', title:'Financial Starter', price:'K1,000', audience:'For sole traders, startups and microbusinesses.', desc:'Establishing clean financial records and a basic cash position.', features:['Income and expense recording','Sales and purchase tracking','Invoice preparation and payment register','Monthly income and expense summary','Basic cash position report'], outcome:'Organised financial records and a clearer picture of where the money goes.', timeline:'Ongoing monthly' },
+  { id:'control', title:'Business Control', price:'K2,000', audience:'For active SMEs with regular transactions.', popular:true, desc:'Taking full control of cash flow, budgets, and monthly performance.', features:['Everything in Starter, plus:','Monthly budget preparation','Cash-flow monitoring','Receivables and payables tracking','Monthly management report','Budget-versus-actual review','Monthly financial review meeting'], outcome:'Better control over cash flow, expenses and business performance.', timeline:'Ongoing monthly' },
+  { id:'growth', title:'Growth & Financial Planning', price:'K4,000', audience:'For growing SMEs and businesses preparing to expand.', desc:'Forecasting, funding readiness, and strategic financial planning.', features:['Everything in Business Control, plus:','Rolling cash-flow forecasts','Quarterly financial planning','Growth budgets and financial scenarios','Financial performance analysis','Funding-readiness assessment','Preparation of financial info for funders'], outcome:'More informed growth decisions and better-organised financial information.', timeline:'Ongoing monthly' }
 ];
 
-const PROJECTS = [
-  "Business budget preparation", "Cash-flow forecast", "Financial records clean-up", 
-  "Financial performance review", "Invoice management setup", "Funding-readiness preparation", "Business financial plan"
-];
+/* Categories used for smart accounting classification */
+const LEDGER_CATEGORIES = {
+  Income: ['Service Fees','Commencement Fees','Consulting Fees','Other Income'],
+  Expense: ['Salaries & Wages','Rent','Utilities','Marketing','Travel','Equipment','Software','Professional Fees','Bank Charges','Other']
+};
 
+/* Cash-flow classification (Operating / Investing / Financing) */
+const CASHFLOW_CLASS = {
+  'Service Fees':'operating','Commencement Fees':'operating','Consulting Fees':'operating','Other Income':'operating',
+  'Salaries & Wages':'operating','Rent':'operating','Utilities':'operating','Marketing':'operating',
+  'Travel':'operating','Software':'operating','Professional Fees':'operating','Bank Charges':'operating','Other':'operating',
+  'Equipment':'investing'
+};
+
+const PERIOD_LABELS = { month:'This Month', last_month:'Last Month', quarter:'This Quarter', year:'This Year', all:'All Time' };
+
+/* ─── UTILITIES ─── */
+const fmtK = (n) => `K${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+const num = (v) => { const n = parseFloat(String(v || '').replace(/[^\d.-]/g, '')); return isNaN(n) ? 0 : n; };
+const toDate = (raw) => { if (!raw) return null; if (raw.toDate) return raw.toDate(); const d = new Date(raw); return isNaN(d) ? null : d; };
+const dateStr = (raw) => { const d = toDate(raw); return d ? d.toISOString().split('T')[0] : ''; };
+const todayStr = () => new Date().toISOString().split('T')[0];
+const addDays = (dateStr, n) => { const d = new Date(dateStr); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; };
+
+/* ─── APP ─── */
 function App() {
-  const [view, setView] = useState('public'); 
-  
-  // Engagement State
+  const [view, setView] = useState('public');
   const [selectedItem, setSelectedItem] = useState(null);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', business: '', location: '' });
+  const [form, setForm] = useState({ name:'', email:'', phone:'', business:'', location:'' });
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
   const [flowStep, setFlowStep] = useState('draft');
   const [orientation, setOrientation] = useState(null);
 
   useEffect(() => {
-    if (selectedItem) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = '';
+    document.body.style.overflow = selectedItem ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [selectedItem]);
 
   const openEngagement = (item) => {
     setSelectedItem(item);
-    setForm({ name: '', email: '', phone: '', business: '', location: '' });
-    setAgreed(false);
-    setError('');
-    setFlowStep('draft');
+    setForm({ name:'', email:'', phone:'', business:'', location:'' });
+    setAgreed(false); setError(''); setFlowStep('draft');
   };
-
-  const closeEngagement = () => {
-    setSelectedItem(null);
-  };
+  const closeEngagement = () => setSelectedItem(null);
 
   const handleExecute = () => {
     setError('');
@@ -266,25 +286,19 @@ function App() {
   };
 
   const getFeeBreakdown = (priceStr) => {
-    if (!priceStr || !priceStr.includes('K')) return { total: priceStr, commencement: priceStr, balance: 'N/A' };
+    if (!priceStr || !priceStr.includes('K')) return { total: priceStr, commencement: priceStr, balance:'N/A' };
     const numMatch = priceStr.match(/[\d,]+/);
-    if (!numMatch) return { total: priceStr, commencement: priceStr, balance: 'N/A' };
-    const rawNum = parseInt(numMatch[0].replace(/,/g, ''), 10);
-    const half = rawNum / 2;
-    const format = (n) => `K${n.toLocaleString()}`;
-    return { total: priceStr, commencement: format(half), balance: format(half) };
+    if (!numMatch) return { total: priceStr, commencement: priceStr, balance:'N/A' };
+    const raw = parseInt(numMatch[0].replace(/,/g,''), 10);
+    const half = raw / 2;
+    return { total: priceStr, commencement: `K${half.toLocaleString()}`, balance: `K${half.toLocaleString()}` };
   };
+  const fees = selectedItem ? getFeeBreakdown(selectedItem.price) : { total:'', commencement:'', balance:'' };
 
-  const fees = selectedItem ? getFeeBreakdown(selectedItem.price) : { total: '', commencement: '', balance: '' };
+  if (view === 'admin') return <AdminPortal onExit={() => setView('public')} />;
 
-  if (view === 'admin') {
-    return <AdminPortal onExit={() => setView('public')} />;
-  }
-
-  /* ─── PUBLIC PAGE RENDER ─── */
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
-      
+    <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', width:'100%' }}>
       <header className="site-header">
         <div className="header-content">
           <a href="#" className="logo-group">
@@ -294,51 +308,43 @@ function App() {
               <div className="logo-text-main">StartEasy Zambia</div>
             </div>
           </a>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <a href="#contact" className="btn-primary hidden sm:inline-flex" style={{ padding: '10px 20px', fontSize: 13 }}>Get Started</a>
+          <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
+            <a href="#contact" className="btn-primary hidden sm:inline-flex" style={{ padding:'10px 20px', fontSize:13 }}>Get Started</a>
             <button className="menu-toggle"><i className="fas fa-bars"></i></button>
           </div>
         </div>
       </header>
 
-      <main style={{ flex: 1, background: '#F5FAF6', width: '100%' }}>
-        <section id="home" className="fadein" style={{ background: 'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)', color: '#fff', padding: '80px 24px', textAlign: 'center', width: '100%' }}>
-          <div className="container" style={{ maxWidth: 900 }}>
-            <span style={{ display: 'inline-block', background: 'rgba(232,115,15,0.2)', color: '#F5A623', padding: '6px 16px', borderRadius: 99, fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 24 }}>
-              Financial Support & Management
-            </span>
-            <h1 className="serif" style={{ fontSize: 'clamp(2.2rem,5vw,3.5rem)', lineHeight: 1.1, marginBottom: 24 }}>
-              Take control of your <br/><em style={{ fontStyle: 'italic', color: '#F5A623' }}>business finances.</em>
-            </h1>
-            <h2 style={{ fontSize: 'clamp(1.1rem,2.5vw,1.4rem)', fontWeight: 600, color: 'rgba(255,255,255,0.9)', marginBottom: 24 }}>
-              Make better decisions. Plan for growth.
-            </h2>
-            <p style={{ fontSize: 16, lineHeight: 1.7, color: 'rgba(255,255,255,0.75)', marginBottom: 40, maxWidth: 750, margin: '0 auto 40px' }}>
-              We provide practical financial management and administrative support to help entrepreneurs and businesses organise their financial records, monitor cash flow, manage expenses and prepare for growth.
-            </p>
-            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <a href="#orientation" className="btn-primary">Find Your Plan <i className="fas fa-arrow-right" style={{ fontSize: 12 }}></i></a>
+      <main style={{ flex:1, background:'#F5FAF6', width:'100%' }}>
+        <section id="home" className="fadein" style={{ background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)', color:'#fff', padding:'80px 24px', textAlign:'center', width:'100%' }}>
+          <div className="container" style={{ maxWidth:900 }}>
+            <span style={{ display:'inline-block', background:'rgba(232,115,15,0.2)', color:'#F5A623', padding:'6px 16px', borderRadius:99, fontSize:11, fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:24 }}>Financial Support & Management</span>
+            <h1 className="serif" style={{ fontSize:'clamp(2.2rem,5vw,3.5rem)', lineHeight:1.1, marginBottom:24 }}>Take control of your <br/><em style={{ fontStyle:'italic', color:'#F5A623' }}>business finances.</em></h1>
+            <h2 style={{ fontSize:'clamp(1.1rem,2.5vw,1.4rem)', fontWeight:600, color:'rgba(255,255,255,0.9)', marginBottom:24 }}>Make better decisions. Plan for growth.</h2>
+            <p style={{ fontSize:16, lineHeight:1.7, color:'rgba(255,255,255,0.75)', marginBottom:40, maxWidth:750, margin:'0 auto 40px' }}>We provide practical financial management and administrative support to help entrepreneurs and businesses organise their financial records, monitor cash flow, manage expenses and prepare for growth.</p>
+            <div style={{ display:'flex', gap:16, justifyContent:'center', flexWrap:'wrap' }}>
+              <a href="#orientation" className="btn-primary">Find Your Plan <i className="fas fa-arrow-right" style={{ fontSize:12 }}></i></a>
               <a href="#packages" className="btn-ghost">View All Packages</a>
             </div>
           </div>
         </section>
 
-        <section id="orientation" className="section-padding" style={{ background: '#fff', borderBottom: '1px solid #eee' }}>
-          <div className="container" style={{ maxWidth: 900, textAlign: 'center' }}>
-            <h2 className="serif" style={{ fontSize: 28, color: '#0A1F12', marginBottom: 12 }}>Where is your business right now?</h2>
-            <p style={{ fontSize: 15, color: 'rgba(10,31,18,0.6)', marginBottom: 40 }}>Select the option that best describes you, and we'll highlight the perfect plan.</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 20 }}>
-              <button className={`gtile ${orientation === 'starter' ? 'sel' : ''}`} onClick={() => handleOrientation('starter', 'pkg-starter')}>
+        <section id="orientation" className="section-padding" style={{ background:'#fff', borderBottom:'1px solid #eee' }}>
+          <div className="container" style={{ maxWidth:900, textAlign:'center' }}>
+            <h2 className="serif" style={{ fontSize:28, color:'#0A1F12', marginBottom:12 }}>Where is your business right now?</h2>
+            <p style={{ fontSize:15, color:'rgba(10,31,18,0.6)', marginBottom:40 }}>Select the option that best describes you, and we'll highlight the perfect plan.</p>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(250px, 1fr))', gap:20 }}>
+              <button className={`gtile ${orientation==='starter'?'sel':''}`} onClick={() => handleOrientation('starter','pkg-starter')}>
                 <div className="ico"><i className="fas fa-seedling"></i></div>
                 <h3>Just Starting Out</h3>
                 <p>I'm a sole trader or new microbusiness trying to get my records in order.</p>
               </button>
-              <button className={`gtile ${orientation === 'control' ? 'sel' : ''}`} onClick={() => handleOrientation('control', 'pkg-control')}>
+              <button className={`gtile ${orientation==='control'?'sel':''}`} onClick={() => handleOrientation('control','pkg-control')}>
                 <div className="ico"><i className="fas fa-store"></i></div>
                 <h3>Active Business</h3>
                 <p>I'm an SME with regular transactions and need better control over cash flow.</p>
               </button>
-              <button className={`gtile ${orientation === 'growth' ? 'sel' : ''}`} onClick={() => handleOrientation('growth', 'pkg-growth')}>
+              <button className={`gtile ${orientation==='growth'?'sel':''}`} onClick={() => handleOrientation('growth','pkg-growth')}>
                 <div className="ico"><i className="fas fa-chart-line"></i></div>
                 <h3>Preparing to Expand</h3>
                 <p>I'm growing and need forecasts, budgets, and funding readiness.</p>
@@ -349,76 +355,70 @@ function App() {
 
         <section id="packages" className="section-padding">
           <div className="container">
-            <div style={{ textAlign: 'center', marginBottom: 60 }}>
-              <h2 className="serif" style={{ fontSize: 32, color: '#0A1F12', marginBottom: 16 }}>Monthly Support Packages</h2>
-              <p style={{ fontSize: 15, color: 'rgba(10,31,18,0.6)', maxWidth: 650, margin: '0 auto' }}>Choose the level of support that matches your business requirements.</p>
+            <div style={{ textAlign:'center', marginBottom:60 }}>
+              <h2 className="serif" style={{ fontSize:32, color:'#0A1F12', marginBottom:16 }}>Monthly Support Packages</h2>
+              <p style={{ fontSize:15, color:'rgba(10,31,18,0.6)', maxWidth:650, margin:'0 auto' }}>Choose the level of support that matches your business requirements.</p>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, alignItems: 'stretch' }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:24, alignItems:'stretch' }}>
               {PACKAGES.map(pkg => (
-                <div key={pkg.id} id={`pkg-${pkg.id}`} className={`pricing-card ${pkg.popular ? 'popular' : ''} ${orientation === pkg.id ? 'highlighted' : ''}`}>
+                <div key={pkg.id} id={`pkg-${pkg.id}`} className={`pricing-card ${pkg.popular?'popular':''} ${orientation===pkg.id?'highlighted':''}`}>
                   {pkg.popular && <div className="pricing-badge">Most Popular</div>}
-                  <h3 style={{ fontSize: 20, fontWeight: 800, color: '#0A1F12', marginBottom: 4 }}>{pkg.title}</h3>
-                  <p style={{ fontSize: 13, color: 'rgba(10,31,18,0.6)', marginBottom: 16 }}>{pkg.audience}</p>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: '#E8730F', marginBottom: 24 }}>{pkg.price} <span style={{ fontSize: 14, fontWeight: 500, color: '#666' }}>/ month</span></div>
-                  <ul className="check-list" style={{ flexGrow: 1 }}>
-                    {pkg.features.map((f, i) => <li key={i}><i className={`fas fa-check-circle ${f.includes('Everything') ? 'text-orange-500' : ''}`}></i> {f}</li>)}
+                  <h3 style={{ fontSize:20, fontWeight:800, color:'#0A1F12', marginBottom:4 }}>{pkg.title}</h3>
+                  <p style={{ fontSize:13, color:'rgba(10,31,18,0.6)', marginBottom:16 }}>{pkg.audience}</p>
+                  <div style={{ fontSize:24, fontWeight:800, color:'#E8730F', marginBottom:24 }}>{pkg.price} <span style={{ fontSize:14, fontWeight:500, color:'#666' }}>/ month</span></div>
+                  <ul className="check-list" style={{ flexGrow:1 }}>
+                    {pkg.features.map((f,i) => <li key={i}><i className={`fas fa-check-circle ${f.includes('Everything')?'text-orange-500':''}`}></i> {f}</li>)}
                   </ul>
-                  <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid #eee', fontSize: 13, fontStyle: 'italic', color: '#555', marginBottom: 20 }}>
-                    <strong>Outcome:</strong> {pkg.outcome}
-                  </div>
-                  <button onClick={() => openEngagement(pkg)} className="btn-primary" style={{ width: '100%' }}>Select Plan</button>
+                  <div style={{ marginTop:24, paddingTop:16, borderTop:'1px solid #eee', fontSize:13, fontStyle:'italic', color:'#555', marginBottom:20 }}><strong>Outcome:</strong> {pkg.outcome}</div>
+                  <button onClick={() => openEngagement(pkg)} className="btn-primary" style={{ width:'100%' }}>Select Plan</button>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section id="contact" style={{ background: '#0A1F12', padding: '60px 24px', textAlign: 'center' }}>
+        <section id="contact" style={{ background:'#0A1F12', padding:'60px 24px', textAlign:'center' }}>
           <div className="container">
-            <h2 className="serif" style={{ fontSize: 28, color: '#fff', marginBottom: 16 }}>Ready to take control?</h2>
-            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.7)', marginBottom: 32, maxWidth: 600, margin: '0 auto 32px' }}>Let's discuss how we can support your financial administration.</p>
-            <a href={waUrl('Hello StartEasy, I would like to discuss Financial Support for my business.')} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ fontSize: 15, padding: '14px 32px' }}>
-              <i className="fab fa-whatsapp" style={{ marginRight: 8 }}></i> Chat with an Officer
+            <h2 className="serif" style={{ fontSize:28, color:'#fff', marginBottom:16 }}>Ready to take control?</h2>
+            <p style={{ fontSize:15, color:'rgba(255,255,255,0.7)', marginBottom:32, maxWidth:600, margin:'0 auto 32px' }}>Let's discuss how we can support your financial administration.</p>
+            <a href={waUrl('Hello StartEasy, I would like to discuss Financial Support for my business.')} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ fontSize:15, padding:'14px 32px' }}>
+              <i className="fab fa-whatsapp" style={{ marginRight:8 }}></i> Chat with an Officer
             </a>
           </div>
         </section>
       </main>
 
-      <footer style={{ background: '#0A1F12', padding: '32px 24px', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 16 }}>© {new Date().getFullYear()} StartEasy Zambia. All rights reserved.</p>
-        <button onClick={() => setView('admin')} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '10px 20px', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+      <footer style={{ background:'#0A1F12', padding:'32px 24px', textAlign:'center', borderTop:'1px solid rgba(255,255,255,0.1)' }}>
+        <p style={{ color:'rgba(255,255,255,0.4)', fontSize:13, marginBottom:16 }}>© {new Date().getFullYear()} StartEasy Zambia. All rights reserved.</p>
+        <button onClick={() => setView('admin')} style={{ background:'none', border:'1px solid rgba(255,255,255,0.2)', color:'#fff', padding:'10px 20px', borderRadius:8, fontSize:12, fontWeight:700, cursor:'pointer', display:'inline-flex', alignItems:'center', gap:8 }}>
           <i className="fas fa-lock"></i> Admin Portal (Accounting & Finance)
         </button>
       </footer>
 
-      {/* ─── ENGAGEMENT PROPOSAL MODAL ─── */}
       {selectedItem && (
-        <div className="modal-overlay mf" onClick={closeEngagement}>
-          <div className="modal-content mc" onClick={e => e.stopPropagation()}>
+        <div className="modal-overlay" onClick={closeEngagement}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#F5A623' }}></span>
-                <span style={{ fontSize: 11, letterSpacing: '.2em', textTransform: 'uppercase', fontWeight: 700, color: '#F5A623' }}>{flowStep === 'draft' ? 'Draft Engagement Proposal' : 'Executed Engagement Agreement'}</span>
+              <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                <span style={{ width:8, height:8, borderRadius:'50%', background:'#F5A623' }}></span>
+                <span style={{ fontSize:11, letterSpacing:'.2em', textTransform:'uppercase', fontWeight:700, color:'#F5A623' }}>{flowStep==='draft'?'Draft Engagement Proposal':'Executed Engagement Agreement'}</span>
               </div>
-              <button onClick={closeEngagement} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', cursor: 'pointer', padding: 8 }}><i className="fas fa-times" style={{ fontSize: 18 }}></i></button>
+              <button onClick={closeEngagement} style={{ background:'none', border:'none', color:'rgba(255,255,255,.5)', cursor:'pointer', padding:8 }}><i className="fas fa-times" style={{ fontSize:18 }}></i></button>
             </div>
-            
-            <div className="modal-body" style={{ background: '#F5FAF6' }}>
-              <div className="el" style={{ position: 'relative' }}>
-                {flowStep === 'payment' && (
-                  <div style={{ position: 'absolute', top: '30%', left: '50%', transform: 'translate(-50%, -50%) rotate(-30deg)', fontSize: 80, fontWeight: 900, color: 'rgba(30,123,60,0.08)', pointerEvents: 'none', zIndex: 0, whiteSpace: 'nowrap', fontFamily: 'Playfair Display' }}>EXECUTED</div>
-                )}
-                <div className="eh" style={{ position: 'relative', zIndex: 1 }}>
+            <div className="modal-body" style={{ background:'#F5FAF6' }}>
+              <div className="el" style={{ position:'relative' }}>
+                {flowStep==='payment' && <div style={{ position:'absolute', top:'30%', left:'50%', transform:'translate(-50%, -50%) rotate(-30deg)', fontSize:80, fontWeight:900, color:'rgba(30,123,60,0.08)', pointerEvents:'none', zIndex:0, whiteSpace:'nowrap', fontFamily:'Playfair Display' }}>EXECUTED</div>}
+                <div className="eh" style={{ position:'relative', zIndex:1 }}>
                   <div><div className="brand">Start<em>Easy Zambia</em></div><div className="sub">Financial Support Engagement</div></div>
-                  <div><div className="dt">AGREEMENT OF ENGAGEMENT</div><div className="mt">{new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}<br/>Ref: SE-FIN-{new Date().getFullYear()}-{Math.floor(Math.random()*9000)+1000}</div></div>
+                  <div><div className="dt">AGREEMENT OF ENGAGEMENT</div><div className="mt">{new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}<br/>Ref: SE-FIN-{new Date().getFullYear()}-{Math.floor(Math.random()*9000)+1000}</div></div>
                 </div>
-                <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ position:'relative', zIndex:1 }}>
                   <p>This Agreement of Engagement (the "Agreement") is entered into by and between <strong>StartEasy Zambia</strong> (the "Company") and the undersigned Client (the "Client").</p>
                   <h4>1. Scope of Service</h4>
                   <p>The Company hereby agrees to provide the following financial support service: <strong>{selectedItem.title}</strong>.</p>
                   <p>{selectedItem.desc || "Dedicated execution of the requested financial task."}</p>
                   <p><strong>Specifically, the Company will deliver:</strong></p>
-                  <ul>{selectedItem.features.map((f, i) => <li key={i}>{f}</li>)}</ul>
+                  <ul>{selectedItem.features.map((f,i) => <li key={i}>{f}</li>)}</ul>
                   <h4>2. Compensation</h4>
                   <p>In consideration of the services rendered, the Client shall pay the Company the following fee:</p>
                   <div className="feebox">
@@ -427,7 +427,7 @@ function App() {
                     <div className="row"><span className="l">Balance (50% due on delivery)</span><span className="v">{fees.balance}</span></div>
                     <div className="total"><span className="tl">Due on acceptance</span><span className="tv">{fees.commencement}</span></div>
                   </div>
-                  <p style={{ fontSize: 11.5, color: '#666', fontStyle: 'italic', marginTop: 8 }}>All amounts are StartEasy service fees for work only. They are separate from and do not include any government or regulator fee.</p>
+                  <p style={{ fontSize:11.5, color:'#666', fontStyle:'italic', marginTop:8 }}>All amounts are StartEasy service fees for work only. They are separate from and do not include any government or regulator fee.</p>
                   <h4>3. Terms and Conditions</h4>
                   <ul>
                     <li><strong>No Employment Relationship:</strong> This Agreement does not create an employer-employee relationship. The Company operates as an independent contractor.</li>
@@ -437,39 +437,39 @@ function App() {
                     <li><strong>Termination:</strong> Either party may terminate this agreement with 30 days written notice.</li>
                   </ul>
                   <h4>4. Client Details</h4>
-                  <div className="form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '10px', width: '100%' }}>
-                    <span><strong>Full Name:</strong><br/><input className="doc-input-line" value={form.name} onChange={e => setForm({...form, name: e.target.value})} disabled={flowStep !== 'draft'} /></span>
-                    <span><strong>Email Address:</strong><br/><input className="doc-input-line" type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} disabled={flowStep !== 'draft'} /></span>
-                    <span><strong>Phone Number:</strong><br/><input className="doc-input-line" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} disabled={flowStep !== 'draft'} /></span>
-                    <span><strong>Physical Location:</strong><br/><input className="doc-input-line" value={form.location} onChange={e => setForm({...form, location: e.target.value})} disabled={flowStep !== 'draft'} /></span>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginTop:'10px', width:'100%' }}>
+                    <span><strong>Full Name:</strong><br/><input className="doc-input-line" value={form.name} onChange={e => setForm({...form, name:e.target.value})} disabled={flowStep!=='draft'} /></span>
+                    <span><strong>Email Address:</strong><br/><input className="doc-input-line" type="email" value={form.email} onChange={e => setForm({...form, email:e.target.value})} disabled={flowStep!=='draft'} /></span>
+                    <span><strong>Phone Number:</strong><br/><input className="doc-input-line" value={form.phone} onChange={e => setForm({...form, phone:e.target.value})} disabled={flowStep!=='draft'} /></span>
+                    <span><strong>Physical Location:</strong><br/><input className="doc-input-line" value={form.location} onChange={e => setForm({...form, location:e.target.value})} disabled={flowStep!=='draft'} /></span>
                   </div>
                   <h4>5. Acceptance and Signature</h4>
                   <p>By signing below, the Client acknowledges that they have read, understood, and agree to be bound by the terms of this Agreement.</p>
                   <div className="sign">
-                    <div><div className="sigval" style={{ color: '#1B6CA8' }}>{SIGNATORY_NAME}</div><div className="lbl">{SIGNATORY_TITLE}</div></div>
-                    <div><div className="sigval" style={{ color: '#E8730F' }}>{form.name || '_________________________'}</div><div className="lbl">For the Client</div></div>
+                    <div><div className="sigval" style={{ color:'#1B6CA8' }}>{SIGNATORY_NAME}</div><div className="lbl">{SIGNATORY_TITLE}</div></div>
+                    <div><div className="sigval" style={{ color:'#E8730F' }}>{form.name || '_________________________'}</div><div className="lbl">For the Client</div></div>
                   </div>
                 </div>
               </div>
 
-              {flowStep === 'draft' ? (
-                <div style={{ marginTop: 24, background: '#fff', padding: 24, borderRadius: 12, border: '1px solid #eee' }}>
-                  <label style={{ display: 'flex', gap: 12, alignItems: 'flex-start', fontSize: 13, color: 'rgba(10,31,18,.85)', cursor: 'pointer', lineHeight: 1.6 }}>
-                    <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ width: 20, height: 20, accentColor: '#E8730F', flexShrink: 0, marginTop: 2 }} />
+              {flowStep==='draft' ? (
+                <div style={{ marginTop:24, background:'#fff', padding:24, borderRadius:12, border:'1px solid #eee' }}>
+                  <label style={{ display:'flex', gap:12, alignItems:'flex-start', fontSize:13, color:'rgba(10,31,18,.85)', cursor:'pointer', lineHeight:1.6 }}>
+                    <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ width:20, height:20, accentColor:'#E8730F', flexShrink:0, marginTop:2 }} />
                     <span>I have read, understood, and agree to the terms of this engagement proposal. I confirm that I am authorized to sign on behalf of my business.</span>
                   </label>
-                  {error && <div style={{ background: '#FFE8E5', color: '#B8564F', padding: 12, borderRadius: 6, marginTop: 16, fontSize: 13, fontWeight: 600 }}>{error}</div>}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 20 }}>
-                    <button onClick={handleExecute} className="btn-primary" style={{ width: '100%', padding: '16px' }}><i className="fas fa-file-signature"></i> Execute Agreement & Proceed to Payment</button>
-                    <button onClick={closeEngagement} style={{ width: '100%', padding: '16px', background: '#fff', border: '1px solid #ccc', borderRadius: 9, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+                  {error && <div style={{ background:'#FFE8E5', color:'#B8564F', padding:12, borderRadius:6, marginTop:16, fontSize:13, fontWeight:600 }}>{error}</div>}
+                  <div style={{ display:'flex', flexDirection:'column', gap:12, marginTop:20 }}>
+                    <button onClick={handleExecute} className="btn-primary" style={{ width:'100%', padding:'16px' }}><i className="fas fa-file-signature"></i> Execute Agreement & Proceed to Payment</button>
+                    <button onClick={closeEngagement} style={{ width:'100%', padding:'16px', background:'#fff', border:'1px solid #ccc', borderRadius:9, fontWeight:600, cursor:'pointer' }}>Cancel</button>
                   </div>
                 </div>
               ) : (
                 <div className="success-box fadein">
-                  <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#EAF7EE', color: '#1E7B3C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, margin: '0 auto 24px' }}><i className="fas fa-check-circle"></i></div>
-                  <h2 className="serif" style={{ fontSize: 24, color: '#0A1F12', marginBottom: 12 }}>Agreement Executed!</h2>
-                  <p style={{ fontSize: 14, color: 'rgba(10,31,18,0.7)', marginBottom: 24, lineHeight: 1.6 }}>Your engagement proposal is now locked and awaiting the <strong>Commencement Fee of {fees.commencement}</strong>. Please select a payment method below and send the transaction reference to our officer on WhatsApp.</p>
-                  <div style={{ textAlign: 'left', marginBottom: 24 }}>
+                  <div style={{ width:64, height:64, borderRadius:'50%', background:'#EAF7EE', color:'#1E7B3C', display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, margin:'0 auto 24px' }}><i className="fas fa-check-circle"></i></div>
+                  <h2 className="serif" style={{ fontSize:24, color:'#0A1F12', marginBottom:12 }}>Agreement Executed!</h2>
+                  <p style={{ fontSize:14, color:'rgba(10,31,18,0.7)', marginBottom:24, lineHeight:1.6 }}>Your engagement proposal is now locked and awaiting the <strong>Commencement Fee of {fees.commencement}</strong>. Please select a payment method below and send the transaction reference to our officer on WhatsApp.</p>
+                  <div style={{ textAlign:'left', marginBottom:24 }}>
                     <div className="method-card">
                       <div className="method-header"><i className="fas fa-mobile-alt"></i> Airtel Money / MTN MoMo</div>
                       <div className="method-row"><span className="l">Recipient Name</span><span className="v">Carol Kambole</span></div>
@@ -483,10 +483,10 @@ function App() {
                       <div className="method-row"><span className="l">Account Number</span><span className="v">0152502166700</span></div>
                     </div>
                   </div>
-                  <a href={waUrl(`*EXECUTED ENGAGEMENT PROPOSAL*\n\n*Client:* ${form.name}\n*Email:* ${form.email}\n*Phone:* ${form.phone || 'N/A'}\n\n*Service:* ${selectedItem.title}\n*Commencement Fee Due:* ${fees.commencement}\n\nI have executed the agreement. Here is my payment proof:`)} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'flex', width: '100%', marginBottom: 12, background: '#25D366', boxShadow: '0 10px 26px rgba(37,211,102,.32)', justifyContent: 'center', padding: '16px' }}>
-                    <i className="fab fa-whatsapp" style={{ fontSize: 18 }}></i> Send Payment Proof on WhatsApp
+                  <a href={waUrl(`*EXECUTED ENGAGEMENT PROPOSAL*\n\n*Client:* ${form.name}\n*Email:* ${form.email}\n*Phone:* ${form.phone || 'N/A'}\n\n*Service:* ${selectedItem.title}\n*Commencement Fee Due:* ${fees.commencement}\n\nI have executed the agreement. Here is my payment proof:`)} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display:'flex', width:'100%', marginBottom:12, background:'#25D366', boxShadow:'0 10px 26px rgba(37,211,102,.32)', justifyContent:'center', padding:'16px' }}>
+                    <i className="fab fa-whatsapp" style={{ fontSize:18 }}></i> Send Payment Proof on WhatsApp
                   </a>
-                  <button onClick={closeEngagement} style={{ background: 'none', border: 'none', color: '#666', textDecoration: 'underline', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>Close and return</button>
+                  <button onClick={closeEngagement} style={{ background:'none', border:'none', color:'#666', textDecoration:'underline', cursor:'pointer', fontSize:13, fontWeight:600 }}>Close and return</button>
                 </div>
               )}
             </div>
@@ -497,9 +497,207 @@ function App() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   ADMIN PORTAL COMPONENT (LIVE, ZERO-BASED)
-   ═══════════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   FORM MODAL (shared for ledger / invoice / client / payment)
+   ═══════════════════════════════════════════════════════════════════ */
+function FormModal({ modal, onClose, onSave, saving, error, clients }) {
+  const [data, setData] = useState(modal.data);
+  const set = (k, v) => setData(d => ({...d, [k]: v}));
+
+  const renderFields = () => {
+    if (modal.type === 'ledger') {
+      return (
+        <>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Date *</label>
+              <input type="date" className="form-input" value={data.date || ''} onChange={e => set('date', e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Type *</label>
+              <select className="form-input" value={data.type || 'Income'} onChange={e => { set('type', e.target.value); set('category', ''); }}>
+                <option value="Income">Income</option>
+                <option value="Expense">Expense</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Description *</label>
+            <input type="text" className="form-input" value={data.desc || ''} onChange={e => set('desc', e.target.value)} placeholder="e.g. Monthly service fee — Client X" required />
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Category</label>
+              <select className="form-input" value={data.category || ''} onChange={e => set('category', e.target.value)}>
+                <option value="">— Select —</option>
+                {(LEDGER_CATEGORIES[data.type] || []).map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Amount (K) *</label>
+              <input type="number" step="0.01" min="0" className="form-input" value={data.amount || ''} onChange={e => set('amount', e.target.value)} placeholder="0.00" required />
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Reference / Notes</label>
+            <input type="text" className="form-input" value={data.reference || ''} onChange={e => set('reference', e.target.value)} placeholder="e.g. Receipt No., Client Ref" />
+          </div>
+        </>
+      );
+    }
+    if (modal.type === 'invoice') {
+      return (
+        <>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Invoice No.</label>
+              <input type="text" className="form-input" value={data.invoiceNo || ''} readOnly style={{ background:'#F8FAFC', fontFamily:'monospace', fontWeight:700 }} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Status</label>
+              <select className="form-input" value={data.status || 'Pending'} onChange={e => set('status', e.target.value)}>
+                <option value="Pending">Pending</option>
+                <option value="Paid">Paid</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Client Name *</label>
+            <input type="text" list="client-list" className="form-input" value={data.client || ''} onChange={e => set('client', e.target.value)} placeholder="Type or select client..." required />
+            <datalist id="client-list">
+              {clients.map(c => <option key={c.id} value={c.name} />)}
+            </datalist>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Description</label>
+            <input type="text" className="form-input" value={data.description || ''} onChange={e => set('description', e.target.value)} placeholder="e.g. Monthly retainer — Business Control" />
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Issue Date *</label>
+              <input type="date" className="form-input" value={data.issueDate || ''} onChange={e => set('issueDate', e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Due Date *</label>
+              <input type="date" className="form-input" value={data.dueDate || ''} onChange={e => set('dueDate', e.target.value)} required />
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Amount (K) *</label>
+            <input type="number" step="0.01" min="0" className="form-input" value={data.amount || ''} onChange={e => set('amount', e.target.value)} placeholder="0.00" required />
+          </div>
+        </>
+      );
+    }
+    if (modal.type === 'client') {
+      return (
+        <>
+          <div className="form-group">
+            <label className="form-label">Full Name *</label>
+            <input type="text" className="form-input" value={data.name || ''} onChange={e => set('name', e.target.value)} required />
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Email *</label>
+              <input type="email" className="form-input" value={data.email || ''} onChange={e => set('email', e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Phone</label>
+              <input type="text" className="form-input" value={data.phone || ''} onChange={e => set('phone', e.target.value)} />
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Package *</label>
+              <select className="form-input" value={data.package || ''} onChange={e => set('package', e.target.value)} required>
+                <option value="">— Select —</option>
+                <option value="Financial Starter">Financial Starter — K1,000</option>
+                <option value="Business Control">Business Control — K2,000</option>
+                <option value="Growth & Financial Planning">Growth & Financial Planning — K4,000</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Status</label>
+              <select className="form-input" value={data.status || 'Active'} onChange={e => set('status', e.target.value)}>
+                <option value="Active">Active</option>
+                <option value="Paused">Paused</option>
+                <option value="Ended">Ended</option>
+              </select>
+            </div>
+          </div>
+        </>
+      );
+    }
+    if (modal.type === 'payment') {
+      return (
+        <>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Client Name *</label>
+              <input type="text" className="form-input" value={data.clientName || ''} onChange={e => set('clientName', e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Client Email *</label>
+              <input type="email" className="form-input" value={data.clientEmail || ''} onChange={e => set('clientEmail', e.target.value)} required />
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Service Package *</label>
+            <select className="form-input" value={data.serviceTitle || ''} onChange={e => set('serviceTitle', e.target.value)} required>
+              <option value="">— Select —</option>
+              {PACKAGES.map(p => <option key={p.id} value={p.title}>{p.title} — {p.price}</option>)}
+            </select>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Amount (K) *</label>
+              <input type="text" className="form-input" value={data.amount || ''} onChange={e => set('amount', e.target.value)} placeholder="e.g. K2,000" required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Status</label>
+              <select className="form-input" value={data.status || 'under_review'} onChange={e => set('status', e.target.value)}>
+                <option value="under_review">Under Review</option>
+                <option value="approved">Approved</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Phone</label>
+            <input type="text" className="form-input" value={data.phone || ''} onChange={e => set('phone', e.target.value)} />
+          </div>
+        </>
+      );
+    }
+    return null;
+  };
+
+  const titleMap = { ledger:'Ledger Entry', invoice:'Invoice', client:'Client', payment:'Payment' };
+
+  return (
+    <div className="modal-form-overlay" onClick={onClose}>
+      <div className="modal-form" onClick={e => e.stopPropagation()}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20 }}>
+          <h3>{modal.mode === 'add' ? 'Add' : 'Edit'} {titleMap[modal.type]}</h3>
+          <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'#666', fontSize:18 }}><i className="fas fa-times"></i></button>
+        </div>
+        {error && <div style={{ background:'#FFE8E5', color:'#B8564F', padding:12, borderRadius:8, fontSize:13, marginBottom:16, fontWeight:600 }}>{error}</div>}
+        <form onSubmit={e => { e.preventDefault(); onSave(data); }}>
+          {renderFields()}
+          <div style={{ display:'flex', gap:12, marginTop:24 }}>
+            <button type="submit" disabled={saving} className="btn-primary" style={{ flex:1, justifyContent:'center' }}>
+              {saving ? <><i className="fas fa-circle-notch fa-spin"></i> Saving...</> : <><i className="fas fa-save"></i> {modal.mode === 'add' ? 'Create' : 'Update'}</>}
+            </button>
+            <button type="button" onClick={onClose} style={{ padding:'14px 24px', background:'#fff', border:'1px solid #ccc', borderRadius:9, fontWeight:600, cursor:'pointer' }}>Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ADMIN PORTAL
+   ═══════════════════════════════════════════════════════════════════ */
 function AdminPortal({ onExit }) {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -507,18 +705,20 @@ function AdminPortal({ onExit }) {
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(true);
-  
-  // Live Data State
+
   const [payments, setPayments] = useState([]);
   const [ledger, setLedger] = useState([]);
   const [clients, setClients] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
-  
-  // Navigation State
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview'); 
+  const [activeTab, setActiveTab] = useState('overview');
   const [statementTab, setStatementTab] = useState('income');
+  const [period, setPeriod] = useState('all');
+  const [modal, setModal] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState('');
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(async (u) => {
@@ -528,12 +728,9 @@ function AdminPortal({ onExit }) {
           const snap = await db.collection('se_admins').doc(u.uid).get();
           setIsAdmin(snap.exists);
           if (!snap.exists) setAuthError('Access denied. You are not an authorized admin.');
-        } catch (e) {
-          setAuthError('Error verifying admin status: ' + e.message);
-        }
+        } catch (e) { setAuthError('Error verifying admin status: ' + e.message); }
       } else {
-        setUser(null);
-        setIsAdmin(false);
+        setUser(null); setIsAdmin(false);
       }
       setAuthLoading(false);
     });
@@ -542,147 +739,286 @@ function AdminPortal({ onExit }) {
 
   useEffect(() => {
     if (!isAdmin) return;
-    
-    // Fetch Payments
-    const unsubPayments = db.collection('se_payments')
-      .orderBy('submittedAt', 'desc')
-      .limit(50)
-      .onSnapshot(snap => {
-        const rawPayments = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const filteredPayments = rawPayments.filter(p => {
-          const e = (p.clientEmail || '').toLowerCase();
-          const n = (p.clientName || '').toLowerCase();
-          const s = (p.serviceTitle || '').toLowerCase();
-          const badE = ['naisainga@gmail.com', 'lewismwaba@gmail.com', 'moneyard2@gmail.com'];
-          const badN = ['lewis mwaba', 'mwaba lewis', 'katongo mercy'];
-          if (badE.includes(e) || badN.includes(n) || s.includes('buyer access subscription')) return false;
-          return true;
-        });
-        setPayments(filteredPayments);
-      }, err => console.error(err));
+    const unsubPayments = db.collection('se_payments').orderBy('submittedAt','desc').limit(100).onSnapshot(snap => {
+      const raw = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const filtered = raw.filter(p => {
+        const e = (p.clientEmail || '').toLowerCase();
+        const n = (p.clientName || '').toLowerCase();
+        const s = (p.serviceTitle || '').toLowerCase();
+        const badE = ['naisainga@gmail.com','lewismwaba@gmail.com','moneyard2@gmail.com'];
+        const badN = ['lewis mwaba','mwaba lewis','katongo mercy'];
+        return !badE.includes(e) && !badN.includes(n) && !s.includes('buyer access subscription');
+      });
+      setPayments(filtered);
+    }, err => console.error(err));
 
-    // Fetch Ledger (Financial Transactions)
-    const unsubLedger = db.collection('se_ledger')
-      .orderBy('date', 'desc')
-      .onSnapshot(snap => {
-        setLedger(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      }, err => console.error(err));
+    const unsubLedger = db.collection('se_ledger').orderBy('date','desc').onSnapshot(snap => {
+      setLedger(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, err => console.error(err));
 
-    // Fetch Clients
-    const unsubClients = db.collection('se_clients')
-      .onSnapshot(snap => {
-        setClients(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      }, err => console.error(err));
+    const unsubClients = db.collection('se_clients').onSnapshot(snap => {
+      setClients(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, err => console.error(err));
 
-    // Fetch Invoices
-    const unsubInvoices = db.collection('se_invoices')
-      .onSnapshot(snap => {
-        setInvoices(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      }, err => console.error(err));
+    const unsubInvoices = db.collection('se_invoices').onSnapshot(snap => {
+      setInvoices(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, err => console.error(err));
 
     setLoadingData(false);
     return () => { unsubPayments(); unsubLedger(); unsubClients(); unsubInvoices(); };
   }, [isAdmin]);
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setAuthError('');
-    setAuthLoading(true);
+    e.preventDefault(); setAuthError(''); setAuthLoading(true);
+    try { await auth.signInWithEmailAndPassword(email, password); }
+    catch (err) { setAuthError(err.message); setAuthLoading(false); }
+  };
+  const handleLogout = () => auth.signOut();
+
+  /* ═══ PERIOD FILTER ═══ */
+  const filterByPeriod = (items, dateField = 'date') => {
+    if (period === 'all') return items;
+    const now = new Date();
+    return items.filter(item => {
+      const d = toDate(item[dateField]);
+      if (!d) return false;
+      if (period === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      if (period === 'last_month') {
+        const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        return d.getMonth() === lm.getMonth() && d.getFullYear() === lm.getFullYear();
+      }
+      if (period === 'quarter') return Math.floor(d.getMonth()/3) === Math.floor(now.getMonth()/3) && d.getFullYear() === now.getFullYear();
+      if (period === 'year') return d.getFullYear() === now.getFullYear();
+      return true;
+    });
+  };
+
+  const filteredLedger = useMemo(() => filterByPeriod(ledger, 'date'), [ledger, period]);
+  const filteredInvoices = useMemo(() => filterByPeriod(invoices, 'issueDate'), [invoices, period]);
+  const filteredPayments = useMemo(() => filterByPeriod(payments, 'submittedAt'), [payments, period]);
+  const periodLabel = PERIOD_LABELS[period];
+
+  /* ═══ AUTO CALCULATIONS ═══ */
+  const calc = useMemo(() => {
+    // Ledger metrics
+    const income = filteredLedger.filter(l => l.type === 'Income');
+    const expense = filteredLedger.filter(l => l.type === 'Expense');
+    const totalIncome = income.reduce((s, l) => s + num(l.amount), 0);
+    const totalExpense = expense.reduce((s, l) => s + num(l.amount), 0);
+    const netProfit = totalIncome - totalExpense;
+    const profitMargin = totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0;
+    const expenseRatio = totalIncome > 0 ? (totalExpense / totalIncome) * 100 : 0;
+
+    // Category breakdowns
+    const incomeByCategory = {};
+    income.forEach(l => { const c = l.category || 'Other Income'; incomeByCategory[c] = (incomeByCategory[c] || 0) + num(l.amount); });
+    const expenseByCategory = {};
+    expense.forEach(l => { const c = l.category || 'Other'; expenseByCategory[c] = (expenseByCategory[c] || 0) + num(l.amount); });
+
+    // Cash-flow classification
+    const cashflow = { operating: { in: 0, out: 0 }, investing: { in: 0, out: 0 }, financing: { in: 0, out: 0 } };
+    filteredLedger.forEach(l => {
+      const cls = CASHFLOW_CLASS[l.category] || 'operating';
+      const v = num(l.amount);
+      if (l.type === 'Income') cashflow[cls].in += v;
+      else cashflow[cls].out += v;
+    });
+    const cfOperating = cashflow.operating.in - cashflow.operating.out;
+    const cfInvesting = cashflow.investing.in - cashflow.investing.out;
+    const cfFinancing = cashflow.financing.in - cashflow.financing.out;
+    const netCashflow = cfOperating + cfInvesting + cfFinancing;
+
+    // Approved commencements (as revenue)
+    const approvedPmts = filteredPayments.filter(p => p.status === 'approved');
+    const commencementCollected = approvedPmts.reduce((s, p) => s + num(p.amount) / 2, 0);
+
+    // Total revenue = ledger income + commencement halves
+    const totalRevenue = totalIncome + commencementCollected;
+
+    // Invoices
+    const invMetrics = { total:0, paid:0, pending:0, overdue:0, count:0 };
+    filteredInvoices.forEach(inv => {
+      const amt = num(inv.amount);
+      invMetrics.total += amt; invMetrics.count += 1;
+      const st = getInvoiceStatus(inv);
+      if (st === 'Paid') invMetrics.paid += amt;
+      else if (st === 'Overdue') invMetrics.overdue += amt;
+      else invMetrics.pending += amt;
+    });
+
+    // Client MRR
+    const pkgPrice = { 'Financial Starter': 1000, 'Business Control': 2000, 'Growth & Financial Planning': 4000 };
+    const activeClients = clients.filter(c => (c.status || 'Active') === 'Active');
+    const mrr = activeClients.reduce((s, c) => s + (pkgPrice[c.package] || 0), 0);
+
+    return {
+      totalIncome, totalExpense, netProfit, profitMargin, expenseRatio,
+      incomeByCategory, expenseByCategory,
+      cashflow, cfOperating, cfInvesting, cfFinancing, netCashflow,
+      commencementCollected, totalRevenue,
+      invMetrics, mrr, activeClients: activeClients.length,
+      totalClients: clients.length
+    };
+  }, [filteredLedger, filteredInvoices, filteredPayments, clients]);
+
+  const pendingPayments = payments.filter(p => p.status === 'under_review' || !p.status);
+
+  /* ═══ HELPERS ═══ */
+  const getInvoiceStatus = (inv) => {
+    if (inv.status === 'Paid') return 'Paid';
+    const due = toDate(inv.dueDate);
+    if (!due) return 'Pending';
+    return due < new Date() ? 'Overdue' : 'Pending';
+  };
+  const nextInvoiceNo = (list) => {
+    const year = new Date().getFullYear();
+    const maxNum = list.filter(i => (i.invoiceNo || '').startsWith(`INV-${year}-`))
+      .reduce((m, i) => Math.max(m, parseInt((i.invoiceNo || '').split('-')[2]) || 0), 0);
+    return `INV-${year}-${String(maxNum + 1).padStart(4, '0')}`;
+  };
+
+  /* ═══ MODAL CRUD ═══ */
+  const openAdd = (type) => {
+    const today = todayStr();
+    let data = {};
+    if (type === 'ledger') data = { date: today, type: 'Income', desc: '', category: 'Service Fees', amount: '', reference: '' };
+    if (type === 'invoice') data = { invoiceNo: nextInvoiceNo(invoices), client: '', description: '', issueDate: today, dueDate: addDays(today, 30), amount: '', status: 'Pending' };
+    if (type === 'client') data = { name: '', email: '', phone: '', package: 'Business Control', status: 'Active' };
+    if (type === 'payment') data = { clientName: '', clientEmail: '', phone: '', serviceTitle: '', amount: '', status: 'under_review' };
+    setModal({ type, mode: 'add', data });
+    setFormError('');
+  };
+  const openEdit = (type, data) => {
+    setModal({ type, mode: 'edit', data: { ...data } });
+    setFormError('');
+  };
+  const closeModal = () => { setModal(null); setFormError(''); };
+
+  const saveEntry = async (data) => {
+    setFormError(''); setSaving(true);
     try {
-      await auth.signInWithEmailAndPassword(email, password);
+      if (modal.type === 'ledger') {
+        if (!data.desc?.trim()) throw new Error('Description is required');
+        if (!data.amount || num(data.amount) <= 0) throw new Error('Amount must be greater than zero');
+        const payload = { ...data, amount: num(data.amount) };
+        if (modal.mode === 'add') {
+          await db.collection('se_ledger').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        } else {
+          await db.collection('se_ledger').doc(data.id).update(payload);
+        }
+      }
+      if (modal.type === 'invoice') {
+        if (!data.client?.trim()) throw new Error('Client name is required');
+        if (!data.amount || num(data.amount) <= 0) throw new Error('Amount must be greater than zero');
+        if (!data.issueDate || !data.dueDate) throw new Error('Issue and due date are required');
+        const payload = { ...data, amount: num(data.amount) };
+        if (modal.mode === 'add') {
+          await db.collection('se_invoices').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        } else {
+          await db.collection('se_invoices').doc(data.id).update(payload);
+        }
+      }
+      if (modal.type === 'client') {
+        if (!data.name?.trim()) throw new Error('Name is required');
+        if (!data.email?.trim()) throw new Error('Email is required');
+        if (modal.mode === 'add') {
+          await db.collection('se_clients').add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        } else {
+          await db.collection('se_clients').doc(data.id).update(data);
+        }
+      }
+      if (modal.type === 'payment') {
+        if (!data.clientName?.trim()) throw new Error('Client name is required');
+        if (!data.clientEmail?.trim()) throw new Error('Client email is required');
+        if (!data.serviceTitle) throw new Error('Service package is required');
+        if (!data.amount) throw new Error('Amount is required');
+        if (modal.mode === 'add') {
+          await db.collection('se_payments').add({ ...data, submittedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        } else {
+          await db.collection('se_payments').doc(data.id).update(data);
+        }
+      }
+      closeModal();
     } catch (err) {
-      setAuthError(err.message);
-      setAuthLoading(false);
+      setFormError(err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleLogout = () => auth.signOut();
+  const handleDelete = async (collection, id) => {
+    if (!window.confirm('Delete this record permanently? This cannot be undone.')) return;
+    try { await db.collection(collection).doc(id).delete(); }
+    catch (err) { alert('Failed to delete: ' + err.message); }
+  };
 
-  const handleVerify = async (paymentId) => {
+  const handleVerifyPayment = async (payment) => {
+    if (!window.confirm('Verify this payment and add client to active portfolio?')) return;
     try {
-      await db.collection('se_payments').doc(paymentId).update({
+      await db.collection('se_payments').doc(payment.id).update({
         status: 'approved',
         verifiedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      alert('Payment verified. Client has been added to the active portfolio.');
-    } catch (err) {
-      alert('Failed to verify: ' + err.message);
-    }
+      // Auto-create client record if not exists
+      const exists = clients.find(c => (c.email || '').toLowerCase() === (payment.clientEmail || '').toLowerCase());
+      if (!exists) {
+        await db.collection('se_clients').add({
+          name: payment.clientName || 'Unknown',
+          email: payment.clientEmail || '',
+          phone: payment.phone || '',
+          package: payment.serviceTitle || '',
+          status: 'Active',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    } catch (err) { alert('Failed to verify: ' + err.message); }
   };
 
-  const handleDelete = async (paymentId) => {
-    if (!window.confirm("Delete this record permanently?")) return;
-    try {
-      await db.collection('se_payments').doc(paymentId).delete();
-    } catch (err) {
-      alert('Failed to delete: ' + err.message);
-    }
+  const handleMarkInvoicePaid = async (inv) => {
+    try { await db.collection('se_invoices').doc(inv.id).update({ status: 'Paid' }); }
+    catch (err) { alert('Failed: ' + err.message); }
   };
 
-  const calculateCommencement = (amountStr) => {
-    if (!amountStr) return 'K0';
-    const numMatch = String(amountStr).match(/[\d,]+/);
-    if (!numMatch) return amountStr;
-    const rawNum = parseInt(numMatch[0].replace(/,/g, ''), 10);
-    return `K${(rawNum / 2).toLocaleString()}`;
-  };
-
+  /* ═══ RENDER AUTH ═══ */
   if (authLoading) {
-    return <div className="auth-gate"><i className="fas fa-circle-notch fa-spin" style={{ color: '#F5A623', fontSize: 32 }}></i></div>;
+    return <div className="auth-gate"><i className="fas fa-circle-notch fa-spin" style={{ color:'#F5A623', fontSize:32 }}></i></div>;
   }
-
   if (!user || !isAdmin) {
     return (
       <div className="auth-gate fadein">
         <div className="auth-box">
-          <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <div className="logo-mark" style={{ margin: '0 auto 16px', width: 48, height: 48, fontSize: 22 }}>S</div>
-            <h2 className="serif" style={{ fontSize: 24, color: '#0A1F12', margin: 0 }}>Finance Admin Portal</h2>
-            <p style={{ fontSize: 14, color: 'rgba(10,31,18,0.6)', marginTop: 8 }}>Authorized personnel only</p>
+          <div style={{ textAlign:'center', marginBottom:24 }}>
+            <div className="logo-mark" style={{ margin:'0 auto 16px', width:48, height:48, fontSize:22 }}>S</div>
+            <h2 className="serif" style={{ fontSize:24, color:'#0A1F12', margin:0 }}>Finance Admin Portal</h2>
+            <p style={{ fontSize:14, color:'rgba(10,31,18,0.6)', marginTop:8 }}>Authorized personnel only</p>
           </div>
-          {authError && <div style={{ background: '#FFE8E5', color: '#B8564F', padding: 12, borderRadius: 8, fontSize: 13, marginBottom: 16, fontWeight: 600 }}><i className="fas fa-exclamation-circle"></i> {authError}</div>}
+          {authError && <div style={{ background:'#FFE8E5', color:'#B8564F', padding:12, borderRadius:8, fontSize:13, marginBottom:16, fontWeight:600 }}><i className="fas fa-exclamation-circle"></i> {authError}</div>}
           <form onSubmit={handleLogin}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0A1F12', marginBottom: 6 }}>Admin Email</label>
+            <label style={{ display:'block', fontSize:12, fontWeight:700, color:'#0A1F12', marginBottom:6 }}>Admin Email</label>
             <input type="email" className="auth-input" value={email} onChange={e => setEmail(e.target.value)} required placeholder="admin@starteasyzambia.com" />
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0A1F12', marginBottom: 6 }}>Password</label>
+            <label style={{ display:'block', fontSize:12, fontWeight:700, color:'#0A1F12', marginBottom:6 }}>Password</label>
             <input type="password" className="auth-input" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••••" />
-            <button type="submit" className="btn-primary" style={{ width: '100%', padding: '14px', marginTop: 8 }}><i className="fas fa-lock-open"></i> Secure Login</button>
+            <button type="submit" className="btn-primary" style={{ width:'100%', padding:'14px', marginTop:8 }}><i className="fas fa-lock-open"></i> Secure Login</button>
           </form>
-          <button onClick={onExit} style={{ width: '100%', background: 'none', border: 'none', color: '#666', fontSize: 13, marginTop: 16, cursor: 'pointer', textDecoration: 'underline' }}>Return to Public Page</button>
+          <button onClick={onExit} style={{ width:'100%', background:'none', border:'none', color:'#666', fontSize:13, marginTop:16, cursor:'pointer', textDecoration:'underline' }}>Return to Public Page</button>
         </div>
       </div>
     );
   }
 
-  // DYNAMIC CALCULATIONS (Starts at 0)
-  const pendingPayments = payments.filter(p => p.status === 'under_review' || !p.status);
-  const approvedPayments = payments.filter(p => p.status === 'approved');
-  
-  const totalCommencementCollected = approvedPayments.reduce((sum, p) => {
-    const amt = parseInt(String(p.amount).replace(/[^\d]/g, '')) || 0;
-    return sum + (amt / 2);
-  }, 0);
-
-  // Dynamic Ledger Calculations
-  const totalLedgerIncome = ledger.filter(l => l.type === 'Income').reduce((sum, l) => sum + (parseFloat(l.amount) || 0), 0);
-  const totalLedgerExpense = ledger.filter(l => l.type === 'Expense').reduce((sum, l) => sum + (parseFloat(l.amount) || 0), 0);
-  
-  // Total Revenue = Commencement fees + Ledger Income
-  const totalRevenue = totalCommencementCollected + totalLedgerIncome;
-  const netIncome = totalRevenue - totalLedgerExpense;
-
+  /* ═══ RENDER DASHBOARD ═══ */
   return (
     <div className="admin-layout fadein">
       <div className="admin-top-bar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:16 }}>
           <button className="admin-hamburger" onClick={() => setIsDrawerOpen(true)}>
             <i className="fas fa-bars"></i>
             <span className="hidden sm:inline">StartEasy Finance</span>
           </button>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <span className="hidden sm:inline" style={{ fontSize: 13, fontWeight: 600, color: 'rgba(10,31,18,0.6)' }}>{user.email}</span>
-          <button onClick={handleLogout} style={{ background: 'rgba(184,86,79,0.1)', border: '1px solid #B8564F', color: '#B8564F', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:16 }}>
+          <span className="hidden sm:inline" style={{ fontSize:13, fontWeight:600, color:'rgba(10,31,18,0.6)' }}>{user.email}</span>
+          <button onClick={handleLogout} style={{ background:'rgba(184,86,79,0.1)', border:'1px solid #B8564F', color:'#B8564F', padding:'8px 16px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', gap:6 }}>
             <i className="fas fa-sign-out-alt"></i> <span className="hidden sm:inline">Sign Out</span>
           </button>
         </div>
@@ -691,107 +1027,123 @@ function AdminPortal({ onExit }) {
       <div className={`admin-drawer-overlay ${isDrawerOpen ? 'open' : ''}`} onClick={() => setIsDrawerOpen(false)}></div>
 
       <aside className={`admin-drawer ${isDrawerOpen ? 'open' : ''}`}>
-        <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div className="logo-mark" style={{ width: 32, height: 32, fontSize: 16 }}>S</div>
+        <div style={{ padding:24, borderBottom:'1px solid rgba(255,255,255,0.1)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+            <div className="logo-mark" style={{ width:32, height:32, fontSize:16 }}>S</div>
             <div>
-              <div style={{ fontSize: 8, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>Accounting & Finance</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>StartEasy Zambia</div>
+              <div style={{ fontSize:8, letterSpacing:'0.15em', textTransform:'uppercase', color:'rgba(255,255,255,0.5)', fontWeight:700 }}>Accounting & Finance</div>
+              <div style={{ fontSize:14, fontWeight:700, color:'#fff' }}>StartEasy Zambia</div>
             </div>
           </div>
-          <button onClick={() => setIsDrawerOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 18 }}><i className="fas fa-times"></i></button>
+          <button onClick={() => setIsDrawerOpen(false)} style={{ background:'none', border:'none', color:'#fff', cursor:'pointer', fontSize:18 }}><i className="fas fa-times"></i></button>
         </div>
 
-        <nav style={{ flex: 1, overflowY: 'auto' }}>
+        <nav style={{ flex:1, overflowY:'auto' }}>
           <div className="admin-nav-section">Overview</div>
-          <div className={`admin-nav-item ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => { setActiveTab('overview'); setIsDrawerOpen(false); }}>
-            <i className="fas fa-chart-pie"></i> Dashboard
-          </div>
+          <div className={`admin-nav-item ${activeTab==='overview'?'active':''}`} onClick={() => { setActiveTab('overview'); setIsDrawerOpen(false); }}><i className="fas fa-chart-pie"></i> Dashboard</div>
 
-          <div className="admin-nav-section" style={{ color: '#F5A623' }}>External Client Operations</div>
-          <div className={`admin-nav-item ${activeTab === 'onboarding' ? 'active' : ''}`} onClick={() => { setActiveTab('onboarding'); setIsDrawerOpen(false); }}>
-            <i className="fas fa-money-check-alt"></i> Onboarding Queue {pendingPayments.length > 0 && <span style={{ background: '#B8564F', color: '#fff', borderRadius: 99, padding: '2px 8px', fontSize: 10, marginLeft: 'auto' }}>{pendingPayments.length}</span>}
+          <div className="admin-nav-section" style={{ color:'#F5A623' }}>Client Operations</div>
+          <div className={`admin-nav-item ${activeTab==='onboarding'?'active':''}`} onClick={() => { setActiveTab('onboarding'); setIsDrawerOpen(false); }}>
+            <i className="fas fa-money-check-alt"></i> Onboarding Queue {pendingPayments.length > 0 && <span style={{ background:'#B8564F', color:'#fff', borderRadius:99, padding:'2px 8px', fontSize:10, marginLeft:'auto' }}>{pendingPayments.length}</span>}
           </div>
-          <div className={`admin-nav-item ${activeTab === 'portfolio' ? 'active' : ''}`} onClick={() => { setActiveTab('portfolio'); setIsDrawerOpen(false); }}>
-            <i className="fas fa-users"></i> Client Portfolio
-          </div>
+          <div className={`admin-nav-item ${activeTab==='portfolio'?'active':''}`} onClick={() => { setActiveTab('portfolio'); setIsDrawerOpen(false); }}><i className="fas fa-users"></i> Client Portfolio</div>
 
-          <div className="admin-nav-section" style={{ color: '#4CB050' }}>Internal Company Finance</div>
-          <div className={`admin-nav-item ${activeTab === 'ledger' ? 'active' : ''}`} onClick={() => { setActiveTab('ledger'); setIsDrawerOpen(false); }}>
-            <i className="fas fa-book"></i> Company Ledger
-          </div>
-          <div className={`admin-nav-item ${activeTab === 'invoices' ? 'active' : ''}`} onClick={() => { setActiveTab('invoices'); setIsDrawerOpen(false); }}>
-            <i className="fas fa-file-invoice"></i> Invoicing
-          </div>
-          <div className={`admin-nav-item ${activeTab === 'statements' ? 'active' : ''}`} onClick={() => { setActiveTab('statements'); setIsDrawerOpen(false); }}>
-            <i className="fas fa-file-signature"></i> Financial Statements
-          </div>
+          <div className="admin-nav-section" style={{ color:'#4CB050' }}>Company Finance</div>
+          <div className={`admin-nav-item ${activeTab==='ledger'?'active':''}`} onClick={() => { setActiveTab('ledger'); setIsDrawerOpen(false); }}><i className="fas fa-book"></i> Company Ledger</div>
+          <div className={`admin-nav-item ${activeTab==='invoices'?'active':''}`} onClick={() => { setActiveTab('invoices'); setIsDrawerOpen(false); }}><i className="fas fa-file-invoice"></i> Invoicing</div>
+          <div className={`admin-nav-item ${activeTab==='statements'?'active':''}`} onClick={() => { setActiveTab('statements'); setIsDrawerOpen(false); }}><i className="fas fa-file-signature"></i> Financial Statements</div>
         </nav>
 
-        <div style={{ padding: 24, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-          <button onClick={handleLogout} style={{ width: '100%', background: 'rgba(184,86,79,0.2)', border: '1px solid #B8564F', color: '#FFB4A8', padding: '10px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <div style={{ padding:24, borderTop:'1px solid rgba(255,255,255,0.1)' }}>
+          <button onClick={handleLogout} style={{ width:'100%', background:'rgba(184,86,79,0.2)', border:'1px solid #B8564F', color:'#FFB4A8', padding:'10px', borderRadius:8, fontSize:13, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
             <i className="fas fa-sign-out-alt"></i> Sign Out
           </button>
         </div>
       </aside>
 
       <main className="admin-content">
-        
+        {/* PERIOD FILTER (global) */}
+        {activeTab !== 'statements' && (
+          <div className="filter-tabs">
+            <span style={{ fontSize:11, fontWeight:800, color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em', marginRight:8 }}>Period:</span>
+            {Object.entries(PERIOD_LABELS).map(([k, label]) => (
+              <button key={k} className={`filter-tab ${period===k?'active':''}`} onClick={() => setPeriod(k)}>{label}</button>
+            ))}
+          </div>
+        )}
+
+        {/* ─── OVERVIEW ─── */}
         {activeTab === 'overview' && (
           <div className="fadein">
-            <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', marginBottom: 24 }}>Finance Dashboard</h1>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 20, marginBottom: 32 }}>
+            <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', marginBottom:8 }}>Finance Dashboard</h1>
+            <p style={{ fontSize:13, color:'#64748B', marginBottom:24 }}>Snapshot · {periodLabel}</p>
+
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:20, marginBottom:32 }}>
               <div className="admin-card">
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Gross Revenue</div>
-                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#1E7B3C' }}>K{totalRevenue.toLocaleString()}</div>
-                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8 }}>Commencement fees + Ledger</div>
+                <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Gross Revenue</div>
+                <div className="serif" style={{ fontSize:30, fontWeight:800, color:'#1E7B3C' }}>{fmtK(calc.totalRevenue)}</div>
+                <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Ledger + Verified Commencements</div>
               </div>
               <div className="admin-card">
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Net Profit</div>
-                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: netIncome >= 0 ? '#1E7B3C' : '#B8564F' }}>K{netIncome.toLocaleString()}</div>
-                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8 }}>Revenue minus expenses</div>
+                <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Net Profit</div>
+                <div className="serif" style={{ fontSize:30, fontWeight:800, color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtK(calc.netProfit)}</div>
+                <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Revenue − Expenses</div>
               </div>
               <div className="admin-card">
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Pending Onboarding</div>
-                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#E8730F' }}>{pendingPayments.length}</div>
-                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8 }}>Awaiting verification</div>
+                <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Profit Margin</div>
+                <div className="serif" style={{ fontSize:30, fontWeight:800, color: calc.profitMargin >= 20 ? '#1E7B3C' : calc.profitMargin >= 0 ? '#E8730F' : '#B8564F' }}>{calc.profitMargin.toFixed(1)}%</div>
+                <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Net Profit ÷ Total Income</div>
               </div>
               <div className="admin-card">
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Active Clients</div>
-                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#0A1F12' }}>{clients.length}</div>
-                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8 }}>Currently on retainers</div>
+                <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Active Clients</div>
+                <div className="serif" style={{ fontSize:30, fontWeight:800, color:'#0A1F12' }}>{calc.activeClients}</div>
+                <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>MRR: <strong>{fmtK(calc.mrr)}</strong></div>
+              </div>
+            </div>
+
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))', gap:20, marginBottom:32 }}>
+              <div className="admin-card">
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+                  <h3 style={{ fontSize:15, fontWeight:800, color:'#0A1F12', margin:0 }}>Cash Position</h3>
+                  <span className={`kpi-trend ${calc.netCashflow >= 0 ? 'up' : 'down'}`}>{calc.netCashflow >= 0 ? '▲ Positive' : '▼ Negative'}</span>
+                </div>
+                <div style={{ fontSize:13, color:'#64748B', marginBottom:8 }}>Net cash flow (Operating + Investing + Financing)</div>
+                <div style={{ fontFamily:'Consolas, monospace', fontSize:22, fontWeight:800, color: calc.netCashflow >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtK(calc.netCashflow)}</div>
+                <div style={{ display:'flex', gap:12, marginTop:16, fontSize:11, color:'#64748B' }}>
+                  <span>Operating: <strong style={{ color:'#0A1F12' }}>{fmtK(calc.cfOperating)}</strong></span>
+                  <span>Investing: <strong style={{ color:'#0A1F12' }}>{fmtK(calc.cfInvesting)}</strong></span>
+                  <span>Financing: <strong style={{ color:'#0A1F12' }}>{fmtK(calc.cfFinancing)}</strong></span>
+                </div>
+              </div>
+              <div className="admin-card">
+                <h3 style={{ fontSize:15, fontWeight:800, color:'#0A1F12', marginBottom:16, marginTop:0 }}>Invoices (AR Aging)</h3>
+                <div style={{ fontSize:13, color:'#64748B', marginBottom:8 }}>{calc.invMetrics.count} invoices · {fmtK(calc.invMetrics.total)} total</div>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, marginTop:12 }}>
+                  <div><div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Paid</div><div style={{ fontSize:16, fontWeight:800, color:'#1E7B3C' }}>{fmtK(calc.invMetrics.paid)}</div></div>
+                  <div><div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Pending</div><div style={{ fontSize:16, fontWeight:800, color:'#E8730F' }}>{fmtK(calc.invMetrics.pending)}</div></div>
+                  <div><div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Overdue</div><div style={{ fontSize:16, fontWeight:800, color:'#B8564F' }}>{fmtK(calc.invMetrics.overdue)}</div></div>
+                </div>
               </div>
             </div>
 
             <div className="admin-card">
-              <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0A1F12', marginBottom: 20 }}>Recent Submissions</h2>
-              <div style={{ overflowX: 'auto' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+                <h2 style={{ fontSize:16, fontWeight:800, color:'#0A1F12', margin:0 }}>Recent Payments</h2>
+                <button onClick={() => openAdd('payment')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Manual</button>
+              </div>
+              <div style={{ overflowX:'auto' }}>
                 <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Client</th>
-                      <th>Service</th>
-                      <th>Amount</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
+                  <thead><tr><th>Client</th><th>Service</th><th>Amount</th><th>Status</th></tr></thead>
                   <tbody>
-                    {payments.slice(0, 5).map(p => (
+                    {payments.slice(0,5).map(p => (
                       <tr key={p.id}>
-                        <td style={{ fontWeight: 700 }}>{p.clientName || 'Unknown'}</td>
+                        <td style={{ fontWeight:700 }}>{p.clientName || 'Unknown'}</td>
                         <td>{p.serviceTitle || 'N/A'}</td>
-                        <td style={{ fontWeight: 700 }}>{p.amount || 'N/A'}</td>
-                        <td>
-                          <span className={`status-pill ${p.status === 'approved' ? 'active' : 'pending'}`}>
-                            {p.status === 'approved' ? 'Active' : 'Under Review'}
-                          </span>
-                        </td>
+                        <td style={{ fontWeight:700 }}>{p.amount || 'N/A'}</td>
+                        <td><span className={`status-pill ${p.status==='approved'?'active':'pending'}`}>{p.status==='approved'?'Active':'Under Review'}</span></td>
                       </tr>
                     ))}
-                    {payments.length === 0 && (
-                      <tr><td colSpan="4" className="empty-state">No live submissions recorded yet.</td></tr>
-                    )}
+                    {payments.length === 0 && <tr><td colSpan="4" className="empty-state">No payments recorded yet.</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -799,58 +1151,39 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
+        {/* ─── ONBOARDING ─── */}
         {activeTab === 'onboarding' && (
           <div className="fadein">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', margin: 0 }}>Onboarding Queue</h1>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24 }}>
+              <div>
+                <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Onboarding Queue</h1>
+                <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{pendingPayments.length} pending · {periodLabel}</p>
+              </div>
+              <button onClick={() => openAdd('payment')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Payment</button>
             </div>
-            
+
             <div className="admin-card">
               {loadingData ? (
-                <div className="empty-state"><i className="fas fa-circle-notch fa-spin" style={{ color: '#E8730F', fontSize: 24 }}></i></div>
-              ) : payments.length === 0 ? (
-                <div className="empty-state">
-                  <i className="fas fa-check-circle" style={{ fontSize: 32, color: '#1E7B3C', marginBottom: 12, display: 'block' }}></i>
-                  No live payments found.
-                </div>
+                <div className="empty-state"><i className="fas fa-circle-notch fa-spin" style={{ color:'#E8730F', fontSize:24 }}></i></div>
+              ) : filteredPayments.length === 0 ? (
+                <div className="empty-state"><i className="fas fa-check-circle" style={{ fontSize:32, color:'#1E7B3C', marginBottom:12, display:'block' }}></i>No payments in this period.</div>
               ) : (
-                <div style={{ overflowX: 'auto' }}>
+                <div style={{ overflowX:'auto' }}>
                   <table className="admin-table">
-                    <thead>
-                      <tr>
-                        <th>Client</th>
-                        <th>Service</th>
-                        <th>Total Fee</th>
-                        <th>Commencement (50%)</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
+                    <thead><tr><th>Client</th><th>Service</th><th>Total Fee</th><th>Commencement (50%)</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody>
-                      {payments.map(p => (
+                      {filteredPayments.map(p => (
                         <tr key={p.id}>
-                          <td>
-                            <div style={{ fontWeight: 700 }}>{p.clientName || 'Unknown'}</div>
-                            <div style={{ fontSize: 11, color: 'rgba(10,31,18,0.5)' }}>{p.clientEmail}</div>
-                          </td>
+                          <td><div style={{ fontWeight:700 }}>{p.clientName || 'Unknown'}</div><div style={{ fontSize:11, color:'rgba(10,31,18,0.5)' }}>{p.clientEmail}</div></td>
                           <td>{p.serviceTitle || 'N/A'}</td>
-                          <td style={{ fontWeight: 700 }}>{p.amount || 'N/A'}</td>
-                          <td style={{ fontWeight: 800, color: '#E8730F' }}>{calculateCommencement(p.amount)}</td>
+                          <td style={{ fontWeight:700 }}>{p.amount || 'N/A'}</td>
+                          <td style={{ fontWeight:800, color:'#E8730F' }}>{fmtK(num(p.amount) / 2)}</td>
+                          <td><span className={`status-pill ${p.status==='approved'?'active':'pending'}`}>{p.status==='approved'?'Active':'Under Review'}</span></td>
                           <td>
-                            <span className={`status-pill ${p.status === 'approved' ? 'active' : 'pending'}`}>
-                              {p.status === 'approved' ? 'Active' : 'Under Review'}
-                            </span>
-                          </td>
-                          <td>
-                            <div style={{ display: 'flex', gap: 8 }}>
-                              {p.status !== 'approved' && (
-                                <button onClick={() => handleVerify(p.id)} style={{ background: '#1E7B3C', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
-                                  Verify
-                                </button>
-                              )}
-                              <button onClick={() => handleDelete(p.id)} style={{ background: '#FFE8E5', color: '#B8564F', border: 'none', padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' }} title="Delete Record">
-                                <i className="fas fa-trash"></i>
-                              </button>
+                            <div style={{ display:'flex', gap:6 }}>
+                              {p.status !== 'approved' && <button onClick={() => handleVerifyPayment(p)} className="btn-sm btn-add" title="Verify"><i className="fas fa-check"></i></button>}
+                              <button onClick={() => openEdit('payment', p)} className="btn-sm btn-edit" title="Edit"><i className="fas fa-pen"></i></button>
+                              <button onClick={() => handleDelete('se_payments', p.id)} className="btn-sm btn-del" title="Delete"><i className="fas fa-trash"></i></button>
                             </div>
                           </td>
                         </tr>
@@ -863,32 +1196,38 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
+        {/* ─── PORTFOLIO ─── */}
         {activeTab === 'portfolio' && (
           <div className="fadein">
-            <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', marginBottom: 24 }}>Client Portfolio</h1>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24 }}>
+              <div>
+                <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Client Portfolio</h1>
+                <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{calc.activeClients} active · MRR: <strong>{fmtK(calc.mrr)}</strong></p>
+              </div>
+              <button onClick={() => openAdd('client')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Client</button>
+            </div>
+
             <div className="admin-card">
-              <div style={{ overflowX: 'auto' }}>
+              <div style={{ overflowX:'auto' }}>
                 <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Client Name</th>
-                      <th>Email</th>
-                      <th>Active Package</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
+                  <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Package</th><th>Status</th><th>Actions</th></tr></thead>
                   <tbody>
                     {clients.map(c => (
                       <tr key={c.id}>
-                        <td style={{ fontWeight: 700 }}>{c.name}</td>
+                        <td style={{ fontWeight:700 }}>{c.name}</td>
                         <td>{c.email}</td>
-                        <td style={{ fontWeight: 600, color: '#1B6CA8' }}>{c.package}</td>
-                        <td><span className="status-pill active">{c.status || 'Active'}</span></td>
+                        <td>{c.phone || '—'}</td>
+                        <td style={{ fontWeight:600, color:'#1B6CA8' }}>{c.package}</td>
+                        <td><span className={`status-pill ${c.status==='Active'||!c.status?'active':c.status==='Paused'?'paused':'pending'}`}>{c.status || 'Active'}</span></td>
+                        <td>
+                          <div style={{ display:'flex', gap:6 }}>
+                            <button onClick={() => openEdit('client', c)} className="btn-sm btn-edit"><i className="fas fa-pen"></i></button>
+                            <button onClick={() => handleDelete('se_clients', c.id)} className="btn-sm btn-del"><i className="fas fa-trash"></i></button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
-                    {clients.length === 0 && (
-                      <tr><td colSpan="4" className="empty-state">No clients in the portfolio yet.</td></tr>
-                    )}
+                    {clients.length === 0 && <tr><td colSpan="6" className="empty-state">No clients yet. Add one or verify a payment to auto-create.</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -896,40 +1235,59 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
+        {/* ─── LEDGER ─── */}
         {activeTab === 'ledger' && (
           <div className="fadein">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', margin: 0 }}>Company Ledger</h1>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
+              <div>
+                <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Company Ledger</h1>
+                <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{periodLabel} · {filteredLedger.length} entries · Net: <strong style={{ color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtK(calc.netProfit)}</strong></p>
+              </div>
+              <button onClick={() => openAdd('ledger')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Entry</button>
             </div>
+
+            {/* Summary cards */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:16, marginBottom:24 }}>
+              <div className="admin-card" style={{ padding:16 }}>
+                <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Total Income</div>
+                <div style={{ fontSize:22, fontWeight:800, color:'#1E7B3C', marginTop:4 }}>{fmtK(calc.totalIncome)}</div>
+              </div>
+              <div className="admin-card" style={{ padding:16 }}>
+                <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Total Expenses</div>
+                <div style={{ fontSize:22, fontWeight:800, color:'#B8564F', marginTop:4 }}>{fmtK(calc.totalExpense)}</div>
+              </div>
+              <div className="admin-card" style={{ padding:16 }}>
+                <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Net Profit</div>
+                <div style={{ fontSize:22, fontWeight:800, color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F', marginTop:4 }}>{fmtK(calc.netProfit)}</div>
+              </div>
+              <div className="admin-card" style={{ padding:16 }}>
+                <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Expense Ratio</div>
+                <div style={{ fontSize:22, fontWeight:800, color:'#E8730F', marginTop:4 }}>{calc.expenseRatio.toFixed(1)}%</div>
+              </div>
+            </div>
+
             <div className="admin-card">
-              <div style={{ overflowX: 'auto' }}>
+              <div style={{ overflowX:'auto' }}>
                 <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Description</th>
-                      <th>Type</th>
-                      <th>Amount</th>
-                    </tr>
-                  </thead>
+                  <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th>Amount</th><th>Ref</th><th>Actions</th></tr></thead>
                   <tbody>
-                    {ledger.map(t => (
+                    {filteredLedger.map(t => (
                       <tr key={t.id}>
-                        <td style={{ whiteSpace: 'nowrap' }}>{t.date}</td>
-                        <td style={{ fontWeight: 600 }}>{t.desc}</td>
+                        <td style={{ whiteSpace:'nowrap', fontSize:12 }}>{dateStr(t.date) || '—'}</td>
+                        <td style={{ fontWeight:600 }}>{t.desc}</td>
+                        <td style={{ fontSize:12, color:'#64748B' }}>{t.category || '—'}</td>
+                        <td><span style={{ fontSize:11, fontWeight:800, color: t.type === 'Income' ? '#1E7B3C' : '#B8564F' }}>{(t.type || '').toUpperCase()}</span></td>
+                        <td style={{ fontWeight:800, color: t.type === 'Income' ? '#1E7B3C' : '#0A1F12' }}>{t.type === 'Income' ? '+' : '−'} {fmtK(t.amount)}</td>
+                        <td style={{ fontSize:11, color:'#64748B' }}>{t.reference || '—'}</td>
                         <td>
-                          <span style={{ fontSize: 11, fontWeight: 800, color: t.type === 'Income' ? '#1E7B3C' : '#B8564F' }}>
-                            {t.type.toUpperCase()}
-                          </span>
-                        </td>
-                        <td style={{ fontWeight: 800, color: t.type === 'Income' ? '#1E7B3C' : '#0A1F12' }}>
-                          {t.type === 'Income' ? '+' : '-'} K{parseFloat(t.amount).toLocaleString()}
+                          <div style={{ display:'flex', gap:6 }}>
+                            <button onClick={() => openEdit('ledger', t)} className="btn-sm btn-edit"><i className="fas fa-pen"></i></button>
+                            <button onClick={() => handleDelete('se_ledger', t.id)} className="btn-sm btn-del"><i className="fas fa-trash"></i></button>
+                          </div>
                         </td>
                       </tr>
                     ))}
-                    {ledger.length === 0 && (
-                      <tr><td colSpan="4" className="empty-state">No ledger transactions recorded yet.</td></tr>
-                    )}
+                    {filteredLedger.length === 0 && <tr><td colSpan="7" className="empty-state">No ledger entries for this period. Click "Add Entry" to create one.</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -937,38 +1295,59 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
+        {/* ─── INVOICES ─── */}
         {activeTab === 'invoices' && (
           <div className="fadein">
-            <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', marginBottom: 24 }}>Invoicing</h1>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
+              <div>
+                <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Invoicing</h1>
+                <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{periodLabel} · {calc.invMetrics.count} invoices · Total: <strong>{fmtK(calc.invMetrics.total)}</strong></p>
+              </div>
+              <button onClick={() => openAdd('invoice')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Create Invoice</button>
+            </div>
+
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:16, marginBottom:24 }}>
+              <div className="admin-card" style={{ padding:16 }}>
+                <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Paid</div>
+                <div style={{ fontSize:22, fontWeight:800, color:'#1E7B3C', marginTop:4 }}>{fmtK(calc.invMetrics.paid)}</div>
+              </div>
+              <div className="admin-card" style={{ padding:16 }}>
+                <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Pending</div>
+                <div style={{ fontSize:22, fontWeight:800, color:'#E8730F', marginTop:4 }}>{fmtK(calc.invMetrics.pending)}</div>
+              </div>
+              <div className="admin-card" style={{ padding:16 }}>
+                <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Overdue</div>
+                <div style={{ fontSize:22, fontWeight:800, color:'#B8564F', marginTop:4 }}>{fmtK(calc.invMetrics.overdue)}</div>
+              </div>
+            </div>
+
             <div className="admin-card">
-              <div style={{ overflowX: 'auto' }}>
+              <div style={{ overflowX:'auto' }}>
                 <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Invoice No</th>
-                      <th>Client</th>
-                      <th>Due Date</th>
-                      <th>Amount</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
+                  <thead><tr><th>Invoice No</th><th>Client</th><th>Issue Date</th><th>Due Date</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
                   <tbody>
-                    {invoices.map(inv => (
-                      <tr key={inv.id}>
-                        <td style={{ fontWeight: 700, fontFamily: 'monospace' }}>{inv.invoiceNo}</td>
-                        <td>{inv.client}</td>
-                        <td>{inv.dueDate}</td>
-                        <td style={{ fontWeight: 700 }}>K{parseFloat(inv.amount).toLocaleString()}</td>
-                        <td>
-                          <span className={`status-pill ${inv.status === 'Paid' ? 'active' : 'pending'}`}>
-                            {inv.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                    {invoices.length === 0 && (
-                      <tr><td colSpan="5" className="empty-state">No invoices generated yet.</td></tr>
-                    )}
+                    {filteredInvoices.map(inv => {
+                      const status = getInvoiceStatus(inv);
+                      const pillClass = status === 'Paid' ? 'active' : status === 'Overdue' ? 'overdue' : 'pending';
+                      return (
+                        <tr key={inv.id}>
+                          <td style={{ fontWeight:700, fontFamily:'monospace', fontSize:12 }}>{inv.invoiceNo}</td>
+                          <td style={{ fontWeight:600 }}>{inv.client}</td>
+                          <td style={{ fontSize:12 }}>{dateStr(inv.issueDate) || '—'}</td>
+                          <td style={{ fontSize:12 }}>{dateStr(inv.dueDate) || '—'}</td>
+                          <td style={{ fontWeight:700 }}>{fmtK(inv.amount)}</td>
+                          <td><span className={`status-pill ${pillClass}`}>{status}</span></td>
+                          <td>
+                            <div style={{ display:'flex', gap:6 }}>
+                              {status !== 'Paid' && <button onClick={() => handleMarkInvoicePaid(inv)} className="btn-sm btn-add" title="Mark as Paid"><i className="fas fa-check"></i></button>}
+                              <button onClick={() => openEdit('invoice', inv)} className="btn-sm btn-edit"><i className="fas fa-pen"></i></button>
+                              <button onClick={() => handleDelete('se_invoices', inv.id)} className="btn-sm btn-del"><i className="fas fa-trash"></i></button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {filteredInvoices.length === 0 && <tr><td colSpan="7" className="empty-state">No invoices for this period. Click "Create Invoice" to add one.</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -976,15 +1355,21 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
+        {/* ─── STATEMENTS ─── */}
         {activeTab === 'statements' && (
           <div className="fadein">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', margin: 0 }}>Financial Statements</h1>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
+              <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Financial Statements</h1>
+              <div className="filter-tabs" style={{ marginBottom:0 }}>
+                {Object.entries(PERIOD_LABELS).map(([k, label]) => (
+                  <button key={k} className={`filter-tab ${period===k?'active':''}`} onClick={() => setPeriod(k)}>{label}</button>
+                ))}
+              </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
-              {[['income', 'Income Statement'], ['balance', 'Balance Sheet'], ['cashflow', 'Cash Flow']].map(([k, label]) => (
-                <button key={k} onClick={() => setStatementTab(k)} style={{ padding: '10px 20px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', border: statementTab === k ? 'none' : '1px solid #E2E8F0', background: statementTab === k ? '#0A1F12' : '#fff', color: statementTab === k ? '#fff' : '#64748B' }}>
+            <div style={{ display:'flex', gap:8, marginBottom:24, flexWrap:'wrap' }}>
+              {[['income','Income Statement'],['balance','Balance Sheet'],['cashflow','Cash Flow']].map(([k, label]) => (
+                <button key={k} onClick={() => setStatementTab(k)} style={{ padding:'10px 20px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', border: statementTab === k ? 'none' : '1px solid #E2E8F0', background: statementTab === k ? '#0A1F12' : '#fff', color: statementTab === k ? '#fff' : '#64748B' }}>
                   {label}
                 </button>
               ))}
@@ -995,24 +1380,40 @@ function AdminPortal({ onExit }) {
                 <h2 className="report-title">StartEasy Zambia</h2>
                 <p className="report-subtitle">
                   {statementTab === 'income' ? 'Income Statement (Profit & Loss)' : statementTab === 'balance' ? 'Statement of Financial Position (Balance Sheet)' : 'Statement of Cash Flows'} <br/>
-                  {new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
+                  For Period: {periodLabel} · {new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' })}
                 </p>
               </div>
 
               {statementTab === 'income' && (
                 <div>
                   <div className="report-row section-title">Revenue</div>
-                  <div className="report-row report-indent"><span>Verified Commencement Fees</span><span>K{totalCommencementCollected.toLocaleString()}</span></div>
-                  <div className="report-row report-indent"><span>Other Ledger Income</span><span>K{totalLedgerIncome.toLocaleString()}</span></div>
-                  <div className="report-row total"><span>Total Revenue</span><span>K{totalRevenue.toLocaleString()}</span></div>
+                  <div className="report-row report-indent"><span>Ledger Income</span><span>{fmtK(calc.totalIncome)}</span></div>
+                  <div className="report-row report-indent"><span>Verified Commencement Fees</span><span>{fmtK(calc.commencementCollected)}</span></div>
+                  <div className="report-row total"><span>Total Revenue</span><span>{fmtK(calc.totalRevenue)}</span></div>
+
+                  <div className="report-row section-title">Income Breakdown by Category</div>
+                  {Object.entries(calc.incomeByCategory).map(([cat, val]) => (
+                    <div key={cat} className="report-row report-indent"><span>{cat}</span><span>{fmtK(val)}</span></div>
+                  ))}
+                  {Object.keys(calc.incomeByCategory).length === 0 && <div className="report-row report-indent" style={{ color:'#94A3B8', fontStyle:'italic' }}><span>No income recorded</span><span>{fmtK(0)}</span></div>}
 
                   <div className="report-row section-title">Operating Expenses</div>
-                  <div className="report-row report-indent"><span>Total Recorded Expenses</span><span>(K{totalLedgerExpense.toLocaleString()})</span></div>
-                  <div className="report-row total"><span>Total Operating Expenses</span><span>(K{totalLedgerExpense.toLocaleString()})</span></div>
+                  {Object.entries(calc.expenseByCategory).map(([cat, val]) => (
+                    <div key={cat} className="report-row report-indent"><span>{cat}</span><span>({fmtK(val)})</span></div>
+                  ))}
+                  {Object.keys(calc.expenseByCategory).length === 0 && <div className="report-row report-indent" style={{ color:'#94A3B8', fontStyle:'italic' }}><span>No expenses recorded</span><span>({fmtK(0)})</span></div>}
+                  <div className="report-row total"><span>Total Operating Expenses</span><span>({fmtK(calc.totalExpense)})</span></div>
 
-                  <div className="report-row total" style={{ fontSize: 18, color: netIncome >= 0 ? '#1E7B3C' : '#B8564F' }}>
-                    <span>Net Income (Profit/Loss)</span>
-                    <span>K{netIncome.toLocaleString()}</span>
+                  <div className="report-row" style={{ marginTop:20, paddingTop:16, borderTop:'1px solid #ccc', fontSize:13, color:'#64748B' }}>
+                    <span>Gross Profit Margin</span><span>{calc.profitMargin.toFixed(2)}%</span>
+                  </div>
+                  <div className="report-row" style={{ fontSize:13, color:'#64748B' }}>
+                    <span>Expense Ratio</span><span>{calc.expenseRatio.toFixed(2)}%</span>
+                  </div>
+
+                  <div className="report-row total" style={{ fontSize:18, color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F' }}>
+                    <span>Net Income (Profit / Loss)</span>
+                    <span>{fmtK(calc.netProfit)}</span>
                   </div>
                 </div>
               )}
@@ -1020,45 +1421,69 @@ function AdminPortal({ onExit }) {
               {statementTab === 'balance' && (
                 <div>
                   <div className="report-row section-title">Assets</div>
-                  <div className="report-row report-indent"><span>Cash & Cash Equivalents</span><span>K{netIncome > 0 ? netIncome.toLocaleString() : 0}</span></div>
-                  <div className="report-row total"><span>Total Assets</span><span>K{netIncome > 0 ? netIncome.toLocaleString() : 0}</span></div>
+                  <div className="report-row report-indent"><span>Cash & Cash Equivalents</span><span>{fmtK(Math.max(0, calc.netCashflow))}</span></div>
+                  <div className="report-row report-indent"><span>Accounts Receivable (Outstanding Invoices)</span><span>{fmtK(calc.invMetrics.pending + calc.invMetrics.overdue)}</span></div>
+                  <div className="report-row total"><span>Total Assets</span><span>{fmtK(Math.max(0, calc.netCashflow) + calc.invMetrics.pending + calc.invMetrics.overdue)}</span></div>
 
                   <div className="report-row section-title">Liabilities</div>
-                  <div className="report-row report-indent"><span>Accounts Payable</span><span>K0</span></div>
-                  <div className="report-row total"><span>Total Liabilities</span><span>K0</span></div>
+                  <div className="report-row report-indent"><span>Accounts Payable</span><span>{fmtK(0)}</span></div>
+                  <div className="report-row total"><span>Total Liabilities</span><span>{fmtK(0)}</span></div>
 
                   <div className="report-row section-title">Equity</div>
-                  <div className="report-row report-indent"><span>Retained Earnings</span><span>K{netIncome > 0 ? netIncome.toLocaleString() : 0}</span></div>
-                  <div className="report-row total"><span>Total Equity</span><span>K{netIncome > 0 ? netIncome.toLocaleString() : 0}</span></div>
+                  <div className="report-row report-indent"><span>Retained Earnings (Net Income)</span><span>{fmtK(calc.netProfit)}</span></div>
+                  <div className="report-row total"><span>Total Equity</span><span>{fmtK(calc.netProfit)}</span></div>
 
-                  <div className="report-row total" style={{ borderTop: '2px solid #333', borderBottom: '4px double #333', fontSize: 16 }}><span>Total Liabilities & Equity</span><span>K{netIncome > 0 ? netIncome.toLocaleString() : 0}</span></div>
+                  <div className="report-row total" style={{ borderTop:'2px solid #333', borderBottom:'4px double #333', fontSize:16 }}>
+                    <span>Total Liabilities & Equity</span>
+                    <span>{fmtK(calc.netProfit)}</span>
+                  </div>
+                  <p style={{ fontSize:11, color:'#94A3B8', textAlign:'center', marginTop:20, fontStyle:'italic' }}>
+                    Note: Simple balance statement — Assets should equal Liabilities + Equity. Timing differences may exist where cash movements are recognised as they occur.
+                  </p>
                 </div>
               )}
 
               {statementTab === 'cashflow' && (
                 <div>
                   <div className="report-row section-title">Operating Activities</div>
-                  <div className="report-row report-indent"><span>Net Income</span><span>K{netIncome.toLocaleString()}</span></div>
-                  <div className="report-row total"><span>Net Cash from Operating Activities</span><span>K{netIncome.toLocaleString()}</span></div>
+                  <div className="report-row report-indent"><span>Cash Inflows (Operating)</span><span>{fmtK(calc.cashflow.operating.in)}</span></div>
+                  <div className="report-row report-indent"><span>Cash Outflows (Operating)</span><span>({fmtK(calc.cashflow.operating.out)})</span></div>
+                  <div className="report-row total"><span>Net Cash from Operating Activities</span><span>{fmtK(calc.cfOperating)}</span></div>
 
                   <div className="report-row section-title">Investing Activities</div>
-                  <div className="report-row report-indent"><span>Purchase of Assets</span><span>K0</span></div>
-                  <div className="report-row total"><span>Net Cash used in Investing Activities</span><span>K0</span></div>
+                  <div className="report-row report-indent"><span>Cash Inflows (Investing)</span><span>{fmtK(calc.cashflow.investing.in)}</span></div>
+                  <div className="report-row report-indent"><span>Cash Outflows (Investing)</span><span>({fmtK(calc.cashflow.investing.out)})</span></div>
+                  <div className="report-row total"><span>Net Cash from Investing Activities</span><span>{fmtK(calc.cfInvesting)}</span></div>
 
                   <div className="report-row section-title">Financing Activities</div>
-                  <div className="report-row report-indent"><span>Capital Injections</span><span>K0</span></div>
-                  <div className="report-row total"><span>Net Cash from Financing Activities</span><span>K0</span></div>
+                  <div className="report-row report-indent"><span>Cash Inflows (Financing)</span><span>{fmtK(calc.cashflow.financing.in)}</span></div>
+                  <div className="report-row report-indent"><span>Cash Outflows (Financing)</span><span>({fmtK(calc.cashflow.financing.out)})</span></div>
+                  <div className="report-row total"><span>Net Cash from Financing Activities</span><span>{fmtK(calc.cfFinancing)}</span></div>
 
-                  <div className="report-row total" style={{ fontSize: 18, color: netIncome >= 0 ? '#1E7B3C' : '#B8564F' }}><span>Net Increase in Cash</span><span>K{netIncome.toLocaleString()}</span></div>
-                  <div className="report-row report-indent" style={{ marginTop: 12, borderTop: '1px solid #ccc', paddingTop: 12 }}><span>Cash at Beginning of Period</span><span>K0</span></div>
-                  <div className="report-row total" style={{ fontSize: 16 }}><span>Cash at End of Period</span><span>K{netIncome.toLocaleString()}</span></div>
+                  <div className="report-row total" style={{ fontSize:18, color: calc.netCashflow >= 0 ? '#1E7B3C' : '#B8564F' }}>
+                    <span>Net Increase / (Decrease) in Cash</span>
+                    <span>{fmtK(calc.netCashflow)}</span>
+                  </div>
+                  <div className="report-row report-indent" style={{ marginTop:12, borderTop:'1px solid #ccc', paddingTop:12 }}><span>Cash at Beginning of Period</span><span>{fmtK(0)}</span></div>
+                  <div className="report-row total" style={{ fontSize:16 }}><span>Cash at End of Period</span><span>{fmtK(calc.netCashflow)}</span></div>
                 </div>
               )}
             </div>
           </div>
         )}
-
       </main>
+
+      {/* FORM MODAL */}
+      {modal && (
+        <FormModal
+          modal={modal}
+          onClose={closeModal}
+          onSave={saveEntry}
+          saving={saving}
+          error={formError}
+          clients={clients}
+        />
+      )}
     </div>
   );
 }
