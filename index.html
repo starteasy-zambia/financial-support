@@ -131,6 +131,7 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .status-pill { padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
 .status-pill.pending { background: #FEF3C7; color: #92400E; }
 .status-pill.active { background: #D1FAE5; color: #065F46; }
+.empty-state { text-align: center; padding: 40px 20px; color: #94A3B8; font-size: 14px; }
 
 /* Auth Gate */
 .auth-gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0A1F12; padding: 24px; }
@@ -214,34 +215,6 @@ const PACKAGES = [
 const PROJECTS = [
   "Business budget preparation", "Cash-flow forecast", "Financial records clean-up", 
   "Financial performance review", "Invoice management setup", "Funding-readiness preparation", "Business financial plan"
-];
-
-// Mock Data for Admin System
-const MOCK_CLIENTS = [
-  { id: 'c1', name: 'Tech Innovators Ltd', email: 'hello@techinnovators.zm', package: 'Business Control', assignedTo: 'Carol Kambole', status: 'Active', nextDeliverable: 'Month-End Report (Due 5th)' },
-  { id: 'c2', name: 'Lusaka Retail Hub', email: 'info@lusakaretail.zm', package: 'Financial Starter', assignedTo: 'Support Team', status: 'Active', nextDeliverable: 'Monthly Income Summary (Due 3rd)' },
-  { id: 'c3', name: 'Green Farms Agro', email: 'contact@greenfarms.zm', package: 'Growth & Financial Planning', assignedTo: 'Carol Kambole', status: 'Active', nextDeliverable: 'Q3 Cashflow Forecast (Due 10th)' },
-];
-
-const MOCK_CLIENT_TASKS = [
-  { id: 't1', client: 'Tech Innovators Ltd', task: 'Prepare October Month-End Management Report', assignedTo: 'Carol', deadline: '2026-11-05', status: 'In Progress', priority: 'High' },
-  { id: 't2', client: 'Lusaka Retail Hub', task: 'Reconcile Bank Statements for October', assignedTo: 'Support', deadline: '2026-11-03', status: 'Overdue', priority: 'Critical' },
-  { id: 't3', client: 'Green Farms Agro', task: 'Update 12-Month Rolling Cashflow Forecast', assignedTo: 'Carol', deadline: '2026-11-10', status: 'Not Started', priority: 'Medium' },
-  { id: 't4', client: 'Copperbelt Mining', task: 'Draft Business Plan for Bank Loan', assignedTo: 'Carol', deadline: '2026-11-15', status: 'In Progress', priority: 'High' },
-];
-
-const MOCK_COMPANY_LEDGER = [
-  { id: 'l1', date: '2026-11-01', desc: 'Payment from Tech Innovators (Commencement)', type: 'Income', amount: 1000, category: 'Client Revenue' },
-  { id: 'l2', date: '2026-11-01', desc: 'Payment from Lusaka Retail Hub (Commencement)', type: 'Income', amount: 500, category: 'Client Revenue' },
-  { id: 'l3', date: '2026-11-01', desc: 'Office Internet Subscription', type: 'Expense', amount: 450, category: 'Utilities' },
-  { id: 'l4', date: '2026-11-02', desc: 'Software Licenses (QuickBooks)', type: 'Expense', amount: 1200, category: 'Software' },
-  { id: 'l5', date: '2026-11-03', desc: 'Staff Transport Allowance', type: 'Expense', amount: 800, category: 'Payroll' },
-];
-
-const MOCK_INVOICES = [
-  { id: 'inv1', client: 'Tech Innovators Ltd', invoiceNo: 'INV-2026-001', amount: 2000, issueDate: '2026-11-01', dueDate: '2026-11-05', status: 'Paid' },
-  { id: 'inv2', client: 'Lusaka Retail Hub', invoiceNo: 'INV-2026-002', amount: 1000, issueDate: '2026-11-01', dueDate: '2026-11-05', status: 'Paid' },
-  { id: 'inv3', client: 'Green Farms Agro', invoiceNo: 'INV-2026-003', amount: 4000, issueDate: '2026-11-01', dueDate: '2026-11-05', status: 'Pending' },
 ];
 
 function App() {
@@ -525,7 +498,7 @@ function App() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   ADMIN PORTAL COMPONENT (EXPANDED ACCOUNTING & FINANCE SYSTEM)
+   ADMIN PORTAL COMPONENT (LIVE, ZERO-BASED)
    ═══════════════════════════════════════════════════════════════════════ */
 function AdminPortal({ onExit }) {
   const [user, setUser] = useState(null);
@@ -535,13 +508,17 @@ function AdminPortal({ onExit }) {
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(true);
   
+  // Live Data State
   const [payments, setPayments] = useState([]);
+  const [ledger, setLedger] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [invoices, setInvoices] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   
   // Navigation State
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview'); 
-  const [statementTab, setStatementTab] = useState('income'); // income, balance, cashflow
+  const [statementTab, setStatementTab] = useState('income');
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(async (u) => {
@@ -565,30 +542,46 @@ function AdminPortal({ onExit }) {
 
   useEffect(() => {
     if (!isAdmin) return;
-    const unsub = db.collection('se_payments')
+    
+    // Fetch Payments
+    const unsubPayments = db.collection('se_payments')
       .orderBy('submittedAt', 'desc')
       .limit(50)
       .onSnapshot(snap => {
         const rawPayments = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // Filter out spam/test data
         const filteredPayments = rawPayments.filter(p => {
-          const email = (p.clientEmail || '').toLowerCase();
-          const name = (p.clientName || '').toLowerCase();
-          const service = (p.serviceTitle || '').toLowerCase();
-          const blacklistedEmails = ['naisainga@gmail.com', 'lewismwaba@gmail.com', 'moneyard2@gmail.com'];
-          const blacklistedNames = ['lewis mwaba', 'mwaba lewis', 'katongo mercy'];
-          if (blacklistedEmails.includes(email)) return false;
-          if (blacklistedNames.includes(name)) return false;
-          if (service.includes('buyer access subscription')) return false;
+          const e = (p.clientEmail || '').toLowerCase();
+          const n = (p.clientName || '').toLowerCase();
+          const s = (p.serviceTitle || '').toLowerCase();
+          const badE = ['naisainga@gmail.com', 'lewismwaba@gmail.com', 'moneyard2@gmail.com'];
+          const badN = ['lewis mwaba', 'mwaba lewis', 'katongo mercy'];
+          if (badE.includes(e) || badN.includes(n) || s.includes('buyer access subscription')) return false;
           return true;
         });
         setPayments(filteredPayments);
-        setLoadingData(false);
-      }, err => {
-        console.error("Error fetching payments:", err);
-        setLoadingData(false);
-      });
-    return unsub;
+      }, err => console.error(err));
+
+    // Fetch Ledger (Financial Transactions)
+    const unsubLedger = db.collection('se_ledger')
+      .orderBy('date', 'desc')
+      .onSnapshot(snap => {
+        setLedger(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      }, err => console.error(err));
+
+    // Fetch Clients
+    const unsubClients = db.collection('se_clients')
+      .onSnapshot(snap => {
+        setClients(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      }, err => console.error(err));
+
+    // Fetch Invoices
+    const unsubInvoices = db.collection('se_invoices')
+      .onSnapshot(snap => {
+        setInvoices(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      }, err => console.error(err));
+
+    setLoadingData(false);
+    return () => { unsubPayments(); unsubLedger(); unsubClients(); unsubInvoices(); };
   }, [isAdmin]);
 
   const handleLogin = async (e) => {
@@ -603,9 +596,7 @@ function AdminPortal({ onExit }) {
     }
   };
 
-  const handleLogout = () => {
-    auth.signOut();
-  };
+  const handleLogout = () => auth.signOut();
 
   const handleVerify = async (paymentId) => {
     try {
@@ -620,7 +611,7 @@ function AdminPortal({ onExit }) {
   };
 
   const handleDelete = async (paymentId) => {
-    if (!window.confirm("Are you sure you want to permanently delete this record? This cannot be undone.")) return;
+    if (!window.confirm("Delete this record permanently?")) return;
     try {
       await db.collection('se_payments').doc(paymentId).delete();
     } catch (err) {
@@ -629,7 +620,7 @@ function AdminPortal({ onExit }) {
   };
 
   const calculateCommencement = (amountStr) => {
-    if (!amountStr) return 'N/A';
+    if (!amountStr) return 'K0';
     const numMatch = String(amountStr).match(/[\d,]+/);
     if (!numMatch) return amountStr;
     const rawNum = parseInt(numMatch[0].replace(/,/g, ''), 10);
@@ -663,15 +654,25 @@ function AdminPortal({ onExit }) {
     );
   }
 
+  // DYNAMIC CALCULATIONS (Starts at 0)
   const pendingPayments = payments.filter(p => p.status === 'under_review' || !p.status);
-  const totalCollected = payments.filter(p => p.status === 'approved').reduce((sum, p) => {
+  const approvedPayments = payments.filter(p => p.status === 'approved');
+  
+  const totalCommencementCollected = approvedPayments.reduce((sum, p) => {
     const amt = parseInt(String(p.amount).replace(/[^\d]/g, '')) || 0;
     return sum + (amt / 2);
   }, 0);
 
+  // Dynamic Ledger Calculations
+  const totalLedgerIncome = ledger.filter(l => l.type === 'Income').reduce((sum, l) => sum + (parseFloat(l.amount) || 0), 0);
+  const totalLedgerExpense = ledger.filter(l => l.type === 'Expense').reduce((sum, l) => sum + (parseFloat(l.amount) || 0), 0);
+  
+  // Total Revenue = Commencement fees + Ledger Income
+  const totalRevenue = totalCommencementCollected + totalLedgerIncome;
+  const netIncome = totalRevenue - totalLedgerExpense;
+
   return (
     <div className="admin-layout fadein">
-      {/* Top Bar with Hamburger and Logout */}
       <div className="admin-top-bar">
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <button className="admin-hamburger" onClick={() => setIsDrawerOpen(true)}>
@@ -687,10 +688,8 @@ function AdminPortal({ onExit }) {
         </div>
       </div>
 
-      {/* Drawer Overlay */}
       <div className={`admin-drawer-overlay ${isDrawerOpen ? 'open' : ''}`} onClick={() => setIsDrawerOpen(false)}></div>
 
-      {/* Drawer Menu */}
       <aside className={`admin-drawer ${isDrawerOpen ? 'open' : ''}`}>
         <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -716,9 +715,6 @@ function AdminPortal({ onExit }) {
           <div className={`admin-nav-item ${activeTab === 'portfolio' ? 'active' : ''}`} onClick={() => { setActiveTab('portfolio'); setIsDrawerOpen(false); }}>
             <i className="fas fa-users"></i> Client Portfolio
           </div>
-          <div className={`admin-nav-item ${activeTab === 'delivery' ? 'active' : ''}`} onClick={() => { setActiveTab('delivery'); setIsDrawerOpen(false); }}>
-            <i className="fas fa-tasks"></i> Service Delivery
-          </div>
 
           <div className="admin-nav-section" style={{ color: '#4CB050' }}>Internal Company Finance</div>
           <div className={`admin-nav-item ${activeTab === 'ledger' ? 'active' : ''}`} onClick={() => { setActiveTab('ledger'); setIsDrawerOpen(false); }}>
@@ -730,14 +726,6 @@ function AdminPortal({ onExit }) {
           <div className={`admin-nav-item ${activeTab === 'statements' ? 'active' : ''}`} onClick={() => { setActiveTab('statements'); setIsDrawerOpen(false); }}>
             <i className="fas fa-file-signature"></i> Financial Statements
           </div>
-          <div className={`admin-nav-item ${activeTab === 'management' ? 'active' : ''}`} onClick={() => { setActiveTab('management'); setIsDrawerOpen(false); }}>
-            <i className="fas fa-chart-bar"></i> Management Accounts
-          </div>
-
-          <div className="admin-nav-section">Administration</div>
-          <div className={`admin-nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => { setActiveTab('settings'); setIsDrawerOpen(false); }}>
-            <i className="fas fa-cog"></i> Settings
-          </div>
         </nav>
 
         <div style={{ padding: 24, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
@@ -747,19 +735,22 @@ function AdminPortal({ onExit }) {
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <main className="admin-content">
         
-        {/* ─── OVERVIEW TAB ─── */}
         {activeTab === 'overview' && (
           <div className="fadein">
             <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', marginBottom: 24 }}>Finance Dashboard</h1>
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 20, marginBottom: 32 }}>
               <div className="admin-card">
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Verified Commencement Fees</div>
-                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#1E7B3C' }}>K{totalCollected.toLocaleString()}</div>
-                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8 }}>From approved clients</div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Gross Revenue</div>
+                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#1E7B3C' }}>K{totalRevenue.toLocaleString()}</div>
+                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8 }}>Commencement fees + Ledger</div>
+              </div>
+              <div className="admin-card">
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Net Profit</div>
+                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: netIncome >= 0 ? '#1E7B3C' : '#B8564F' }}>K{netIncome.toLocaleString()}</div>
+                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8 }}>Revenue minus expenses</div>
               </div>
               <div className="admin-card">
                 <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Pending Onboarding</div>
@@ -768,13 +759,13 @@ function AdminPortal({ onExit }) {
               </div>
               <div className="admin-card">
                 <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Active Clients</div>
-                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#0A1F12' }}>{MOCK_CLIENTS.length}</div>
+                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#0A1F12' }}>{clients.length}</div>
                 <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8 }}>Currently on retainers</div>
               </div>
             </div>
 
             <div className="admin-card">
-              <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0A1F12', marginBottom: 20 }}>Recent Onboarding Submissions</h2>
+              <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0A1F12', marginBottom: 20 }}>Recent Submissions</h2>
               <div style={{ overflowX: 'auto' }}>
                 <table className="admin-table">
                   <thead>
@@ -799,7 +790,7 @@ function AdminPortal({ onExit }) {
                       </tr>
                     ))}
                     {payments.length === 0 && (
-                      <tr><td colSpan="4" style={{ textAlign: 'center', padding: 40, color: 'rgba(10,31,18,0.5)' }}>No real submissions yet.</td></tr>
+                      <tr><td colSpan="4" className="empty-state">No live submissions recorded yet.</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -808,7 +799,6 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
-        {/* ─── ONBOARDING QUEUE TAB ─── */}
         {activeTab === 'onboarding' && (
           <div className="fadein">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -817,11 +807,11 @@ function AdminPortal({ onExit }) {
             
             <div className="admin-card">
               {loadingData ? (
-                <div style={{ textAlign: 'center', padding: '40px 0' }}><i className="fas fa-circle-notch fa-spin" style={{ color: '#E8730F', fontSize: 24 }}></i></div>
+                <div className="empty-state"><i className="fas fa-circle-notch fa-spin" style={{ color: '#E8730F', fontSize: 24 }}></i></div>
               ) : payments.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(10,31,18,0.5)', fontSize: 14 }}>
+                <div className="empty-state">
                   <i className="fas fa-check-circle" style={{ fontSize: 32, color: '#1E7B3C', marginBottom: 12, display: 'block' }}></i>
-                  No payments found in the database.
+                  No live payments found.
                 </div>
               ) : (
                 <div style={{ overflowX: 'auto' }}>
@@ -855,7 +845,7 @@ function AdminPortal({ onExit }) {
                             <div style={{ display: 'flex', gap: 8 }}>
                               {p.status !== 'approved' && (
                                 <button onClick={() => handleVerify(p.id)} style={{ background: '#1E7B3C', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
-                                  Verify & Onboard
+                                  Verify
                                 </button>
                               )}
                               <button onClick={() => handleDelete(p.id)} style={{ background: '#FFE8E5', color: '#B8564F', border: 'none', padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' }} title="Delete Record">
@@ -873,7 +863,6 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
-        {/* ─── CLIENT PORTFOLIO TAB ─── */}
         {activeTab === 'portfolio' && (
           <div className="fadein">
             <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', marginBottom: 24 }}>Client Portfolio</h1>
@@ -883,25 +872,23 @@ function AdminPortal({ onExit }) {
                   <thead>
                     <tr>
                       <th>Client Name</th>
+                      <th>Email</th>
                       <th>Active Package</th>
-                      <th>Assigned Officer</th>
-                      <th>Next Deliverable</th>
                       <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {MOCK_CLIENTS.map(c => (
+                    {clients.map(c => (
                       <tr key={c.id}>
-                        <td>
-                          <div style={{ fontWeight: 700 }}>{c.name}</div>
-                          <div style={{ fontSize: 11, color: 'rgba(10,31,18,0.5)' }}>{c.email}</div>
-                        </td>
+                        <td style={{ fontWeight: 700 }}>{c.name}</td>
+                        <td>{c.email}</td>
                         <td style={{ fontWeight: 600, color: '#1B6CA8' }}>{c.package}</td>
-                        <td>{c.assignedTo}</td>
-                        <td style={{ fontSize: 12, color: 'rgba(10,31,18,0.7)' }}>{c.nextDeliverable}</td>
-                        <td><span className="status-pill active">{c.status}</span></td>
+                        <td><span className="status-pill active">{c.status || 'Active'}</span></td>
                       </tr>
                     ))}
+                    {clients.length === 0 && (
+                      <tr><td colSpan="4" className="empty-state">No clients in the portfolio yet.</td></tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -909,58 +896,10 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
-        {/* ─── SERVICE DELIVERY TAB ─── */}
-        {activeTab === 'delivery' && (
-          <div className="fadein">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', margin: 0 }}>Service Delivery Tasks</h1>
-              <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }}><i className="fas fa-plus"></i> Assign Task</button>
-            </div>
-            <div className="admin-card">
-              <div style={{ overflowX: 'auto' }}>
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Client</th>
-                      <th>Task Description</th>
-                      <th>Assigned To</th>
-                      <th>Deadline</th>
-                      <th>Priority</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {MOCK_CLIENT_TASKS.map(t => (
-                      <tr key={t.id}>
-                        <td style={{ fontWeight: 700 }}>{t.client}</td>
-                        <td>{t.task}</td>
-                        <td>{t.assignedTo}</td>
-                        <td style={{ whiteSpace: 'nowrap' }}>{t.deadline}</td>
-                        <td>
-                          <span style={{ fontSize: 11, fontWeight: 800, color: t.priority === 'Critical' ? '#B8564F' : t.priority === 'High' ? '#E8730F' : '#1B6CA8' }}>
-                            {t.priority.toUpperCase()}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={`status-pill ${t.status === 'In Progress' ? 'pending' : t.status === 'Overdue' ? 'active' : ''}`} style={{ background: t.status === 'Overdue' ? '#FFE8E5' : '', color: t.status === 'Overdue' ? '#B8564F' : '' }}>
-                            {t.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ─── COMPANY LEDGER TAB ─── */}
         {activeTab === 'ledger' && (
           <div className="fadein">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
               <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', margin: 0 }}>Company Ledger</h1>
-              <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }}><i className="fas fa-plus"></i> Record Transaction</button>
             </div>
             <div className="admin-card">
               <div style={{ overflowX: 'auto' }}>
@@ -969,27 +908,28 @@ function AdminPortal({ onExit }) {
                     <tr>
                       <th>Date</th>
                       <th>Description</th>
-                      <th>Category</th>
                       <th>Type</th>
                       <th>Amount</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {MOCK_COMPANY_LEDGER.map(t => (
+                    {ledger.map(t => (
                       <tr key={t.id}>
                         <td style={{ whiteSpace: 'nowrap' }}>{t.date}</td>
                         <td style={{ fontWeight: 600 }}>{t.desc}</td>
-                        <td><span style={{ fontSize: 11, background: '#F1F5F9', padding: '2px 8px', borderRadius: 4, fontWeight: 600 }}>{t.category}</span></td>
                         <td>
                           <span style={{ fontSize: 11, fontWeight: 800, color: t.type === 'Income' ? '#1E7B3C' : '#B8564F' }}>
                             {t.type.toUpperCase()}
                           </span>
                         </td>
                         <td style={{ fontWeight: 800, color: t.type === 'Income' ? '#1E7B3C' : '#0A1F12' }}>
-                          {t.type === 'Income' ? '+' : '-'} K{t.amount.toLocaleString()}
+                          {t.type === 'Income' ? '+' : '-'} K{parseFloat(t.amount).toLocaleString()}
                         </td>
                       </tr>
                     ))}
+                    {ledger.length === 0 && (
+                      <tr><td colSpan="4" className="empty-state">No ledger transactions recorded yet.</td></tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -997,7 +937,6 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
-        {/* ─── INVOICES TAB ─── */}
         {activeTab === 'invoices' && (
           <div className="fadein">
             <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', marginBottom: 24 }}>Invoicing</h1>
@@ -1008,20 +947,18 @@ function AdminPortal({ onExit }) {
                     <tr>
                       <th>Invoice No</th>
                       <th>Client</th>
-                      <th>Issue Date</th>
                       <th>Due Date</th>
                       <th>Amount</th>
                       <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {MOCK_INVOICES.map(inv => (
+                    {invoices.map(inv => (
                       <tr key={inv.id}>
                         <td style={{ fontWeight: 700, fontFamily: 'monospace' }}>{inv.invoiceNo}</td>
                         <td>{inv.client}</td>
-                        <td>{inv.issueDate}</td>
                         <td>{inv.dueDate}</td>
-                        <td style={{ fontWeight: 700 }}>K{inv.amount.toLocaleString()}</td>
+                        <td style={{ fontWeight: 700 }}>K{parseFloat(inv.amount).toLocaleString()}</td>
                         <td>
                           <span className={`status-pill ${inv.status === 'Paid' ? 'active' : 'pending'}`}>
                             {inv.status}
@@ -1029,6 +966,9 @@ function AdminPortal({ onExit }) {
                         </td>
                       </tr>
                     ))}
+                    {invoices.length === 0 && (
+                      <tr><td colSpan="5" className="empty-state">No invoices generated yet.</td></tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -1036,15 +976,12 @@ function AdminPortal({ onExit }) {
           </div>
         )}
 
-        {/* ─── FINANCIAL STATEMENTS TAB ─── */}
         {activeTab === 'statements' && (
           <div className="fadein">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
               <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', margin: 0 }}>Financial Statements</h1>
-              <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }}><i className="fas fa-download"></i> Export PDF</button>
             </div>
 
-            {/* Statement Tabs */}
             <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
               {[['income', 'Income Statement'], ['balance', 'Balance Sheet'], ['cashflow', 'Cash Flow']].map(([k, label]) => (
                 <button key={k} onClick={() => setStatementTab(k)} style={{ padding: '10px 20px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', border: statementTab === k ? 'none' : '1px solid #E2E8F0', background: statementTab === k ? '#0A1F12' : '#fff', color: statementTab === k ? '#fff' : '#64748B' }}>
@@ -1058,155 +995,66 @@ function AdminPortal({ onExit }) {
                 <h2 className="report-title">StartEasy Zambia</h2>
                 <p className="report-subtitle">
                   {statementTab === 'income' ? 'Income Statement (Profit & Loss)' : statementTab === 'balance' ? 'Statement of Financial Position (Balance Sheet)' : 'Statement of Cash Flows'} <br/>
-                  For the Month Ending 30 November 2026
+                  {new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
                 </p>
               </div>
 
               {statementTab === 'income' && (
                 <div>
                   <div className="report-row section-title">Revenue</div>
-                  <div className="report-row report-indent"><span>Client Subscriptions & Retainers</span><span>K45,000</span></div>
-                  <div className="report-row report-indent"><span>One-Time Advisory Projects</span><span>K15,000</span></div>
-                  <div className="report-row total"><span>Total Revenue</span><span>K60,000</span></div>
-
-                  <div className="report-row section-title">Cost of Sales</div>
-                  <div className="report-row report-indent"><span>Contractor Payments</span><span>(K10,000)</span></div>
-                  <div className="report-row total"><span>Gross Profit</span><span>K50,000</span></div>
+                  <div className="report-row report-indent"><span>Verified Commencement Fees</span><span>K{totalCommencementCollected.toLocaleString()}</span></div>
+                  <div className="report-row report-indent"><span>Other Ledger Income</span><span>K{totalLedgerIncome.toLocaleString()}</span></div>
+                  <div className="report-row total"><span>Total Revenue</span><span>K{totalRevenue.toLocaleString()}</span></div>
 
                   <div className="report-row section-title">Operating Expenses</div>
-                  <div className="report-row report-indent"><span>Salaries & Wages</span><span>(K15,000)</span></div>
-                  <div className="report-row report-indent"><span>Software & Subscriptions</span><span>(K2,500)</span></div>
-                  <div className="report-row report-indent"><span>Marketing & Advertising</span><span>(K3,000)</span></div>
-                  <div className="report-row report-indent"><span>Rent & Utilities</span><span>(K4,500)</span></div>
-                  <div className="report-row report-indent"><span>Professional Fees (Legal, Audit)</span><span>(K2,000)</span></div>
-                  <div className="report-row total"><span>Total Operating Expenses</span><span>(K27,000)</span></div>
+                  <div className="report-row report-indent"><span>Total Recorded Expenses</span><span>(K{totalLedgerExpense.toLocaleString()})</span></div>
+                  <div className="report-row total"><span>Total Operating Expenses</span><span>(K{totalLedgerExpense.toLocaleString()})</span></div>
 
-                  <div className="report-row total" style={{ fontSize: 18, color: '#1E7B3C' }}><span>Net Income (Profit)</span><span>K23,000</span></div>
+                  <div className="report-row total" style={{ fontSize: 18, color: netIncome >= 0 ? '#1E7B3C' : '#B8564F' }}>
+                    <span>Net Income (Profit/Loss)</span>
+                    <span>K{netIncome.toLocaleString()}</span>
+                  </div>
                 </div>
               )}
 
               {statementTab === 'balance' && (
                 <div>
                   <div className="report-row section-title">Assets</div>
-                  <div className="report-row report-indent"><span>Current Assets</span><span></span></div>
-                  <div className="report-row report-indent" style={{ paddingLeft: 48 }}><span>Cash at Bank</span><span>K35,000</span></div>
-                  <div className="report-row report-indent" style={{ paddingLeft: 48 }}><span>Accounts Receivable</span><span>K12,000</span></div>
-                  <div className="report-row report-indent"><span>Fixed Assets</span><span></span></div>
-                  <div className="report-row report-indent" style={{ paddingLeft: 48 }}><span>Computer Equipment (Net)</span><span>K18,000</span></div>
-                  <div className="report-row total"><span>Total Assets</span><span>K65,000</span></div>
+                  <div className="report-row report-indent"><span>Cash & Cash Equivalents</span><span>K{netIncome > 0 ? netIncome.toLocaleString() : 0}</span></div>
+                  <div className="report-row total"><span>Total Assets</span><span>K{netIncome > 0 ? netIncome.toLocaleString() : 0}</span></div>
 
                   <div className="report-row section-title">Liabilities</div>
-                  <div className="report-row report-indent"><span>Current Liabilities</span><span></span></div>
-                  <div className="report-row report-indent" style={{ paddingLeft: 48 }}><span>Accounts Payable</span><span>K8,000</span></div>
-                  <div className="report-row report-indent" style={{ paddingLeft: 48 }}><span>Tax Payable (ZRA)</span><span>K7,000</span></div>
-                  <div className="report-row total"><span>Total Liabilities</span><span>K15,000</span></div>
+                  <div className="report-row report-indent"><span>Accounts Payable</span><span>K0</span></div>
+                  <div className="report-row total"><span>Total Liabilities</span><span>K0</span></div>
 
                   <div className="report-row section-title">Equity</div>
-                  <div className="report-row report-indent"><span>Owner's Capital</span><span>K27,000</span></div>
-                  <div className="report-row report-indent"><span>Retained Earnings</span><span>K23,000</span></div>
-                  <div className="report-row total"><span>Total Equity</span><span>K50,000</span></div>
+                  <div className="report-row report-indent"><span>Retained Earnings</span><span>K{netIncome > 0 ? netIncome.toLocaleString() : 0}</span></div>
+                  <div className="report-row total"><span>Total Equity</span><span>K{netIncome > 0 ? netIncome.toLocaleString() : 0}</span></div>
 
-                  <div className="report-row total" style={{ borderTop: '2px solid #333', borderBottom: '4px double #333', fontSize: 16 }}><span>Total Liabilities & Equity</span><span>K65,000</span></div>
+                  <div className="report-row total" style={{ borderTop: '2px solid #333', borderBottom: '4px double #333', fontSize: 16 }}><span>Total Liabilities & Equity</span><span>K{netIncome > 0 ? netIncome.toLocaleString() : 0}</span></div>
                 </div>
               )}
 
               {statementTab === 'cashflow' && (
                 <div>
                   <div className="report-row section-title">Operating Activities</div>
-                  <div className="report-row report-indent"><span>Net Income</span><span>K23,000</span></div>
-                  <div className="report-row report-indent"><span>Adjustments (Depreciation)</span><span>K2,000</span></div>
-                  <div className="report-row report-indent"><span>Changes in Working Capital</span><span>(K5,000)</span></div>
-                  <div className="report-row total"><span>Net Cash from Operating Activities</span><span>K20,000</span></div>
+                  <div className="report-row report-indent"><span>Net Income</span><span>K{netIncome.toLocaleString()}</span></div>
+                  <div className="report-row total"><span>Net Cash from Operating Activities</span><span>K{netIncome.toLocaleString()}</span></div>
 
                   <div className="report-row section-title">Investing Activities</div>
-                  <div className="report-row report-indent"><span>Purchase of Equipment</span><span>(K10,000)</span></div>
-                  <div className="report-row total"><span>Net Cash used in Investing Activities</span><span>(K10,000)</span></div>
+                  <div className="report-row report-indent"><span>Purchase of Assets</span><span>K0</span></div>
+                  <div className="report-row total"><span>Net Cash used in Investing Activities</span><span>K0</span></div>
 
                   <div className="report-row section-title">Financing Activities</div>
-                  <div className="report-row report-indent"><span>Capital Injection</span><span>K15,000</span></div>
-                  <div className="report-row report-indent"><span>Loan Proceeds</span><span>K10,000</span></div>
-                  <div className="report-row total"><span>Net Cash from Financing Activities</span><span>K25,000</span></div>
+                  <div className="report-row report-indent"><span>Capital Injections</span><span>K0</span></div>
+                  <div className="report-row total"><span>Net Cash from Financing Activities</span><span>K0</span></div>
 
-                  <div className="report-row total" style={{ fontSize: 18, color: '#1E7B3C' }}><span>Net Increase in Cash</span><span>K35,000</span></div>
+                  <div className="report-row total" style={{ fontSize: 18, color: netIncome >= 0 ? '#1E7B3C' : '#B8564F' }}><span>Net Increase in Cash</span><span>K{netIncome.toLocaleString()}</span></div>
                   <div className="report-row report-indent" style={{ marginTop: 12, borderTop: '1px solid #ccc', paddingTop: 12 }}><span>Cash at Beginning of Period</span><span>K0</span></div>
-                  <div className="report-row total" style={{ fontSize: 16 }}><span>Cash at End of Period</span><span>K35,000</span></div>
+                  <div className="report-row total" style={{ fontSize: 16 }}><span>Cash at End of Period</span><span>K{netIncome.toLocaleString()}</span></div>
                 </div>
               )}
             </div>
-          </div>
-        )}
-
-        {/* ─── MANAGEMENT ACCOUNTS TAB ─── */}
-        {activeTab === 'management' && (
-          <div className="fadein">
-            <h1 className="serif" style={{ fontSize: 28, fontWeight: 800, color: '#0A1F12', marginBottom: 24 }}>Management Accounts</h1>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, marginBottom: 32 }}>
-              <div className="admin-card" style={{ borderTop: '4px solid #1E7B3C' }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Gross Margin</div>
-                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#0A1F12' }}>83.3%</div>
-                <div style={{ fontSize: 12, color: '#1E7B3C', marginTop: 8, fontWeight: 600 }}><i className="fas fa-arrow-up"></i> Up 2.1% from last month</div>
-              </div>
-              <div className="admin-card" style={{ borderTop: '4px solid #E8730F' }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Operating Cash Runway</div>
-                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#0A1F12' }}>4.5 Months</div>
-                <div style={{ fontSize: 12, color: 'rgba(10,31,18,0.5)', marginTop: 8, fontWeight: 600 }}>Based on current burn rate</div>
-              </div>
-              <div className="admin-card" style={{ borderTop: '4px solid #1B6CA8' }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(10,31,18,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Customer Acquisition Cost</div>
-                <div className="serif" style={{ fontSize: 32, fontWeight: 800, color: '#0A1F12' }}>K450</div>
-                <div style={{ fontSize: 12, color: '#B8564F', marginTop: 8, fontWeight: 600 }}><i className="fas fa-arrow-up"></i> Up 5% (Ad spend increased)</div>
-              </div>
-            </div>
-
-            <div className="admin-card">
-              <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0A1F12', marginBottom: 20 }}>Budget Variance Analysis (Top 3 Variances)</h2>
-              <div style={{ overflowX: 'auto' }}>
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Category</th>
-                      <th>Budget</th>
-                      <th>Actual</th>
-                      <th>Variance</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td style={{ fontWeight: 700 }}>Software Subscriptions</td>
-                      <td>K1,500</td>
-                      <td>K2,500</td>
-                      <td style={{ color: '#B8564F', fontWeight: 700 }}>+ K1,000 (Overspent)</td>
-                      <td><span className="status-pill pending" style={{ background: '#FFE8E5', color: '#B8564F' }}>Action Needed</span></td>
-                    </tr>
-                    <tr>
-                      <td style={{ fontWeight: 700 }}>Client Revenue</td>
-                      <td>K50,000</td>
-                      <td>K60,000</td>
-                      <td style={{ color: '#1E7B3C', fontWeight: 700 }}>+ K10,000 (Overperformed)</td>
-                      <td><span className="status-pill active">On Track</span></td>
-                    </tr>
-                    <tr>
-                      <td style={{ fontWeight: 700 }}>Marketing & Ads</td>
-                      <td>K5,000</td>
-                      <td>K3,000</td>
-                      <td style={{ color: '#1E7B3C', fontWeight: 700 }}>- K2,000 (Underspent)</td>
-                      <td><span className="status-pill active">On Track</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ─── SETTINGS TAB ─── */}
-        {activeTab === 'settings' && (
-          <div className="fadein" style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(10,31,18,0.5)' }}>
-            <i className="fas fa-cog" style={{ fontSize: 48, marginBottom: 16, color: '#CBD5E1' }}></i>
-            <h2 className="serif" style={{ fontSize: 24, color: '#0A1F12', marginBottom: 8 }}>System Settings</h2>
-            <p>Manage user roles, permissions, and system configurations.</p>
           </div>
         )}
 
