@@ -401,7 +401,10 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
   const sym = curSym(payslip.currency);
   const totalEarnings = (payslip.earnings || []).reduce((s, e) => s + num(e.amount), 0);
   const totalDeductions = (payslip.deductions || []).reduce((s, d) => s + num(d.amount), 0);
+  const totalEmployerCosts = (payslip.employerContributions || []).reduce((s, c) => s + num(c.amount), 0);
   const net = totalEarnings - totalDeductions;
+  const totalCostToCompany = totalEarnings + totalEmployerCosts;
+  
   const empName = team?.name || payslip.employeeName || 'Founder / Team';
   const empPos = team?.position || payslip.position || '';
   const empId = team?.employeeId || payslip.employeeId || '—';
@@ -530,20 +533,45 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
         </div>
       </div>
 
+      {/* Employer Contributions / Payroll Costs */}
+      {(payslip.employerContributions || []).length > 0 && (
+        <div style={{ marginTop:16, border:'1px solid #ddd', borderRadius:6, overflow:'hidden' }}>
+          <div style={{ background:'#1B6CA8', color:'#fff', padding:'9px 14px', fontSize:10.5, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.06em' }}>Payroll Costs (Employer Contributions)</div>
+          {(payslip.employerContributions || []).map((c, i) => (
+            <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'8px 14px', borderBottom:'1px solid #f0f0f0', fontSize:12 }}>
+              <span style={{ color:'#555' }}>{c.label || '—'}</span>
+              <span style={{ fontWeight:600, fontFamily:'Consolas, monospace' }}>{sym}{fmtNum(c.amount)}</span>
+            </div>
+          ))}
+          <div style={{ display:'flex', justifyContent:'space-between', padding:'10px 14px', background:'#F8FAFC', borderTop:'2px solid #1B6CA8', fontSize:12, fontWeight:800 }}>
+            <span>Total Cost to Company</span>
+            <span style={{ fontFamily:'Consolas, monospace', color:'#1B6CA8' }}>{sym}{fmtNum(totalCostToCompany)}</span>
+          </div>
+        </div>
+      )}
+
       {/* Footer signatures */}
       <div style={{ marginTop:28, paddingTop:18, borderTop:'1px solid #ddd', display:'grid', gridTemplateColumns:'1fr 1fr', gap:36 }}>
         <div>
           <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:8 }}>Prepared By</div>
           <div style={{ borderBottom:'1px solid #333', paddingBottom:4, minHeight:30, fontFamily:"'Playfair Display',serif", fontSize:15, fontStyle:'italic', color:'#0A1F12' }}>
-            {payslip.preparedBy || '_____________________'}
+            {payslip.preparedBy || 'Carol Kambole'}
           </div>
           <div style={{ fontSize:10.5, color:'#666', marginTop:6 }}>{payslip.preparedByTitle || 'Finance & Administration'}</div>
         </div>
         <div>
-          <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:8 }}>Date Issued</div>
-          <div style={{ borderBottom:'1px solid #333', paddingBottom:4, minHeight:30, fontFamily:"'Playfair Display',serif", fontSize:15, color:'#0A1F12' }}>
-            {payslip.payDate || '—'}
+          <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:8 }}>Authorised Director Signatory</div>
+          <div style={{ borderBottom:'1px solid #333', paddingBottom:4, minHeight:30, fontFamily:"'Playfair Display',serif", fontSize:15, fontStyle:'italic', color:'#0A1F12' }}>
+            MWABA LEWIS
           </div>
+          <div style={{ fontSize:10.5, color:'#666', marginTop:6 }}>Approves and authorises fixed monthly payments</div>
+        </div>
+      </div>
+
+      <div style={{ marginTop:24, paddingTop:12 }}>
+        <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:8 }}>Date Issued</div>
+        <div style={{ borderBottom:'1px solid #333', paddingBottom:4, minHeight:30, fontFamily:"'Playfair Display',serif", fontSize:15, color:'#0A1F12' }}>
+          {payslip.payDate || '—'}
         </div>
       </div>
 
@@ -733,6 +761,22 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
                   </div>
                 ))}
                 {(data.deductions || []).length === 0 && <div style={{ fontSize:11.5, color:'#999', fontStyle:'italic', padding:'4px 0' }}>No deductions</div>}
+              </div>
+
+              {/* Employer Contributions / Payroll Costs */}
+              <div style={{ marginBottom:16 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                  <label className="form-label" style={{ margin:0 }}>Payroll Costs (Employer)</label>
+                  <button type="button" onClick={() => addItem('employerContributions')} className="btn-sm btn-add" style={{ padding:'3px 10px' }}><i className="fas fa-plus"></i> Add</button>
+                </div>
+                {(data.employerContributions || []).map((c, i) => (
+                  <div key={i} style={{ display:'flex', gap:6, marginBottom:6 }}>
+                    <input className="form-input" placeholder="Label" value={c.label} onChange={ev => updateList('employerContributions', i, 'label', ev.target.value)} style={{ flex:2, fontSize:12, padding:'8px 10px' }} />
+                    <input type="number" step="0.01" className="form-input" placeholder="0.00" value={c.amount} onChange={ev => updateList('employerContributions', i, 'amount', ev.target.value)} style={{ flex:1, fontSize:12, padding:'8px 10px' }} />
+                    <button type="button" onClick={() => removeItem('employerContributions', i)} className="btn-sm btn-del" style={{ padding:'0 10px' }}><i className="fas fa-times"></i></button>
+                  </div>
+                ))}
+                {(data.employerContributions || []).length === 0 && <div style={{ fontSize:11.5, color:'#999', fontStyle:'italic', padding:'4px 0' }}>Optional (e.g. Workers Comp)</div>}
               </div>
 
               <div className="form-row">
@@ -1733,6 +1777,7 @@ function AdminPortal({ onExit }) {
           exchangeRate: existing?.exchangeRate || 27.5,
           earnings: existing?.earnings || [],
           deductions: existing?.deductions || [],
+          employerContributions: existing?.employerContributions || [],
           status: existing?.status || 'Draft',
           preparedBy: existing?.preparedBy || 'Carol Kambole',
           preparedByTitle: existing?.preparedByTitle || 'Co-founder & Director of Finance & Administration'
@@ -2499,7 +2544,7 @@ function AdminPortal({ onExit }) {
                             <td><span className={`status-pill ${m.status==='Active'||!m.status?'active':'paused'}`}>{m.status || 'Active'}</span></td>
                             <td>
                               <div style={{ display:'flex', gap:6 }}>
-                                <button onClick={() => openPayslipGenerator({ employeeId: m.id, periodMonth: new Date().getMonth(), periodYear: new Date().getFullYear(), payDate: todayStr(), currency:'ZMW', exchangeRate:27.5, earnings:[], deductions:[], status:'Draft', preparedBy:'Carol Kambole', preparedByTitle:'Co-founder & Director of Finance & Administration' })} className="btn-sm btn-blue" title="Generate Retainer Advice"><i className="fas fa-file-invoice-dollar"></i></button>
+                                <button onClick={() => openPayslipGenerator({ employeeId: m.id, periodMonth: new Date().getMonth(), periodYear: new Date().getFullYear(), payDate: todayStr(), currency:'ZMW', exchangeRate:27.5, earnings:[], deductions:[], employerContributions:[], status:'Draft', preparedBy:'Carol Kambole', preparedByTitle:'Co-founder & Director of Finance & Administration' })} className="btn-sm btn-blue" title="Generate Retainer Advice"><i className="fas fa-file-invoice-dollar"></i></button>
                                 <button onClick={() => openEdit('team', m)} className="btn-sm btn-edit"><i className="fas fa-pen"></i></button>
                                 <button onClick={() => handleDelete('se_team', m.id)} className="btn-sm btn-del"><i className="fas fa-trash"></i></button>
                               </div>
