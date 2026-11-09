@@ -389,6 +389,29 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
   const empId = team?.employeeId || payslip.employeeId || '—';
   const empEmail = team?.email || payslip.email || '';
   const refNo = payslip.reference || payslip.id || 'PS-DRAFT';
+  
+  const rate = num(payslip.exchangeRate) || 27.5;
+  
+  // Calculate Secondary Currency Equivalent
+  let secondaryAmountText = '';
+  if (payslip.currency === 'ZMW') {
+     const usdEq = net / rate;
+     secondaryAmountText = `≈ $${fmtNum(usdEq)} USD (Contract Equivalent)`;
+  } else {
+     const zmwEq = net * rate;
+     secondaryAmountText = `≈ K${fmtNum(zmwEq)} ZMW (Contract Equivalent)`;
+  }
+
+  // Dynamic Legal Disclaimer based on position
+  const posLower = empPos.toLowerCase();
+  let legalFooter = '';
+  if (posLower.includes('principal founder')) {
+    legalFooter = 'This advice is for strategic leadership and advisory services rendered under the Principal Founder Agreement. It does not constitute an employment contract and does not create an employer-employee relationship.';
+  } else if (posLower.includes('founder')) {
+    legalFooter = 'This advice is for services rendered under the Founder Contributor Agreement. It does not constitute an employment contract and does not create an employer-employee relationship.';
+  } else {
+    legalFooter = 'This advice is for professional services rendered. It does not constitute an employment contract and does not create an employer-employee relationship.';
+  }
 
   return (
     <div id={renderId} style={{
@@ -474,10 +497,15 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
       <div style={{ marginTop:18, background:'linear-gradient(135deg,#0A1F12,#123A1F)', color:'#fff', padding:'18px 22px', borderRadius:10, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
         <div>
           <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:'0.16em', textTransform:'uppercase', color:'#F5A623', marginBottom:4 }}>Net Retainer Paid</div>
-          <div style={{ fontSize:10.5, color:'rgba(255,255,255,0.6)' }}>Amount paid to founder / team</div>
+          <div style={{ fontSize:10.5, color:'rgba(255,255,255,0.8)' }}>Paid to: <strong>{empName}</strong></div>
         </div>
-        <div style={{ fontFamily:"'Playfair Display',serif", fontSize:28, fontWeight:800, color:'#F5A623' }}>
-          {sym}{fmtNum(net)}
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:28, fontWeight:800, color:'#F5A623' }}>
+            {sym}{fmtNum(net)}
+          </div>
+          <div style={{ fontSize:10.5, color:'rgba(255,255,255,0.65)', marginTop:2 }}>
+            {secondaryAmountText}
+          </div>
         </div>
       </div>
 
@@ -499,8 +527,7 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
       </div>
 
       <div style={{ marginTop:22, fontSize:9.5, color:'#999', textAlign:'center', fontStyle:'italic', lineHeight:1.6 }}>
-        This advice is for strategic leadership and advisory services rendered under a Founder/Advisory Agreement.<br/>
-        It does not constitute an employment contract and does not create an employer-employee relationship.<br/>
+        {legalFooter}<br/>
         StartEasy Zambia
       </div>
     </div>
