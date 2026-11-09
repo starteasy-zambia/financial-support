@@ -280,8 +280,8 @@ const ZAMBIA_PAYE_BANDS = [
 ];
 
 const DEFAULT_TEAM = [
-  { name:'Mwaba Lewis', position:'Principal Founder & Strategic Sponsor', netMonthlyUSD:1725, equity:'50%', email:'', phone:'', employeeId:'SE-FND-001', status:'Active', paymentNotes:'Bank Transfer - Standard Chartered', contractRef:'Principal Founder Agreement' },
-  { name:'Carol Kambole', position:'Co-founder & Director of Finance & Administration', netMonthlyUSD:600, equity:'6%', email:'', phone:'', employeeId:'SE-FND-002', status:'Active', paymentNotes:'Bank Transfer - Standard Chartered', contractRef:'Founder Contributor Agreement' }
+  { name:'Mwaba Lewis', position:'Principal Founder & Strategic Sponsor', netMonthlyUSD:1725, equity:'50%', email:'', phone:'', employeeId:'SE-RET-001', status:'Active', paymentNotes:'Bank Transfer - Standard Chartered', contractRef:'Monthly Payment Agreement' },
+  { name:'Carol Kambole', position:'Co-founder & Director of Finance & Administration', netMonthlyUSD:600, equity:'6%', email:'', phone:'', employeeId:'SE-RET-002', status:'Active', paymentNotes:'Bank Transfer - Standard Chartered', contractRef:'Monthly Payment Agreement' }
 ];
 
 /* ─── UTILITIES ─── */
@@ -423,19 +423,16 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
      secondaryAmountText = `≈ K${fmtNum(zmwEq)} ZMW (Contract Equivalent)`;
   }
 
-  // Dynamic Legal Disclaimer based on Contract / Position
-  const contractRef = team?.contractRef || payslip.contractRef || '';
-  let agreementName = 'the applicable agreement';
-  
-  if (contractRef) {
-    agreementName = contractRef;
-  } else if ((empPos || '').toLowerCase().includes('principal founder')) {
-    agreementName = 'the Principal Founder Agreement';
-  } else if ((empPos || '').toLowerCase().includes('founder')) {
-    agreementName = 'the Founder Contributor Agreement';
+  // Dynamic Authorised Signatory (Flip based on recipient)
+  let authSignatoryName = 'MWABA LEWIS';
+  let authSignatoryTitle = 'Principal Founder & Strategic Sponsor';
+  if (empName.toLowerCase().includes('mwaba')) {
+    authSignatoryName = 'CAROL KAMBOLE';
+    authSignatoryTitle = 'Co-founder & Director of Finance & Administration';
   }
-  
-  const legalFooter = `This fixed monthly retainer is for the services & responsibilities captured in ${agreementName}. It does not constitute an employment contract and does not create an employer-employee relationship.`;
+
+  // Suggested Legal Disclaimer
+  const legalFooter = `This monthly retainer is processed in accordance with the Monthly Payment Agreement entered into between ${empName} and StartEasy Zambia, covering their responsibilities as ${empPos}. It does not constitute an employment contract and does not create an employer–employee relationship.`;
 
   return (
     <div id={renderId} style={{
@@ -469,7 +466,7 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
           <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:6 }}>Founder / Recipient</div>
           <div style={{ fontSize:14.5, fontWeight:700, color:'#0A1F12' }}>{empName}</div>
           <div style={{ fontSize:11.5, color:'#555', marginTop:2 }}>{empPos}</div>
-          <div style={{ fontSize:10.5, color:'#777', marginTop:6 }}>ID: {empId}</div>
+          <div style={{ fontSize:10.5, color:'#777', marginTop:6 }}>Reference ID: {empId}</div>
           {empEmail && <div style={{ fontSize:10.5, color:'#777' }}>{empEmail}</div>}
         </div>
         <div>
@@ -562,7 +559,7 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
         <div>
           <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:8 }}>Authorised Director Signatory</div>
           <div style={{ borderBottom:'1px solid #333', paddingBottom:4, minHeight:30, fontFamily:"'Playfair Display',serif", fontSize:15, fontStyle:'italic', color:'#0A1F12' }}>
-            MWABA LEWIS
+            {authSignatoryName}
           </div>
           <div style={{ fontSize:10.5, color:'#666', marginTop:6 }}>Approves and authorises fixed monthly payments</div>
         </div>
@@ -672,6 +669,13 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
         </div>
 
         {error && <div style={{ background:'#FFE8E5', color:'#B8564F', padding:12, borderRadius:8, fontSize:13, marginBottom:16, fontWeight:600 }}>{error}</div>}
+
+        <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', color: '#92400E', padding: '12px', borderRadius: '8px', fontSize: '12px', marginBottom: '16px', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+          <i className="fas fa-exclamation-triangle" style={{ marginTop: '2px' }}></i>
+          <div>
+            <strong>Important Note on Tax Treatment:</strong> Please ensure the correct withholding tax treatment (e.g., PAYE, WHT) is confirmed by the accountant based on the specific Monthly Payment Agreement before finalising this document.
+          </div>
+        </div>
 
         <form onSubmit={e => { e.preventDefault(); onSave({ ...data, netPay }); }}>
           <div className="payslip-layout">
@@ -1361,9 +1365,9 @@ function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
               <input type="number" step="0.01" min="0" className="form-input" value={data.netMonthlyUSD ?? ''} onChange={e => set('netMonthlyUSD', e.target.value)} required placeholder="e.g. 1725" />
             </div>
             <div className="form-group">
-              <label className="form-label">Team / Founder ID (Auto-generated)</label>
-              <input type="text" className="form-input" value={data.employeeId || ''} onChange={e => set('employeeId', e.target.value)} placeholder="e.g. SE-EMP-001" />
-              <div style={{ fontSize: 10, color: '#64748B', marginTop: 4 }}>You can edit this to match your HR records.</div>
+              <label className="form-label">Reference ID (Auto-generated)</label>
+              <input type="text" className="form-input" value={data.employeeId || ''} onChange={e => set('employeeId', e.target.value)} placeholder="e.g. SE-RET-001" />
+              <div style={{ fontSize: 10, color: '#64748B', marginTop: 4 }}>You can edit this to match your records.</div>
             </div>
           </div>
           <div className="form-row">
@@ -1400,7 +1404,7 @@ function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
           </div>
           <div className="form-group">
             <label className="form-label">Contract Reference</label>
-            <select className="form-input" value={['Principal Founder Agreement', 'Founder Contributor Agreement', 'Advisory Agreement', 'Independent Contractor Agreement'].includes(data.contractRef) ? data.contractRef : (data.contractRef ? 'Other' : '')} onChange={e => {
+            <select className="form-input" value={['Principal Founder Agreement', 'Founder Contributor Agreement', 'Advisory Agreement', 'Monthly Payment Agreement'].includes(data.contractRef) ? data.contractRef : (data.contractRef ? 'Other' : '')} onChange={e => {
               const val = e.target.value;
               if (val === 'Other') set('contractRef', ' ');
               else set('contractRef', val);
@@ -1408,11 +1412,11 @@ function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
               <option value="">— Select Contract —</option>
               <option value="Principal Founder Agreement">Principal Founder Agreement</option>
               <option value="Founder Contributor Agreement">Founder Contributor Agreement</option>
+              <option value="Monthly Payment Agreement">Monthly Payment Agreement</option>
               <option value="Advisory Agreement">Advisory Agreement</option>
-              <option value="Independent Contractor Agreement">Independent Contractor Agreement</option>
               <option value="Other">Other (Specify...)</option>
             </select>
-            {(data.contractRef === 'Other' || (data.contractRef && !['Principal Founder Agreement', 'Founder Contributor Agreement', 'Advisory Agreement', 'Independent Contractor Agreement'].includes(data.contractRef))) && (
+            {(data.contractRef === 'Other' || (data.contractRef && !['Principal Founder Agreement', 'Founder Contributor Agreement', 'Monthly Payment Agreement', 'Advisory Agreement'].includes(data.contractRef))) && (
               <input type="text" className="form-input" style={{ marginTop: 8 }} value={data.contractRef === 'Other' ? '' : data.contractRef} onChange={e => set('contractRef', e.target.value)} placeholder="Type custom contract reference..." />
             )}
           </div>
@@ -1745,11 +1749,11 @@ function AdminPortal({ onExit }) {
     
     if (type === 'team') {
       const existingIds = team.map(t => t.employeeId || '');
-      const maxEmp = existingIds.reduce((max, id) => {
-        const match = id.match(/SE-EMP-(\d+)/i);
+      const maxRet = existingIds.reduce((max, id) => {
+        const match = id.match(/SE-RET-(\d+)/i);
         return match ? Math.max(max, parseInt(match[1])) : max;
       }, 0);
-      const nextId = `SE-EMP-${String(maxEmp + 1).padStart(3, '0')}`;
+      const nextId = `SE-RET-${String(maxRet + 1).padStart(3, '0')}`;
       data = { name: '', position: '', email: '', phone: '', netMonthlyUSD: '', employeeId: nextId, equity: '', status: 'Active', paymentNotes: '', contractRef: '' };
     }
 
@@ -2528,7 +2532,7 @@ function AdminPortal({ onExit }) {
                   <div style={{ overflowX:'auto' }}>
                     <table className="admin-table">
                       <thead>
-                        <tr><th>Name</th><th>Position</th><th>Fixed Monthly Retainer (USD)</th><th>Equity</th><th>Team / Founder ID</th><th>Status</th><th>Actions</th></tr>
+                        <tr><th>Name</th><th>Position</th><th>Fixed Monthly Retainer (USD)</th><th>Equity</th><th>Reference ID</th><th>Status</th><th>Actions</th></tr>
                       </thead>
                       <tbody>
                         {filteredTeam.map(m => (
