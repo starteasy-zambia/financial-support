@@ -280,8 +280,8 @@ const ZAMBIA_PAYE_BANDS = [
 ];
 
 const DEFAULT_TEAM = [
-  { name:'Mwaba Lewis', position:'Principal Founder & Strategic Sponsor', netMonthlyUSD:1725, equity:'50%', email:'', phone:'', employeeId:'SE-EMP-001', status:'Active', paymentNotes:'Monthly Payment Agreement · Principal Founder', contractRef:'MONTHLY PAYMENT AGREEMENT_ LEWIS' },
-  { name:'Carol Kambole', position:'Co-founder & Director of Finance & Administration', netMonthlyUSD:600, equity:'6%', email:'', phone:'', employeeId:'SE-EMP-002', status:'Active', paymentNotes:'Monthly Payment Agreement · Co-founder', contractRef:'MONTHLY PAYMENT AGREEMENT _ CAROL' }
+  { name:'Mwaba Lewis', position:'Principal Founder & Strategic Sponsor', netMonthlyUSD:1725, equity:'50%', email:'', phone:'', employeeId:'SE-FND-001', status:'Active', paymentNotes:'Bank Transfer - Standard Chartered', contractRef:'Principal Founder Agreement' },
+  { name:'Carol Kambole', position:'Co-founder & Director of Finance & Administration', netMonthlyUSD:600, equity:'6%', email:'', phone:'', employeeId:'SE-FND-002', status:'Active', paymentNotes:'Bank Transfer - Standard Chartered', contractRef:'Founder Contributor Agreement' }
 ];
 
 /* ─── UTILITIES ─── */
@@ -305,7 +305,7 @@ const calcPAYE = (taxable) => {
   return tax;
 };
 const calcZMWBreakdown = (gross) => {
-  // No NAPSA or NHIMA for independent contractors, only PAYE Withholding
+  // No NAPSA or NHIMA for independent founders, only PAYE Withholding
   const paye = calcPAYE(gross);
   const net = gross - paye;
   return { gross, paye, net };
@@ -377,14 +377,14 @@ function DoughnutChart({ chartData, type }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   REMITTANCE DOCUMENT — printable, branded compensation slip
+   RETAINER DOCUMENT — printable, branded retainer advice
    ═══════════════════════════════════════════════════════════════════ */
-function RemittanceDocument({ payslip, team, renderId = 'payslip-render' }) {
+function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
   const sym = curSym(payslip.currency);
   const totalEarnings = (payslip.earnings || []).reduce((s, e) => s + num(e.amount), 0);
   const totalDeductions = (payslip.deductions || []).reduce((s, d) => s + num(d.amount), 0);
   const net = totalEarnings - totalDeductions;
-  const empName = team?.name || payslip.employeeName || 'Contractor';
+  const empName = team?.name || payslip.employeeName || 'Founder / Team';
   const empPos = team?.position || payslip.position || '';
   const empId = team?.employeeId || payslip.employeeId || '—';
   const empEmail = team?.email || payslip.email || '';
@@ -404,11 +404,11 @@ function RemittanceDocument({ payslip, team, renderId = 'payslip-render' }) {
             Start<em style={{ fontStyle:'normal', color:'#E8730F' }}>Easy</em> Zambia
           </div>
           <div style={{ fontSize:9.5, letterSpacing:'1.6px', textTransform:'uppercase', color:'#8A6828', fontWeight:700, marginTop:4 }}>
-            Confidential Contractor Remittance
+            Confidential Retainer Advice
           </div>
         </div>
         <div style={{ textAlign:'right' }}>
-          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:800, color:'#E8730F', letterSpacing:'1.2px' }}>REMITTANCE</div>
+          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:800, color:'#E8730F', letterSpacing:'1.2px' }}>ADVICE</div>
           <div style={{ fontSize:10.5, color:'#666', marginTop:4, lineHeight:1.5 }}>
             {payslip.periodLabel || '—'}<br/>
             Ref: {refNo}
@@ -419,7 +419,7 @@ function RemittanceDocument({ payslip, team, renderId = 'payslip-render' }) {
       {/* Employee & Payment info */}
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:20 }}>
         <div>
-          <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:6 }}>Contractor / Recipient</div>
+          <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:6 }}>Founder / Recipient</div>
           <div style={{ fontSize:14.5, fontWeight:700, color:'#0A1F12' }}>{empName}</div>
           <div style={{ fontSize:11.5, color:'#555', marginTop:2 }}>{empPos}</div>
           <div style={{ fontSize:10.5, color:'#777', marginTop:6 }}>ID: {empId}</div>
@@ -441,7 +441,7 @@ function RemittanceDocument({ payslip, team, renderId = 'payslip-render' }) {
       {/* Earnings / Deductions tables */}
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:0, border:'1px solid #ddd', borderRadius:6, overflow:'hidden' }}>
         <div>
-          <div style={{ background:'#0A1F12', color:'#fff', padding:'9px 14px', fontSize:10.5, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.06em' }}>Compensation</div>
+          <div style={{ background:'#0A1F12', color:'#fff', padding:'9px 14px', fontSize:10.5, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.06em' }}>Retainer Breakdown</div>
           {(payslip.earnings || []).map((e, i) => (
             <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'8px 14px', borderBottom:'1px solid #f0f0f0', fontSize:12 }}>
               <span style={{ color:'#555' }}>{e.label || '—'}</span>
@@ -450,7 +450,7 @@ function RemittanceDocument({ payslip, team, renderId = 'payslip-render' }) {
           ))}
           {(payslip.earnings || []).length === 0 && <div style={{ padding:'10px 14px', fontSize:11.5, color:'#999', fontStyle:'italic' }}>No compensation</div>}
           <div style={{ display:'flex', justifyContent:'space-between', padding:'10px 14px', background:'#F0F7F2', borderTop:'2px solid #0A1F12', fontSize:12, fontWeight:800 }}>
-            <span>Gross Compensation</span>
+            <span>Gross Retainer</span>
             <span style={{ fontFamily:'Consolas, monospace' }}>{sym}{fmtNum(totalEarnings)}</span>
           </div>
         </div>
@@ -473,8 +473,8 @@ function RemittanceDocument({ payslip, team, renderId = 'payslip-render' }) {
       {/* Net pay highlight */}
       <div style={{ marginTop:18, background:'linear-gradient(135deg,#0A1F12,#123A1F)', color:'#fff', padding:'18px 22px', borderRadius:10, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
         <div>
-          <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:'0.16em', textTransform:'uppercase', color:'#F5A623', marginBottom:4 }}>Net Remittance</div>
-          <div style={{ fontSize:10.5, color:'rgba(255,255,255,0.6)' }}>Amount paid to contractor</div>
+          <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:'0.16em', textTransform:'uppercase', color:'#F5A623', marginBottom:4 }}>Net Retainer Paid</div>
+          <div style={{ fontSize:10.5, color:'rgba(255,255,255,0.6)' }}>Amount paid to founder / team</div>
         </div>
         <div style={{ fontFamily:"'Playfair Display',serif", fontSize:28, fontWeight:800, color:'#F5A623' }}>
           {sym}{fmtNum(net)}
@@ -499,7 +499,7 @@ function RemittanceDocument({ payslip, team, renderId = 'payslip-render' }) {
       </div>
 
       <div style={{ marginTop:22, fontSize:9.5, color:'#999', textAlign:'center', fontStyle:'italic', lineHeight:1.6 }}>
-        This remittance is for professional services rendered under a Monthly Payment Agreement.<br/>
+        This advice is for strategic leadership and advisory services rendered under a Founder/Advisory Agreement.<br/>
         It does not constitute an employment contract and does not create an employer-employee relationship.<br/>
         StartEasy Zambia
       </div>
@@ -574,7 +574,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20 }}>
           <div>
             <h3 style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:22, color:'#0A1F12' }}>
-              {modal.mode === 'add' ? 'Generate Remittance Advice' : 'Edit Remittance Advice'}
+              {modal.mode === 'add' ? 'Generate Retainer Advice' : 'Edit Retainer Advice'}
             </h3>
             <p style={{ margin:'4px 0 0', fontSize:12, color:'#64748B' }}>Fill in the fields — the document updates live.</p>
           </div>
@@ -588,7 +588,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
             {/* LEFT COLUMN: form */}
             <div>
               <div className="form-group">
-                <label className="form-label">Contractor / Founder *</label>
+                <label className="form-label">Founder / Team Member *</label>
                 <select className="form-input" value={data.employeeId || ''} onChange={e => set('employeeId', e.target.value)} required>
                   <option value="">— Select team member —</option>
                   {teamMembers.map(t => (
@@ -644,7 +644,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
               {/* Earnings */}
               <div style={{ marginBottom:16 }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-                  <label className="form-label" style={{ margin:0 }}>Compensation (Earnings)</label>
+                  <label className="form-label" style={{ margin:0 }}>Retainer Breakdown (Earnings)</label>
                   <button type="button" onClick={() => addItem('earnings')} className="btn-sm btn-add" style={{ padding:'3px 10px' }}><i className="fas fa-plus"></i> Add</button>
                 </div>
                 {(data.earnings || []).map((e, i) => (
@@ -688,7 +688,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
               </div>
 
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', background:'#F0F7F2', borderRadius:8, padding:'12px 16px', marginTop:8 }}>
-                <span style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', color:'#1E7B3C', letterSpacing:'0.05em' }}>Net Remittance</span>
+                <span style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', color:'#1E7B3C', letterSpacing:'0.05em' }}>Net Retainer Paid</span>
                 <span style={{ fontFamily:'Consolas, monospace', fontSize:18, fontWeight:800, color:'#1E7B3C' }}>{sym}{fmtNum(netPay)}</span>
               </div>
             </div>
@@ -703,7 +703,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
               </div>
               {showPreview && (
                 <div style={{ maxHeight:'70vh', overflow:'auto', border:'1px dashed #CBD5E1', borderRadius:8, padding:10, background:'#F8FAFC' }}>
-                  <RemittanceDocument payslip={previewPayslip} team={selectedTeam} renderId="payslip-live-preview" />
+                  <RetainerDocument payslip={previewPayslip} team={selectedTeam} renderId="payslip-live-preview" />
                 </div>
               )}
             </div>
@@ -711,7 +711,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
 
           <div style={{ display:'flex', gap:10, marginTop:24, flexWrap:'wrap' }}>
             <button type="submit" disabled={saving} className="btn-primary" style={{ flex:1, justifyContent:'center', minWidth:160 }}>
-              {saving ? <><i className="fas fa-circle-notch fa-spin"></i> Saving...</> : <><i className="fas fa-save"></i> {modal.mode === 'add' ? 'Save Remittance' : 'Update Remittance'}</>}
+              {saving ? <><i className="fas fa-circle-notch fa-spin"></i> Saving...</> : <><i className="fas fa-save"></i> {modal.mode === 'add' ? 'Save Advice' : 'Update Advice'}</>}
             </button>
             <button type="button" onClick={() => onDownload(previewPayslip, selectedTeam, 'payslip-live-preview')} className="btn-sm btn-blue" style={{ padding:'12px 20px', fontSize:13 }}>
               <i className="fas fa-download"></i> Download PDF
@@ -732,7 +732,7 @@ function PayslipViewModal({ payslip, team, onClose, onDownload }) {
     <div className="modal-form-overlay" onClick={onClose}>
       <div className="modal-form wide" onClick={e => e.stopPropagation()} style={{ padding:24 }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
-          <h3 style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:20, color:'#0A1F12' }}>Remittance Preview</h3>
+          <h3 style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:20, color:'#0A1F12' }}>Retainer Advice Preview</h3>
           <div style={{ display:'flex', gap:8 }}>
             <button onClick={() => onDownload(payslip, team, 'payslip-view-render')} className="btn-sm btn-blue" style={{ padding:'9px 16px', fontSize:13 }}>
               <i className="fas fa-download"></i> Download PDF
@@ -741,7 +741,7 @@ function PayslipViewModal({ payslip, team, onClose, onDownload }) {
           </div>
         </div>
         <div style={{ maxHeight:'80vh', overflow:'auto', background:'#F8FAFC', borderRadius:8, padding:16 }}>
-          <RemittanceDocument payslip={payslip} team={team} renderId="payslip-view-render" />
+          <RetainerDocument payslip={payslip} team={team} renderId="payslip-view-render" />
         </div>
       </div>
     </div>
@@ -1224,12 +1224,19 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Net Monthly Retainer (USD) *</label>
+              <label className="form-label">Fixed Monthly Retainer (USD) *</label>
               <input type="number" step="0.01" min="0" className="form-input" value={data.netMonthlyUSD ?? ''} onChange={e => set('netMonthlyUSD', e.target.value)} required placeholder="e.g. 1725" />
             </div>
             <div className="form-group">
-              <label className="form-label">Contractor ID</label>
-              <input type="text" className="form-input" value={data.employeeId || ''} onChange={e => set('employeeId', e.target.value)} placeholder="e.g. SE-EMP-001" />
+              <label className="form-label">Team / Founder ID</label>
+              <select className="form-input" value={data.employeeId || ''} onChange={e => set('employeeId', e.target.value)}>
+                <option value="">— Select ID —</option>
+                <option value="SE-FND-001">SE-FND-001</option>
+                <option value="SE-FND-002">SE-FND-002</option>
+                <option value="SE-EMP-001">SE-EMP-001</option>
+                <option value="SE-EMP-002">SE-EMP-002</option>
+                <option value="SE-EMP-003">SE-EMP-003</option>
+              </select>
             </div>
           </div>
           <div className="form-row">
@@ -1246,12 +1253,26 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
             </div>
           </div>
           <div className="form-group">
-            <label className="form-label">Payment Notes</label>
-            <input type="text" className="form-input" value={data.paymentNotes || ''} onChange={e => set('paymentNotes', e.target.value)} placeholder="e.g. Bank transfer to SCB acct" />
+            <label className="form-label">Payment Method / Notes</label>
+            <select className="form-input" value={data.paymentNotes || ''} onChange={e => set('paymentNotes', e.target.value)}>
+              <option value="">— Select Payment Method —</option>
+              <option value="Bank Transfer - Standard Chartered">Bank Transfer - Standard Chartered</option>
+              <option value="Bank Transfer - Other Bank">Bank Transfer - Other Bank</option>
+              <option value="Mobile Money - Airtel">Mobile Money - Airtel</option>
+              <option value="Mobile Money - MTN">Mobile Money - MTN</option>
+              <option value="Cash / Cheque">Cash / Cheque</option>
+            </select>
           </div>
           <div className="form-group">
             <label className="form-label">Contract Reference</label>
-            <input type="text" className="form-input" value={data.contractRef || ''} onChange={e => set('contractRef', e.target.value)} placeholder="e.g. MONTHLY PAYMENT AGREEMENT" />
+            <select className="form-input" value={data.contractRef || ''} onChange={e => set('contractRef', e.target.value)}>
+              <option value="">— Select Contract —</option>
+              <option value="Principal Founder Agreement">Principal Founder Agreement</option>
+              <option value="Founder Contributor Agreement">Founder Contributor Agreement</option>
+              <option value="Monthly Payment Agreement">Monthly Payment Agreement</option>
+              <option value="Advisory Agreement">Advisory Agreement</option>
+              <option value="Independent Contractor Agreement">Independent Contractor Agreement</option>
+            </select>
           </div>
         </>
       );
@@ -1284,7 +1305,7 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   ADMIN PORTAL — with Team & Remittance Advices
+   ADMIN PORTAL — with Team & Retainer Advices
    ═══════════════════════════════════════════════════════════════════ */
 function AdminPortal({ onExit }) {
   const [user, setUser] = useState(null);
@@ -1410,23 +1431,23 @@ function AdminPortal({ onExit }) {
     });
   };
 
-  /* ─── PDF: Payslip ─── */
+  /* ─── PDF: Retainer Advice ─── */
   const downloadPayslipPDF = (payslip, teamMember, renderId) => {
     const element = document.getElementById(renderId || 'payslip-view-render');
-    if (!element) { showToast('Remittance not ready. Try again.', 'error'); return; }
-    const empName = (teamMember?.name || payslip?.employeeName || 'Contractor').replace(/\s+/g,'_');
+    if (!element) { showToast('Retainer advice not ready. Try again.', 'error'); return; }
+    const empName = (teamMember?.name || payslip?.employeeName || 'Founder').replace(/\s+/g,'_');
     const periodLabel = (payslip?.periodLabel || 'Period').replace(/\s+/g,'_');
-    showToast('Generating remittance PDF...', 'info');
+    showToast('Generating retainer advice PDF...', 'info');
     window.html2pdf().set({
       margin:       0.3,
-      filename:     `Remittance_${empName}_${periodLabel}.pdf`,
+      filename:     `Retainer_Advice_${empName}_${periodLabel}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
       jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
     }).from(element).save().then(() => {
-      showToast('Remittance downloaded successfully!', 'success');
+      showToast('Retainer advice downloaded successfully!', 'success');
     }).catch(() => {
-      showToast('Failed to generate remittance PDF.', 'error');
+      showToast('Failed to generate retainer advice PDF.', 'error');
     });
   };
 
@@ -1618,10 +1639,10 @@ function AdminPortal({ onExit }) {
   const savePayslip = async (data) => {
     setFormError(''); setSaving(true);
     try {
-      if (!data.employeeId) throw new Error('Please select a contractor.');
+      if (!data.employeeId) throw new Error('Please select a founder/team member.');
       const teamMember = team.find(t => t.id === data.employeeId);
       const totalEarnings = (data.earnings || []).reduce((s, e) => s + num(e.amount), 0);
-      if (totalEarnings <= 0) throw new Error('Compensation must be greater than zero. Try Auto-Calculate.');
+      if (totalEarnings <= 0) throw new Error('Retainer amount must be greater than zero. Try Auto-Calculate.');
 
       const payload = {
         ...data,
@@ -1638,15 +1659,15 @@ function AdminPortal({ onExit }) {
 
       if (payslipModal.mode === 'add') {
         await db.collection('se_payslips').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        showToast('Remittance saved.', 'success');
+        showToast('Retainer advice saved.', 'success');
       } else {
         await db.collection('se_payslips').doc(data.id).update(payload);
-        showToast('Remittance updated.', 'success');
+        showToast('Retainer advice updated.', 'success');
       }
       closePayslipModal();
     } catch (err) {
       setFormError(err.message);
-      showToast('Failed to save remittance.', 'error');
+      showToast('Failed to save retainer advice.', 'error');
     } finally {
       setSaving(false);
     }
@@ -1688,7 +1709,7 @@ function AdminPortal({ onExit }) {
       if (modal.type === 'team') {
         if (!data.name?.trim()) throw new Error('Name is required');
         if (!data.position?.trim()) throw new Error('Position is required');
-        if (data.netMonthlyUSD === '' || num(data.netMonthlyUSD) < 0) throw new Error('Net monthly retainer is required');
+        if (data.netMonthlyUSD === '' || num(data.netMonthlyUSD) < 0) throw new Error('Fixed monthly retainer is required');
         const payload = { ...data, netMonthlyUSD: num(data.netMonthlyUSD) };
         if (modal.mode === 'add') await db.collection('se_team').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         else await db.collection('se_team').doc(data.id).update(payload);
@@ -1842,12 +1863,12 @@ function AdminPortal({ onExit }) {
             <div className={`admin-nav-item ${activeTab==='invoices'?'active':''}`} onClick={() => { setActiveTab('invoices'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-file-invoice"></i> Invoicing</div>
             <div className={`admin-nav-item ${activeTab==='statements'?'active':''}`} onClick={() => { setActiveTab('statements'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-file-signature"></i> Financial Statements</div>
 
-            <div className="admin-nav-section" style={{ color:'#1B6CA8' }}>Contractors & Retainers</div>
+            <div className="admin-nav-section" style={{ color:'#1B6CA8' }}>Founders & Team</div>
             <div className={`admin-nav-item ${activeTab==='team'?'active':''}`} onClick={() => { setActiveTab('team'); setIsDrawerOpen(false); setSearchTerm(''); }}>
-              <i className="fas fa-user-tie"></i> Team Members
+              <i className="fas fa-user-tie"></i> Founders & Team
             </div>
             <div className={`admin-nav-item ${activeTab==='payslips'?'active':''}`} onClick={() => { setActiveTab('payslips'); setIsDrawerOpen(false); setSearchTerm(''); }}>
-              <i className="fas fa-file-invoice-dollar"></i> Remittances
+              <i className="fas fa-file-invoice-dollar"></i> Retainer Advices
             </div>
           </nav>
 
@@ -1885,7 +1906,7 @@ function AdminPortal({ onExit }) {
               <div style={{ width:'100%', maxWidth:350 }}>
                 <div style={{ position:'relative', width:'100%' }}>
                   <i className="fas fa-search" style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', color:'#94A3B8' }}></i>
-                  <input type="text" placeholder={activeTab==='team'?'Search team members...':'Search remittances...'} className="form-input" style={{ paddingLeft:36, paddingRight:searchTerm?36:12, borderRadius:20 }} value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} />
+                  <input type="text" placeholder={activeTab==='team'?'Search founders & team...':'Search retainer advices...'} className="form-input" style={{ paddingLeft:36, paddingRight:searchTerm?36:12, borderRadius:20 }} value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} />
                   {searchTerm && <i className="fas fa-times" style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', color:'#94A3B8', cursor:'pointer' }} onClick={()=>setSearchTerm('')}></i>}
                 </div>
               </div>
@@ -2324,12 +2345,12 @@ function AdminPortal({ onExit }) {
             </div>
           )}
 
-          {/* ══════════════ TEAM MEMBERS TAB ══════════════ */}
+          {/* ══════════════ FOUNDERS & TEAM TAB ══════════════ */}
           {activeTab === 'team' && (
             <div className="fadein">
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
                 <div>
-                  <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Contractors & Founders</h1>
+                  <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Founders & Team</h1>
                   <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{team.length} member{team.length !== 1 ? 's' : ''} · Total monthly retainers: <strong>US${fmtNum(team.reduce((s,t)=>s+num(t.netMonthlyUSD),0))}</strong></p>
                 </div>
                 <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
@@ -2353,7 +2374,7 @@ function AdminPortal({ onExit }) {
                   <div style={{ overflowX:'auto' }}>
                     <table className="admin-table">
                       <thead>
-                        <tr><th>Name</th><th>Position</th><th>Net Monthly (USD)</th><th>Equity</th><th>Contractor ID</th><th>Status</th><th>Actions</th></tr>
+                        <tr><th>Name</th><th>Position</th><th>Fixed Monthly Retainer (USD)</th><th>Equity</th><th>Team / Founder ID</th><th>Status</th><th>Actions</th></tr>
                       </thead>
                       <tbody>
                         {filteredTeam.map(m => (
@@ -2369,7 +2390,7 @@ function AdminPortal({ onExit }) {
                             <td><span className={`status-pill ${m.status==='Active'||!m.status?'active':'paused'}`}>{m.status || 'Active'}</span></td>
                             <td>
                               <div style={{ display:'flex', gap:6 }}>
-                                <button onClick={() => openPayslipGenerator({ employeeId: m.id, periodMonth: new Date().getMonth(), periodYear: new Date().getFullYear(), payDate: todayStr(), currency:'ZMW', exchangeRate:27.5, earnings:[], deductions:[], status:'Draft', preparedBy:'Carol Kambole', preparedByTitle:'Co-founder & Director of Finance & Administration' })} className="btn-sm btn-blue" title="Generate Remittance"><i className="fas fa-file-invoice-dollar"></i></button>
+                                <button onClick={() => openPayslipGenerator({ employeeId: m.id, periodMonth: new Date().getMonth(), periodYear: new Date().getFullYear(), payDate: todayStr(), currency:'ZMW', exchangeRate:27.5, earnings:[], deductions:[], status:'Draft', preparedBy:'Carol Kambole', preparedByTitle:'Co-founder & Director of Finance & Administration' })} className="btn-sm btn-blue" title="Generate Retainer Advice"><i className="fas fa-file-invoice-dollar"></i></button>
                                 <button onClick={() => openEdit('team', m)} className="btn-sm btn-edit"><i className="fas fa-pen"></i></button>
                                 <button onClick={() => handleDelete('se_team', m.id)} className="btn-sm btn-del"><i className="fas fa-trash"></i></button>
                               </div>
@@ -2384,18 +2405,18 @@ function AdminPortal({ onExit }) {
             </div>
           )}
 
-          {/* ══════════════ REMITTANCES TAB ══════════════ */}
+          {/* ══════════════ RETAINER ADVICES TAB ══════════════ */}
           {activeTab === 'payslips' && (
             <div className="fadein">
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
                 <div>
-                  <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Remittance Advices</h1>
+                  <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Retainer Advices</h1>
                   <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>
                     {payslips.length} document{payslips.length !== 1 ? 's' : ''} · {payslips.filter(p=>p.status==='Paid').length} paid · {payslips.filter(p=>p.status!=='Paid').length} draft
                   </p>
                 </div>
-                <button onClick={() => openPayslipGenerator()} className="btn-primary" style={{ padding:'11px 22px', fontSize:13.5 }} disabled={team.length === 0} title={team.length === 0 ? 'Add a contractor first' : ''}>
-                  <i className="fas fa-plus"></i> Generate Remittance
+                <button onClick={() => openPayslipGenerator()} className="btn-primary" style={{ padding:'11px 22px', fontSize:13.5 }} disabled={team.length === 0} title={team.length === 0 ? 'Add a founder/team member first' : ''}>
+                  <i className="fas fa-plus"></i> Generate Retainer Advice
                 </button>
               </div>
 
@@ -2404,8 +2425,8 @@ function AdminPortal({ onExit }) {
                   <div style={{ display:'flex', alignItems:'center', gap:12 }}>
                     <i className="fas fa-exclamation-triangle" style={{ color:'#92400E', fontSize:20 }}></i>
                     <div>
-                      <div style={{ fontWeight:800, color:'#92400E', fontSize:13 }}>No contractors yet</div>
-                      <div style={{ fontSize:12, color:'#78350F', marginTop:2 }}>Go to <strong>Contractors & Founders</strong> and add a member (or seed the defaults) before generating remittances.</div>
+                      <div style={{ fontWeight:800, color:'#92400E', fontSize:13 }}>No founders/team members yet</div>
+                      <div style={{ fontSize:12, color:'#78350F', marginTop:2 }}>Go to <strong>Founders & Team</strong> and add a member (or seed the defaults) before generating advices.</div>
                     </div>
                   </div>
                 </div>
@@ -2415,12 +2436,12 @@ function AdminPortal({ onExit }) {
                 {filteredPayslips.length === 0 ? (
                   <div className="empty-state">
                     <i className="fas fa-file-invoice-dollar" style={{ fontSize:32, color:'#CBD5E1', marginBottom:12, display:'block' }}></i>
-                    No remittances yet. Click <strong>Generate Remittance</strong> to create one.
+                    No retainer advices yet. Click <strong>Generate Retainer Advice</strong> to create one.
                   </div>
                 ) : (
                   <div style={{ overflowX:'auto' }}>
                     <table className="admin-table">
-                      <thead><tr><th>Ref</th><th>Contractor</th><th>Period</th><th>Currency</th><th>Gross</th><th>Withholding</th><th>Net Pay</th><th>Status</th><th>Actions</th></tr></thead>
+                      <thead><tr><th>Ref</th><th>Founder / Team</th><th>Period</th><th>Currency</th><th>Gross</th><th>Withholding</th><th>Net Retainer</th><th>Status</th><th>Actions</th></tr></thead>
                       <tbody>
                         {filteredPayslips.map(p => {
                           const t = team.find(tm => tm.id === p.employeeId);
