@@ -138,6 +138,7 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .status-pill.active { background: #D1FAE5; color: #065F46; }
 .status-pill.overdue { background: #FFE8E5; color: #B8564F; }
 .status-pill.paused { background: #E2E8F0; color: #475569; }
+.status-pill.draft { background: #E2E8F0; color: #475569; }
 .empty-state { text-align: center; padding: 40px 20px; color: #94A3B8; font-size: 14px; }
 
 /* Auth Gate */
@@ -171,10 +172,13 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .btn-add { background: #1E7B3C; color: #fff; }
 .btn-edit { background: #F5A623; color: #fff; }
 .btn-del { background: #FFE8E5; color: #B8564F; }
+.btn-blue { background: #1B6CA8; color: #fff; }
+.btn-gray { background: #E2E8F0; color: #1E293B; }
 
 /* Form Modal - Centered and Fixed */
 .modal-form-overlay { position: fixed; inset: 0; z-index: 99999; display: flex; align-items: flex-start; justify-content: center; padding: 20px 16px; background: rgba(10,31,18,0.85); backdrop-filter: blur(8px); overflow-y: auto; }
 .modal-form { background: #fff; border-radius: 12px; width: 100%; max-width: 520px; padding: 28px; margin: auto; box-shadow: 0 30px 80px rgba(0,0,0,.4); position: relative; }
+.modal-form.wide { max-width: 1140px; }
 
 .kpi-trend { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 99px; display: inline-block; }
 .kpi-trend.up { background: #D1FAE5; color: #065F46; }
@@ -188,6 +192,10 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .toast.error { border-left: 4px solid #B8564F; }
 .toast.info { border-left: 4px solid #1B6CA8; }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* Payslip modal layout */
+.payslip-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 900px) { .payslip-layout { grid-template-columns: 1fr; } }
 
 @media (max-width: 768px) {
   .admin-content { padding: 16px; }
@@ -209,6 +217,8 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
   .admin-top-bar, .admin-drawer, .filter-tabs, .btn-sm, .admin-hamburger, .admin-drawer-overlay { display: none !important; }
   .admin-content { padding: 0 !important; margin: 0 !important; }
   .admin-layout { display: block !important; }
+  .modal-form-overlay, .modal-overlay { position: static !important; background: none !important; }
+  .no-print { display: none !important; }
 }
 </style>
 </head>
@@ -260,6 +270,23 @@ const CASHFLOW_CLASS = {
 
 const PERIOD_LABELS = { month:'This Month', last_month:'Last Month', quarter:'This Quarter', year:'This Year', all:'All Time' };
 
+/* ─── PAYROLL / PAYSLIP CONSTANTS ─── */
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const ZAMBIA_PAYE_BANDS = [
+  { min: 0, max: 5100, rate: 0 },
+  { min: 5100, max: 7100, rate: 0.20 },
+  { min: 7100, max: 9900, rate: 0.30 },
+  { min: 9900, max: Infinity, rate: 0.37 }
+];
+const NAPSA_CEILING = 29800;
+const NAPSA_RATE = 0.05;
+const NHIMA_RATE = 0.01;
+
+const DEFAULT_TEAM = [
+  { name:'Mwaba Lewis', position:'Principal Founder & Strategic Sponsor', netMonthlyUSD:1725, equity:'50%', email:'', phone:'', employeeId:'SE-EMP-001', status:'Active', paymentNotes:'Monthly Payment Agreement · Principal Founder', contractRef:'MONTHLY PAYMENT AGREEMENT_ LEWIS' },
+  { name:'Carol Kambole', position:'Co-founder & Director of Finance & Administration', netMonthlyUSD:600, equity:'6%', email:'', phone:'', employeeId:'SE-EMP-002', status:'Active', paymentNotes:'Monthly Payment Agreement · Co-founder', contractRef:'MONTHLY PAYMENT AGREEMENT _ CAROL' }
+];
+
 /* ─── UTILITIES ─── */
 const fmtK = (n) => `K${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 const num = (v) => { const n = parseFloat(String(v || '').replace(/[^\d.-]/g, '')); return isNaN(n) ? 0 : n; };
@@ -267,6 +294,39 @@ const toDate = (raw) => { if (!raw) return null; if (raw.toDate) return raw.toDa
 const dateStr = (raw) => { const d = toDate(raw); return d ? d.toISOString().split('T')[0] : ''; };
 const todayStr = () => new Date().toISOString().split('T')[0];
 const addDays = (dateStr, n) => { const d = new Date(dateStr); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; };
+const fmtNum = (n) => num(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const curSym = (currency) => currency === 'USD' ? '$' : 'K';
+
+/* PAYE + gross-up helpers */
+const calcPAYE = (taxable) => {
+  let tax = 0;
+  for (const band of ZAMBIA_PAYE_BANDS) {
+    if (taxable > band.min) {
+      tax += (Math.min(taxable, band.max) - band.min) * band.rate;
+    }
+  }
+  return tax;
+};
+const calcZMWBreakdown = (gross) => {
+  const napsaEmp = Math.min(gross, NAPSA_CEILING) * NAPSA_RATE;
+  const nhimaEmp = gross * NHIMA_RATE;
+  const taxable = gross - napsaEmp - nhimaEmp;
+  const paye = calcPAYE(taxable);
+  const net = gross - napsaEmp - nhimaEmp - paye;
+  const napsaEmployer = Math.min(gross, NAPSA_CEILING) * NAPSA_RATE;
+  const nhimaEmployer = gross * NHIMA_RATE;
+  return { gross, napsaEmp, nhimaEmp, paye, net, napsaEmployer, nhimaEmployer };
+};
+const calcGrossFromNetZMW = (targetNet) => {
+  let lo = Math.max(0, targetNet);
+  let hi = Math.max(targetNet * 3, targetNet + 5000);
+  for (let i = 0; i < 80; i++) {
+    const mid = (lo + hi) / 2;
+    if (calcZMWBreakdown(mid).net < targetNet) lo = mid;
+    else hi = mid;
+  }
+  return Math.ceil(((lo + hi) / 2) * 100) / 100;
+};
 
 /* ─── BRAND LOGO COMPONENT ─── */
 function BrandLogo({ size = 38, showDirectoryLabel = false }){
@@ -296,10 +356,8 @@ function DoughnutChart({ chartData, type }) {
 
   useEffect(() => {
     if (!canvasRef.current || !window.Chart || !chartData || Object.keys(chartData).length === 0) return;
-    
     const ctx = canvasRef.current.getContext('2d');
     if (chartRef.current) chartRef.current.destroy();
-    
     const labels = Object.keys(chartData);
     const data = Object.values(chartData);
     const colors = type === 'income' 
@@ -319,14 +377,413 @@ function DoughnutChart({ chartData, type }) {
         plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11, family: 'Inter' } } } }
       }
     });
-
     return () => { if (chartRef.current) chartRef.current.destroy(); };
   }, [chartData, type]);
 
   return <canvas ref={canvasRef} />;
 }
 
-/* ─── APP ─── */
+/* ═══════════════════════════════════════════════════════════════════
+   PAYSLIP DOCUMENT — printable, branded payslip
+   ═══════════════════════════════════════════════════════════════════ */
+function PayslipDocument({ payslip, team, renderId = 'payslip-render' }) {
+  const sym = curSym(payslip.currency);
+  const totalEarnings = (payslip.earnings || []).reduce((s, e) => s + num(e.amount), 0);
+  const totalDeductions = (payslip.deductions || []).reduce((s, d) => s + num(d.amount), 0);
+  const net = totalEarnings - totalDeductions;
+  const empName = team?.name || payslip.employeeName || 'Employee';
+  const empPos = team?.position || payslip.position || '';
+  const empId = team?.employeeId || payslip.employeeId || '—';
+  const empEmail = team?.email || payslip.email || '';
+  const refNo = payslip.reference || payslip.id || 'PS-DRAFT';
+
+  return (
+    <div id={renderId} style={{
+      background:'#fff', border:'1px solid #D0D0D0', borderRadius:8,
+      padding:'34px 40px', fontFamily:'Inter, sans-serif', fontSize:12.5,
+      color:'#222', width:'100%', maxWidth:780, margin:'0 auto',
+      boxShadow:'0 10px 30px rgba(0,0,0,.06)', overflowWrap:'break-word'
+    }}>
+      {/* Header */}
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', paddingBottom:16, borderBottom:'3px solid #0A1F12', marginBottom:22, flexWrap:'wrap', gap:16 }}>
+        <div>
+          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:24, fontWeight:800, color:'#0A1F12', letterSpacing:0.5 }}>
+            Start<em style={{ fontStyle:'normal', color:'#E8730F' }}>Easy</em> Zambia
+          </div>
+          <div style={{ fontSize:9.5, letterSpacing:'1.6px', textTransform:'uppercase', color:'#8A6828', fontWeight:700, marginTop:4 }}>
+            Financial Support & Management
+          </div>
+        </div>
+        <div style={{ textAlign:'right' }}>
+          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:800, color:'#E8730F', letterSpacing:'1.2px' }}>PAYSLIP</div>
+          <div style={{ fontSize:10.5, color:'#666', marginTop:4, lineHeight:1.5 }}>
+            {payslip.periodLabel || '—'}<br/>
+            Ref: {refNo}
+          </div>
+        </div>
+      </div>
+
+      {/* Employee & Payment info */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:20 }}>
+        <div>
+          <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:6 }}>Employee</div>
+          <div style={{ fontSize:14.5, fontWeight:700, color:'#0A1F12' }}>{empName}</div>
+          <div style={{ fontSize:11.5, color:'#555', marginTop:2 }}>{empPos}</div>
+          <div style={{ fontSize:10.5, color:'#777', marginTop:6 }}>ID: {empId}</div>
+          {empEmail && <div style={{ fontSize:10.5, color:'#777' }}>{empEmail}</div>}
+        </div>
+        <div>
+          <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:6 }}>Payment Details</div>
+          <div style={{ fontSize:11.5, color:'#555', lineHeight:1.8 }}>
+            Pay Date: <strong style={{ color:'#0A1F12' }}>{payslip.payDate || '—'}</strong><br/>
+            Period: <strong style={{ color:'#0A1F12' }}>{payslip.periodLabel || '—'}</strong><br/>
+            Currency: <strong style={{ color:'#0A1F12' }}>{payslip.currency || 'ZMW'}</strong>
+            {payslip.currency === 'ZMW' && payslip.exchangeRate && (
+              <><br/><span style={{ fontSize:10.5, color:'#888' }}>Rate: 1 USD = ZMW {payslip.exchangeRate}</span></>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Earnings / Deductions tables */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:0, border:'1px solid #ddd', borderRadius:6, overflow:'hidden' }}>
+        <div>
+          <div style={{ background:'#0A1F12', color:'#fff', padding:'9px 14px', fontSize:10.5, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.06em' }}>Earnings</div>
+          {(payslip.earnings || []).map((e, i) => (
+            <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'8px 14px', borderBottom:'1px solid #f0f0f0', fontSize:12 }}>
+              <span style={{ color:'#555' }}>{e.label || '—'}</span>
+              <span style={{ fontWeight:600, fontFamily:'Consolas, monospace' }}>{sym}{fmtNum(e.amount)}</span>
+            </div>
+          ))}
+          {(payslip.earnings || []).length === 0 && <div style={{ padding:'10px 14px', fontSize:11.5, color:'#999', fontStyle:'italic' }}>No earnings</div>}
+          <div style={{ display:'flex', justifyContent:'space-between', padding:'10px 14px', background:'#F0F7F2', borderTop:'2px solid #0A1F12', fontSize:12, fontWeight:800 }}>
+            <span>Gross Earnings</span>
+            <span style={{ fontFamily:'Consolas, monospace' }}>{sym}{fmtNum(totalEarnings)}</span>
+          </div>
+        </div>
+        <div style={{ borderLeft:'1px solid #ddd' }}>
+          <div style={{ background:'#B8564F', color:'#fff', padding:'9px 14px', fontSize:10.5, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.06em' }}>Deductions</div>
+          {(payslip.deductions || []).map((d, i) => (
+            <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'8px 14px', borderBottom:'1px solid #f0f0f0', fontSize:12 }}>
+              <span style={{ color:'#555' }}>{d.label || '—'}</span>
+              <span style={{ fontWeight:600, fontFamily:'Consolas, monospace' }}>{sym}{fmtNum(d.amount)}</span>
+            </div>
+          ))}
+          {(payslip.deductions || []).length === 0 && <div style={{ padding:'10px 14px', fontSize:11.5, color:'#999', fontStyle:'italic' }}>No deductions</div>}
+          <div style={{ display:'flex', justifyContent:'space-between', padding:'10px 14px', background:'#FDF2F1', borderTop:'2px solid #B8564F', fontSize:12, fontWeight:800 }}>
+            <span>Total Deductions</span>
+            <span style={{ fontFamily:'Consolas, monospace' }}>{sym}{fmtNum(totalDeductions)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Net pay highlight */}
+      <div style={{ marginTop:18, background:'linear-gradient(135deg,#0A1F12,#123A1F)', color:'#fff', padding:'18px 22px', borderRadius:10, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <div>
+          <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:'0.16em', textTransform:'uppercase', color:'#F5A623', marginBottom:4 }}>Net Pay</div>
+          <div style={{ fontSize:10.5, color:'rgba(255,255,255,0.6)' }}>Amount paid to employee</div>
+        </div>
+        <div style={{ fontFamily:"'Playfair Display',serif", fontSize:28, fontWeight:800, color:'#F5A623' }}>
+          {sym}{fmtNum(net)}
+        </div>
+      </div>
+
+      {/* Employer contributions */}
+      {(payslip.employerContributions || []).length > 0 && (
+        <div style={{ marginTop:18 }}>
+          <div style={{ fontSize:10, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:8 }}>Employer Contributions (not deducted from net)</div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+            {(payslip.employerContributions || []).map((c, i) => (
+              <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'6px 12px', background:'#F8FAFC', borderRadius:4, fontSize:11.5, border:'1px solid #eee' }}>
+                <span style={{ color:'#555' }}>{c.label || '—'}</span>
+                <span style={{ fontFamily:'Consolas, monospace', fontWeight:600 }}>{sym}{fmtNum(c.amount)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Footer signatures */}
+      <div style={{ marginTop:28, paddingTop:18, borderTop:'1px solid #ddd', display:'grid', gridTemplateColumns:'1fr 1fr', gap:36 }}>
+        <div>
+          <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:8 }}>Prepared By</div>
+          <div style={{ borderBottom:'1px solid #333', paddingBottom:4, minHeight:30, fontFamily:"'Playfair Display',serif", fontSize:15, fontStyle:'italic', color:'#0A1F12' }}>
+            {payslip.preparedBy || '_____________________'}
+          </div>
+          <div style={{ fontSize:10.5, color:'#666', marginTop:6 }}>{payslip.preparedByTitle || 'Finance & Administration'}</div>
+        </div>
+        <div>
+          <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:8 }}>Date Issued</div>
+          <div style={{ borderBottom:'1px solid #333', paddingBottom:4, minHeight:30, fontFamily:"'Playfair Display',serif", fontSize:15, color:'#0A1F12' }}>
+            {payslip.payDate || '—'}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginTop:22, fontSize:9.5, color:'#999', textAlign:'center', fontStyle:'italic', lineHeight:1.6 }}>
+        This is a computer-generated payslip. Confidential — for the named employee only.<br/>
+        StartEasy Zambia · Financial Support &amp; Management
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAYSLIP GENERATOR MODAL (form + live preview)
+   ═══════════════════════════════════════════════════════════════════ */
+function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamMembers }) {
+  const [data, setData] = useState(modal.data);
+  const [showPreview, setShowPreview] = useState(true);
+  const set = (k, v) => setData(d => ({ ...d, [k]: v }));
+
+  const selectedTeam = teamMembers.find(t => t.id === data.employeeId);
+  const sym = curSym(data.currency);
+
+  const updateList = (key, i, field, val) => {
+    const list = [...(data[key] || [])];
+    list[i] = { ...list[i], [field]: val };
+    set(key, list);
+  };
+  const addItem = (key) => set(key, [...(data[key] || []), { label: '', amount: '' }]);
+  const removeItem = (key, i) => set(key, (data[key] || []).filter((_, idx) => idx !== i));
+
+  const totalEarnings = (data.earnings || []).reduce((s, e) => s + num(e.amount), 0);
+  const totalDeductions = (data.deductions || []).reduce((s, d) => s + num(d.amount), 0);
+  const netPay = totalEarnings - totalDeductions;
+
+  const autoCalc = () => {
+    if (!selectedTeam) return;
+    const netUSD = num(selectedTeam.netMonthlyUSD);
+    if (data.currency === 'USD') {
+      set('earnings', [{ label: 'Base Salary (USD Contract)', amount: netUSD.toFixed(2) }]);
+      set('deductions', []);
+      set('employerContributions', []);
+    } else {
+      const rate = num(data.exchangeRate) || 1;
+      const netZMW = netUSD * rate;
+      const gross = calcGrossFromNetZMW(netZMW);
+      const bd = calcZMWBreakdown(gross);
+      set('earnings', [{ label: 'Gross Salary (ZMW)', amount: gross.toFixed(2) }]);
+      set('deductions', [
+        { label: 'NAPSA (5%)', amount: bd.napsaEmp.toFixed(2) },
+        { label: 'NHIMA (1%)', amount: bd.nhimaEmp.toFixed(2) },
+        { label: 'PAYE', amount: bd.paye.toFixed(2) }
+      ]);
+      set('employerContributions', [
+        { label: 'NAPSA Employer (5%)', amount: bd.napsaEmployer.toFixed(2) },
+        { label: 'NHIMA Employer (1%)', amount: bd.nhimaEmployer.toFixed(2) }
+      ]);
+    }
+  };
+
+  const previewPayslip = {
+    ...data,
+    employeeName: selectedTeam?.name,
+    position: selectedTeam?.position,
+    employeeId: selectedTeam?.employeeId,
+    email: selectedTeam?.email,
+    periodLabel: `${MONTHS[data.periodMonth]} ${data.periodYear}`,
+    currency: data.currency
+  };
+
+  return (
+    <div className="modal-form-overlay" onClick={onClose}>
+      <div className="modal-form wide" onClick={e => e.stopPropagation()}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20 }}>
+          <div>
+            <h3 style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:22, color:'#0A1F12' }}>
+              {modal.mode === 'add' ? 'Generate Payslip' : 'Edit Payslip'}
+            </h3>
+            <p style={{ margin:'4px 0 0', fontSize:12, color:'#64748B' }}>Fill in the fields — the payslip updates live.</p>
+          </div>
+          <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'#666', fontSize:18 }}><i className="fas fa-times"></i></button>
+        </div>
+
+        {error && <div style={{ background:'#FFE8E5', color:'#B8564F', padding:12, borderRadius:8, fontSize:13, marginBottom:16, fontWeight:600 }}>{error}</div>}
+
+        <form onSubmit={e => { e.preventDefault(); onSave({ ...data, netPay }); }}>
+          <div className="payslip-layout">
+            {/* LEFT COLUMN: form */}
+            <div>
+              <div className="form-group">
+                <label className="form-label">Employee *</label>
+                <select className="form-input" value={data.employeeId || ''} onChange={e => set('employeeId', e.target.value)} required>
+                  <option value="">— Select team member —</option>
+                  {teamMembers.map(t => (
+                    <option key={t.id} value={t.id}>{t.name} — {t.position}</option>
+                  ))}
+                </select>
+                {selectedTeam && (
+                  <div style={{ fontSize:11, color:'#1B6CA8', marginTop:6, fontWeight:600 }}>
+                    Contract net: US${fmtNum(selectedTeam.netMonthlyUSD)} / month
+                  </div>
+                )}
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Period Month *</label>
+                  <select className="form-input" value={data.periodMonth ?? new Date().getMonth()} onChange={e => set('periodMonth', parseInt(e.target.value))}>
+                    {MONTHS.map((m, i) => <option key={m} value={i}>{m}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Period Year *</label>
+                  <input type="number" className="form-input" value={data.periodYear || new Date().getFullYear()} onChange={e => set('periodYear', parseInt(e.target.value) || new Date().getFullYear())} min="2020" max="2100" />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Pay Date *</label>
+                  <input type="date" className="form-input" value={data.payDate || todayStr()} onChange={e => set('payDate', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Currency *</label>
+                  <select className="form-input" value={data.currency || 'ZMW'} onChange={e => set('currency', e.target.value)}>
+                    <option value="ZMW">ZMW (Kwacha)</option>
+                    <option value="USD">USD (Dollar)</option>
+                  </select>
+                </div>
+              </div>
+
+              {data.currency === 'ZMW' && (
+                <div className="form-group">
+                  <label className="form-label">Exchange Rate (ZMW per USD)</label>
+                  <input type="number" step="0.01" className="form-input" value={data.exchangeRate || ''} onChange={e => set('exchangeRate', e.target.value)} placeholder="e.g. 27.50" />
+                </div>
+              )}
+
+              <div style={{ display:'flex', gap:8, marginBottom:16 }}>
+                <button type="button" onClick={autoCalc} disabled={!selectedTeam} className="btn-sm btn-blue" style={{ flex:1, justifyContent:'center', padding:'10px' }}>
+                  <i className="fas fa-calculator"></i> Auto-Calculate from Contract
+                </button>
+              </div>
+
+              {/* Earnings */}
+              <div style={{ marginBottom:16 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                  <label className="form-label" style={{ margin:0 }}>Earnings</label>
+                  <button type="button" onClick={() => addItem('earnings')} className="btn-sm btn-add" style={{ padding:'3px 10px' }}><i className="fas fa-plus"></i> Add</button>
+                </div>
+                {(data.earnings || []).map((e, i) => (
+                  <div key={i} style={{ display:'flex', gap:6, marginBottom:6 }}>
+                    <input className="form-input" placeholder="Label" value={e.label} onChange={ev => updateList('earnings', i, 'label', ev.target.value)} style={{ flex:2, fontSize:12, padding:'8px 10px' }} />
+                    <input type="number" step="0.01" className="form-input" placeholder="0.00" value={e.amount} onChange={ev => updateList('earnings', i, 'amount', ev.target.value)} style={{ flex:1, fontSize:12, padding:'8px 10px' }} />
+                    <button type="button" onClick={() => removeItem('earnings', i)} className="btn-sm btn-del" style={{ padding:'0 10px' }}><i className="fas fa-times"></i></button>
+                  </div>
+                ))}
+                {(data.earnings || []).length === 0 && <div style={{ fontSize:11.5, color:'#999', fontStyle:'italic', padding:'4px 0' }}>Click Auto-Calculate or add manually</div>}
+              </div>
+
+              {/* Deductions */}
+              <div style={{ marginBottom:16 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                  <label className="form-label" style={{ margin:0 }}>Deductions</label>
+                  <button type="button" onClick={() => addItem('deductions')} className="btn-sm btn-add" style={{ padding:'3px 10px' }}><i className="fas fa-plus"></i> Add</button>
+                </div>
+                {(data.deductions || []).map((d, i) => (
+                  <div key={i} style={{ display:'flex', gap:6, marginBottom:6 }}>
+                    <input className="form-input" placeholder="Label" value={d.label} onChange={ev => updateList('deductions', i, 'label', ev.target.value)} style={{ flex:2, fontSize:12, padding:'8px 10px' }} />
+                    <input type="number" step="0.01" className="form-input" placeholder="0.00" value={d.amount} onChange={ev => updateList('deductions', i, 'amount', ev.target.value)} style={{ flex:1, fontSize:12, padding:'8px 10px' }} />
+                    <button type="button" onClick={() => removeItem('deductions', i)} className="btn-sm btn-del" style={{ padding:'0 10px' }}><i className="fas fa-times"></i></button>
+                  </div>
+                ))}
+                {(data.deductions || []).length === 0 && <div style={{ fontSize:11.5, color:'#999', fontStyle:'italic', padding:'4px 0' }}>No deductions</div>}
+              </div>
+
+              {/* Employer contributions */}
+              <div style={{ marginBottom:16 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                  <label className="form-label" style={{ margin:0 }}>Employer Contributions</label>
+                  <button type="button" onClick={() => addItem('employerContributions')} className="btn-sm btn-add" style={{ padding:'3px 10px' }}><i className="fas fa-plus"></i> Add</button>
+                </div>
+                {(data.employerContributions || []).map((c, i) => (
+                  <div key={i} style={{ display:'flex', gap:6, marginBottom:6 }}>
+                    <input className="form-input" placeholder="Label" value={c.label} onChange={ev => updateList('employerContributions', i, 'label', ev.target.value)} style={{ flex:2, fontSize:12, padding:'8px 10px' }} />
+                    <input type="number" step="0.01" className="form-input" placeholder="0.00" value={c.amount} onChange={ev => updateList('employerContributions', i, 'amount', ev.target.value)} style={{ flex:1, fontSize:12, padding:'8px 10px' }} />
+                    <button type="button" onClick={() => removeItem('employerContributions', i)} className="btn-sm btn-del" style={{ padding:'0 10px' }}><i className="fas fa-times"></i></button>
+                  </div>
+                ))}
+                {(data.employerContributions || []).length === 0 && <div style={{ fontSize:11.5, color:'#999', fontStyle:'italic', padding:'4px 0' }}>Optional</div>}
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Status</label>
+                  <select className="form-input" value={data.status || 'Draft'} onChange={e => set('status', e.target.value)}>
+                    <option value="Draft">Draft</option>
+                    <option value="Paid">Paid</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Prepared By</label>
+                  <input className="form-input" value={data.preparedBy || ''} onChange={e => set('preparedBy', e.target.value)} placeholder="e.g. Carol Kambole" />
+                </div>
+              </div>
+
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', background:'#F0F7F2', borderRadius:8, padding:'12px 16px', marginTop:8 }}>
+                <span style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', color:'#1E7B3C', letterSpacing:'0.05em' }}>Net Pay</span>
+                <span style={{ fontFamily:'Consolas, monospace', fontSize:18, fontWeight:800, color:'#1E7B3C' }}>{sym}{fmtNum(netPay)}</span>
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN: live preview */}
+            <div>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+                <span className="form-label" style={{ margin:0 }}>Live Preview</span>
+                <button type="button" onClick={() => setShowPreview(v => !v)} className="btn-sm btn-gray" style={{ padding:'3px 10px' }}>
+                  <i className={`fas ${showPreview ? 'fa-eye-slash' : 'fa-eye'}`}></i> {showPreview ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              {showPreview && (
+                <div style={{ maxHeight:'70vh', overflow:'auto', border:'1px dashed #CBD5E1', borderRadius:8, padding:10, background:'#F8FAFC' }}>
+                  <PayslipDocument payslip={previewPayslip} team={selectedTeam} renderId="payslip-live-preview" />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={{ display:'flex', gap:10, marginTop:24, flexWrap:'wrap' }}>
+            <button type="submit" disabled={saving} className="btn-primary" style={{ flex:1, justifyContent:'center', minWidth:160 }}>
+              {saving ? <><i className="fas fa-circle-notch fa-spin"></i> Saving...</> : <><i className="fas fa-save"></i> {modal.mode === 'add' ? 'Save Payslip' : 'Update Payslip'}</>}
+            </button>
+            <button type="button" onClick={() => onDownload(previewPayslip, selectedTeam, 'payslip-live-preview')} className="btn-sm btn-blue" style={{ padding:'12px 20px', fontSize:13 }}>
+              <i className="fas fa-download"></i> Download PDF
+            </button>
+            <button type="button" onClick={onClose} style={{ padding:'12px 20px', background:'#fff', border:'1px solid #ccc', borderRadius:9, fontWeight:600, cursor:'pointer' }}>Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAYSLIP VIEW MODAL (read-only + download)
+   ═══════════════════════════════════════════════════════════════════ */
+function PayslipViewModal({ payslip, team, onClose, onDownload }) {
+  return (
+    <div className="modal-form-overlay" onClick={onClose}>
+      <div className="modal-form wide" onClick={e => e.stopPropagation()} style={{ padding:24 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+          <h3 style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:20, color:'#0A1F12' }}>Payslip Preview</h3>
+          <div style={{ display:'flex', gap:8 }}>
+            <button onClick={() => onDownload(payslip, team, 'payslip-view-render')} className="btn-sm btn-blue" style={{ padding:'9px 16px', fontSize:13 }}>
+              <i className="fas fa-download"></i> Download PDF
+            </button>
+            <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'#666', fontSize:18 }}><i className="fas fa-times"></i></button>
+          </div>
+        </div>
+        <div style={{ maxHeight:'80vh', overflow:'auto', background:'#F8FAFC', borderRadius:8, padding:16 }}>
+          <PayslipDocument payslip={payslip} team={team} renderId="payslip-view-render" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── APP (PUBLIC) ─── */
 function App() {
   const [view, setView] = useState('public');
   const [selectedItem, setSelectedItem] = useState(null);
@@ -382,8 +839,6 @@ function App() {
 
   return (
     <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', width:'100%' }}>
-      
-      {/* HEADER */}
       <header className="site-header">
         <div className="header-content">
           <div style={{ display:'flex', alignItems:'center', gap:12, minWidth:0 }}>
@@ -402,8 +857,6 @@ function App() {
             </button>
           </div>
         </div>
-
-        {/* MOBILE DROPDOWN MENU */}
         {mobileMenuOpen && (
           <div className="mobile-menu-dropdown">
             <a href="#home" onClick={() => setMobileMenuOpen(false)}><i className="fas fa-home" style={{width:16}}></i> Home</a>
@@ -514,26 +967,20 @@ function App() {
                   <div><div className="dt">ENGAGEMENT LETTER</div><div className="mt">{new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}<br/>Ref: SE-FIN-{new Date().getFullYear()}-{Math.floor(Math.random()*9000)+1000}</div></div>
                 </div>
                 <div style={{ position:'relative', zIndex:1 }}>
-                  
-                  {/* Formal Letter Header */}
                   <div style={{ marginBottom: 24, paddingBottom: 16, borderBottom: '1px dashed #eee' }}>
                     <p style={{ margin: '0 0 8px', fontSize: 13.5, color: '#666' }}><strong>To:</strong></p>
                     <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700, color: '#0A1F12' }}>{form.name || '[Client Name]'}</p>
                     <p style={{ margin: '0 0 4px', fontSize: 13, color: '#555' }}>{form.business || '[Business Name]'}</p>
                     <p style={{ margin: '0', fontSize: 13, color: '#555' }}>{form.email || '[Client Email]'}</p>
                   </div>
-
                   <p style={{ marginBottom: 20, fontSize: 14 }}>Dear <strong>{form.name || '[Client Name]'}</strong>,</p>
-                  
                   <p>Thank you for choosing StartEasy Zambia. We are pleased to submit this formal Engagement Letter and Agreement for your consideration.</p>
                   <p>This document outlines the scope of services, compensation, and terms under which we will provide the <strong>{selectedItem.title}</strong> service to you and your business.</p>
-
                   <h4 style={{ marginTop: 32 }}>1. Scope of Service</h4>
                   <p>The Company hereby agrees to provide the following financial support service: <strong>{selectedItem.title}</strong>.</p>
                   <p>{selectedItem.desc || "Dedicated execution of the requested financial task."}</p>
                   <p><strong>Specifically, the Company will deliver:</strong></p>
                   <ul>{selectedItem.features.map((f,i) => <li key={i}>{f}</li>)}</ul>
-                  
                   <h4>2. Compensation</h4>
                   <p>In consideration of the services rendered, the Client shall pay the Company the following fee:</p>
                   <div className="feebox">
@@ -543,7 +990,6 @@ function App() {
                     <div className="total"><span className="tl">Due on acceptance</span><span className="tv">{fees.commencement}</span></div>
                   </div>
                   <p style={{ fontSize:11.5, color:'#666', fontStyle:'italic', marginTop:8 }}>All amounts are StartEasy service fees for work only. They are separate from and do not include any government or regulator fee.</p>
-                  
                   <h4>3. Terms and Conditions</h4>
                   <ul>
                     <li><strong>No Employment Relationship:</strong> This Agreement does not create an employer-employee relationship. The Company operates as an independent contractor.</li>
@@ -552,10 +998,8 @@ function App() {
                     <li><strong>Payment Terms:</strong> The commencement fee (50%) is due upon acceptance to initiate work. The balance (50%) is due upon delivery of the agreed deliverables.</li>
                     <li><strong>Termination:</strong> Either party may terminate this agreement with 30 days written notice.</li>
                   </ul>
-
                   <h4>4. Acceptance and Signature</h4>
                   <p>By signing below, the Client acknowledges that they have read, understood, and agree to be bound by the terms of this Agreement. Please complete your details in the box below to execute.</p>
-                  
                   <div className="sign">
                     <div><div className="sigval" style={{ color:'#1B6CA8' }}>{SIGNATORY_NAME}</div><div className="lbl">{SIGNATORY_TITLE}</div></div>
                     <div><div className="sigval" style={{ color:'#E8730F' }}>{form.name || '_________________________'}</div><div className="lbl">For the Client</div></div>
@@ -566,7 +1010,6 @@ function App() {
               {flowStep==='draft' ? (
                 <div style={{ marginTop:24, background:'#fff', padding:24, borderRadius:12, border:'1px solid #eee' }}>
                   <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 16, color: '#0A1F12' }}>Sign & Execute</h3>
-                  
                   <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom: 16 }}>
                     <div><label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: '#666', marginBottom: 4, display: 'block' }}>Full Name *</label><input className="form-input" value={form.name} onChange={e => setForm({...form, name:e.target.value})} placeholder="Your full name" /></div>
                     <div><label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: '#666', marginBottom: 4, display: 'block' }}>Email Address *</label><input className="form-input" type="email" value={form.email} onChange={e => setForm({...form, email:e.target.value})} placeholder="you@company.com" /></div>
@@ -575,7 +1018,6 @@ function App() {
                     <div><label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: '#666', marginBottom: 4, display: 'block' }}>Business Name</label><input className="form-input" value={form.business} onChange={e => setForm({...form, business:e.target.value})} placeholder="If applicable" /></div>
                     <div><label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: '#666', marginBottom: 4, display: 'block' }}>Phone Number</label><input className="form-input" value={form.phone} onChange={e => setForm({...form, phone:e.target.value})} placeholder="+260..." /></div>
                   </div>
-
                   <label style={{ display:'flex', gap:12, alignItems:'flex-start', fontSize:13, color:'rgba(10,31,18,.85)', cursor:'pointer', lineHeight:1.6 }}>
                     <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ width:20, height:20, accentColor:'#E8730F', flexShrink:0, marginTop:2 }} />
                     <span>I have read, understood, and agree to the terms of this engagement letter. I confirm that I am authorized to sign on behalf of my business.</span>
@@ -620,7 +1062,7 @@ function App() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   FORM MODAL
+   FORM MODAL (existing + NEW team type)
    ═══════════════════════════════════════════════════════════════════ */
 function FormModal({ modal, onClose, onSave, saving, error, clients }) {
   const [data, setData] = useState(modal.data);
@@ -794,16 +1236,71 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
         </>
       );
     }
+    if (modal.type === 'team') {
+      return (
+        <>
+          <div className="form-group">
+            <label className="form-label">Full Name *</label>
+            <input type="text" className="form-input" value={data.name || ''} onChange={e => set('name', e.target.value)} required placeholder="e.g. Carol Kambole" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Position / Title *</label>
+            <input type="text" className="form-input" value={data.position || ''} onChange={e => set('position', e.target.value)} required placeholder="e.g. Co-founder & Director of Finance" />
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input type="email" className="form-input" value={data.email || ''} onChange={e => set('email', e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Phone</label>
+              <input type="text" className="form-input" value={data.phone || ''} onChange={e => set('phone', e.target.value)} />
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Net Monthly (USD) *</label>
+              <input type="number" step="0.01" min="0" className="form-input" value={data.netMonthlyUSD ?? ''} onChange={e => set('netMonthlyUSD', e.target.value)} required placeholder="e.g. 1725" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Employee ID</label>
+              <input type="text" className="form-input" value={data.employeeId || ''} onChange={e => set('employeeId', e.target.value)} placeholder="e.g. SE-EMP-001" />
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Equity %</label>
+              <input type="text" className="form-input" value={data.equity || ''} onChange={e => set('equity', e.target.value)} placeholder="e.g. 6%" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Status</label>
+              <select className="form-input" value={data.status || 'Active'} onChange={e => set('status', e.target.value)}>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Payment Notes</label>
+            <input type="text" className="form-input" value={data.paymentNotes || ''} onChange={e => set('paymentNotes', e.target.value)} placeholder="e.g. Bank transfer to SCB acct" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Contract Reference</label>
+            <input type="text" className="form-input" value={data.contractRef || ''} onChange={e => set('contractRef', e.target.value)} placeholder="e.g. MONTHLY PAYMENT AGREEMENT" />
+          </div>
+        </>
+      );
+    }
     return null;
   };
 
-  const titleMap = { ledger:'Ledger Entry', invoice:'Invoice', client:'Client', payment:'Payment' };
+  const titleMap = { ledger:'Ledger Entry', invoice:'Invoice', client:'Client', payment:'Payment', team:'Team Member' };
 
   return (
     <div className="modal-form-overlay" onClick={onClose}>
       <div className="modal-form" onClick={e => e.stopPropagation()}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20 }}>
-          <h3>{modal.mode === 'add' ? 'Add' : 'Edit'} {titleMap[modal.type]}</h3>
+          <h3 style={{ fontFamily:"'Playfair Display',serif", margin:0 }}>{modal.mode === 'add' ? 'Add' : 'Edit'} {titleMap[modal.type]}</h3>
           <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'#666', fontSize:18 }}><i className="fas fa-times"></i></button>
         </div>
         {error && <div style={{ background:'#FFE8E5', color:'#B8564F', padding:12, borderRadius:8, fontSize:13, marginBottom:16, fontWeight:600 }}>{error}</div>}
@@ -822,7 +1319,7 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   ADMIN PORTAL
+   ADMIN PORTAL — with Team & Payslips
    ═══════════════════════════════════════════════════════════════════ */
 function AdminPortal({ onExit }) {
   const [user, setUser] = useState(null);
@@ -836,6 +1333,8 @@ function AdminPortal({ onExit }) {
   const [ledger, setLedger] = useState([]);
   const [clients, setClients] = useState([]);
   const [invoices, setInvoices] = useState([]);
+  const [team, setTeam] = useState([]);
+  const [payslips, setPayslips] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -843,12 +1342,14 @@ function AdminPortal({ onExit }) {
   const [statementTab, setStatementTab] = useState('income');
   const [period, setPeriod] = useState('all');
   const [modal, setModal] = useState(null);
+  const [payslipModal, setPayslipModal] = useState(null);
+  const [viewingPayslip, setViewingPayslip] = useState(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [isExporting, setIsExporting] = useState(false);
 
-  // TOASTS STATE
+  /* toasts */
   const [toasts, setToasts] = useState([]);
   const showToast = (message, type = 'success') => {
     const id = Date.now();
@@ -856,16 +1357,13 @@ function AdminPortal({ onExit }) {
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
   };
 
-  // LOCK BODY SCROLL WHEN MODAL IS OPEN
+  /* body scroll lock */
   useEffect(() => {
-    if (modal) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    document.body.style.overflow = (modal || payslipModal || viewingPayslip) ? 'hidden' : 'unset';
     return () => { document.body.style.overflow = 'unset'; };
-  }, [modal]);
+  }, [modal, payslipModal, viewingPayslip]);
 
+  /* auth */
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(async (u) => {
       if (u) {
@@ -883,6 +1381,7 @@ function AdminPortal({ onExit }) {
     return unsub;
   }, []);
 
+  /* data listeners */
   useEffect(() => {
     if (!isAdmin) return;
     const unsubPayments = db.collection('se_payments').orderBy('submittedAt','desc').limit(100).onSnapshot(snap => {
@@ -910,8 +1409,16 @@ function AdminPortal({ onExit }) {
       setInvoices(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     }, err => console.error(err));
 
+    const unsubTeam = db.collection('se_team').onSnapshot(snap => {
+      setTeam(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, err => console.error(err));
+
+    const unsubPayslips = db.collection('se_payslips').orderBy('createdAt','desc').onSnapshot(snap => {
+      setPayslips(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, err => console.error(err));
+
     setLoadingData(false);
-    return () => { unsubPayments(); unsubLedger(); unsubClients(); unsubInvoices(); };
+    return () => { unsubPayments(); unsubLedger(); unsubClients(); unsubInvoices(); unsubTeam(); unsubPayslips(); };
   }, [isAdmin]);
 
   const handleLogin = async (e) => {
@@ -921,12 +1428,11 @@ function AdminPortal({ onExit }) {
   };
   const handleLogout = () => auth.signOut();
 
-  // ─── DIRECT PDF DOWNLOAD (html2pdf) ───
+  /* ─── PDF: Statements (unchanged) ─── */
   const downloadPDF = () => {
     const element = document.getElementById('print-area');
     if (!element) return;
     showToast('Generating PDF...', 'info');
-
     const opt = {
       margin:       0.5,
       filename:     `StartEasy_Statement_${todayStr()}.pdf`,
@@ -934,22 +1440,38 @@ function AdminPortal({ onExit }) {
       html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
       jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
-    
     window.html2pdf().set(opt).from(element).save().then(() => {
       showToast('PDF Downloaded successfully!', 'success');
     });
   };
 
-  // ─── IMPROVED CSV EXPORT ───
+  /* ─── PDF: Payslip ─── */
+  const downloadPayslipPDF = (payslip, teamMember, renderId) => {
+    const element = document.getElementById(renderId || 'payslip-view-render');
+    if (!element) { showToast('Payslip not ready. Try again.', 'error'); return; }
+    const empName = (teamMember?.name || payslip?.employeeName || 'Employee').replace(/\s+/g,'_');
+    const periodLabel = (payslip?.periodLabel || 'Period').replace(/\s+/g,'_');
+    showToast('Generating payslip PDF...', 'info');
+    window.html2pdf().set({
+      margin:       0.3,
+      filename:     `Payslip_${empName}_${periodLabel}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
+      jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+    }).from(element).save().then(() => {
+      showToast('Payslip downloaded successfully!', 'success');
+    }).catch(() => {
+      showToast('Failed to generate payslip PDF.', 'error');
+    });
+  };
+
+  /* CSV export (unchanged) */
   const exportToCSV = (data, filename, headers) => {
     if (!data || !data.length) return showToast("No data to export.", "error");
-    
     setIsExporting(true);
     setTimeout(() => {
       try {
-        const csvRows = [];
-        csvRows.push(headers.join(','));
-        
+        const csvRows = [headers.join(',')];
         for (const row of data) {
           const values = headers.map(header => {
             let val = row[header];
@@ -958,31 +1480,17 @@ function AdminPortal({ onExit }) {
           });
           csvRows.push(values.join(','));
         }
-        
-        const csvString = csvRows.join('\n');
-        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-        
-        if (navigator.msSaveBlob) {
-          navigator.msSaveBlob(blob, `${filename}_${todayStr()}.csv`);
-        } else {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${filename}_${todayStr()}.csv`;
-          a.style.display = 'none';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }
-        
+        const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = `${filename}_${todayStr()}.csv`; a.style.display = 'none';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
         showToast(`${filename} exported successfully!`, 'success');
       } catch (err) {
         showToast("Failed to export CSV.", "error");
-      } finally {
-        setIsExporting(false);
-      }
-    }, 500);
+      } finally { setIsExporting(false); }
+    }, 400);
   };
 
   const filterByPeriod = (items, dateField = 'date') => {
@@ -1005,31 +1513,27 @@ function AdminPortal({ onExit }) {
   const applySearch = (items) => {
     if (!searchTerm) return items;
     const lowerSearch = searchTerm.toLowerCase();
-    return items.filter(item => {
-      return Object.values(item).some(val => 
-        String(val || '').toLowerCase().includes(lowerSearch)
-      );
-    });
+    return items.filter(item => Object.values(item).some(val => String(val || '').toLowerCase().includes(lowerSearch)));
   };
 
   const isPackagePayment = (title) => {
-      if (!title) return false;
-      const t = title.toLowerCase();
-      return t.includes('financial starter') || t.includes('business control') || t.includes('growth & financial planning');
+    if (!title) return false;
+    const t = title.toLowerCase();
+    return t.includes('financial starter') || t.includes('business control') || t.includes('growth & financial planning');
   };
 
   const periodLedger = useMemo(() => filterByPeriod(ledger, 'date'), [ledger, period]);
   const periodInvoices = useMemo(() => filterByPeriod(invoices, 'issueDate'), [invoices, period]);
   const periodPayments = useMemo(() => filterByPeriod(payments, 'submittedAt'), [payments, period]);
-
   const filteredLedger = useMemo(() => applySearch(periodLedger), [periodLedger, searchTerm]);
   const filteredInvoices = useMemo(() => applySearch(periodInvoices), [periodInvoices, searchTerm]);
   const filteredPayments = useMemo(() => applySearch(periodPayments), [periodPayments, searchTerm]);
   const filteredClients = useMemo(() => applySearch(clients), [clients, searchTerm]);
-  
+  const filteredTeam = useMemo(() => applySearch(team), [team, searchTerm]);
+  const filteredPayslips = useMemo(() => applySearch(payslips), [payslips, searchTerm]);
   const periodLabel = PERIOD_LABELS[period];
 
-  // Calculations strictly use Period Data
+  /* financial calculations */
   const calc = useMemo(() => {
     const income = periodLedger.filter(l => l.type === 'Income');
     const expense = periodLedger.filter(l => l.type === 'Expense');
@@ -1059,10 +1563,8 @@ function AdminPortal({ onExit }) {
     const approvedPmts = periodPayments.filter(p => p.status === 'approved');
     const finPmts = approvedPmts.filter(p => isPackagePayment(p.serviceTitle));
     const dirPmts = approvedPmts.filter(p => !isPackagePayment(p.serviceTitle));
-    
     const finCollected = finPmts.reduce((s, p) => s + num(p.amount) / 2, 0);
     const dirCollected = dirPmts.reduce((s, p) => s + num(p.amount), 0);
-    
     const commencementCollected = finCollected + dirCollected;
     const totalRevenue = totalIncome + commencementCollected;
 
@@ -1097,7 +1599,7 @@ function AdminPortal({ onExit }) {
     if (!due) return 'Pending';
     return due < new Date() ? 'Overdue' : 'Pending';
   };
-  
+
   const nextInvoiceNo = (list) => {
     const year = new Date().getFullYear();
     const maxNum = list.filter(i => (i.invoiceNo || '').startsWith(`INV-${year}-`))
@@ -1112,15 +1614,81 @@ function AdminPortal({ onExit }) {
     if (type === 'invoice') data = { invoiceNo: nextInvoiceNo(invoices), client: '', description: '', issueDate: today, dueDate: addDays(today, 30), amount: '', status: 'Pending' };
     if (type === 'client') data = { name: '', email: '', phone: '', package: 'Business Control', status: 'Active' };
     if (type === 'payment') data = { clientName: '', clientEmail: '', phone: '', serviceTitle: '', amount: '', status: 'under_review' };
+    if (type === 'team') data = { name: '', position: '', email: '', phone: '', netMonthlyUSD: '', employeeId: '', equity: '', status: 'Active', paymentNotes: '', contractRef: '' };
     setModal({ type, mode: 'add', data });
     setFormError('');
   };
-  const openEdit = (type, data) => {
-    setModal({ type, mode: 'edit', data: { ...data } });
-    setFormError('');
-  };
+  const openEdit = (type, data) => { setModal({ type, mode: 'edit', data: { ...data } }); setFormError(''); };
   const closeModal = () => { setModal(null); setFormError(''); };
 
+  /* open payslip generator */
+  const openPayslipGenerator = (existing) => {
+    const now = new Date();
+    if (existing) {
+      setPayslipModal({ mode: 'edit', data: { ...existing } });
+    } else {
+      const firstTeam = team[0];
+      setPayslipModal({
+        mode: 'add',
+        data: {
+          employeeId: firstTeam?.id || '',
+          periodMonth: now.getMonth(),
+          periodYear: now.getFullYear(),
+          payDate: todayStr(),
+          currency: 'ZMW',
+          exchangeRate: 27.5,
+          earnings: [],
+          deductions: [],
+          employerContributions: [],
+          status: 'Draft',
+          preparedBy: 'Carol Kambole',
+          preparedByTitle: 'Co-founder & Director of Finance & Administration'
+        }
+      });
+    }
+    setFormError('');
+  };
+  const closePayslipModal = () => { setPayslipModal(null); setFormError(''); };
+
+  /* save payslip */
+  const savePayslip = async (data) => {
+    setFormError(''); setSaving(true);
+    try {
+      if (!data.employeeId) throw new Error('Please select an employee.');
+      const teamMember = team.find(t => t.id === data.employeeId);
+      const totalEarnings = (data.earnings || []).reduce((s, e) => s + num(e.amount), 0);
+      if (totalEarnings <= 0) throw new Error('Earnings must be greater than zero. Try Auto-Calculate.');
+
+      const payload = {
+        ...data,
+        employeeName: teamMember?.name || '',
+        position: teamMember?.position || '',
+        employeeId: teamMember?.employeeId || '',
+        email: teamMember?.email || '',
+        periodLabel: `${MONTHS[data.periodMonth]} ${data.periodYear}`,
+        gross: totalEarnings,
+        totalDeductions: (data.deductions || []).reduce((s, d) => s + num(d.amount), 0),
+        netPay: data.netPay,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      if (payslipModal.mode === 'add') {
+        await db.collection('se_payslips').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        showToast('Payslip saved.', 'success');
+      } else {
+        await db.collection('se_payslips').doc(data.id).update(payload);
+        showToast('Payslip updated.', 'success');
+      }
+      closePayslipModal();
+    } catch (err) {
+      setFormError(err.message);
+      showToast('Failed to save payslip.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /* save other records */
   const saveEntry = async (data) => {
     setFormError(''); setSaving(true);
     try {
@@ -1128,42 +1696,38 @@ function AdminPortal({ onExit }) {
         if (!data.desc?.trim()) throw new Error('Description is required');
         if (!data.amount || num(data.amount) <= 0) throw new Error('Amount must be greater than zero');
         const payload = { ...data, amount: num(data.amount) };
-        if (modal.mode === 'add') {
-          await db.collection('se_ledger').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        } else {
-          await db.collection('se_ledger').doc(data.id).update(payload);
-        }
+        if (modal.mode === 'add') await db.collection('se_ledger').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        else await db.collection('se_ledger').doc(data.id).update(payload);
       }
       if (modal.type === 'invoice') {
         if (!data.client?.trim()) throw new Error('Client name is required');
         if (!data.amount || num(data.amount) <= 0) throw new Error('Amount must be greater than zero');
         if (!data.issueDate || !data.dueDate) throw new Error('Issue and due date are required');
         const payload = { ...data, amount: num(data.amount) };
-        if (modal.mode === 'add') {
-          await db.collection('se_invoices').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        } else {
-          await db.collection('se_invoices').doc(data.id).update(payload);
-        }
+        if (modal.mode === 'add') await db.collection('se_invoices').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        else await db.collection('se_invoices').doc(data.id).update(payload);
       }
       if (modal.type === 'client') {
         if (!data.name?.trim()) throw new Error('Name is required');
         if (!data.email?.trim()) throw new Error('Email is required');
-        if (modal.mode === 'add') {
-          await db.collection('se_clients').add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        } else {
-          await db.collection('se_clients').doc(data.id).update(data);
-        }
+        if (modal.mode === 'add') await db.collection('se_clients').add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        else await db.collection('se_clients').doc(data.id).update(data);
       }
       if (modal.type === 'payment') {
         if (!data.clientName?.trim()) throw new Error('Client name is required');
         if (!data.clientEmail?.trim()) throw new Error('Client email is required');
         if (!data.serviceTitle) throw new Error('Service package is required');
         if (!data.amount) throw new Error('Amount is required');
-        if (modal.mode === 'add') {
-          await db.collection('se_payments').add({ ...data, submittedAt: firebase.firestore.FieldValue.serverTimestamp() });
-        } else {
-          await db.collection('se_payments').doc(data.id).update(data);
-        }
+        if (modal.mode === 'add') await db.collection('se_payments').add({ ...data, submittedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        else await db.collection('se_payments').doc(data.id).update(data);
+      }
+      if (modal.type === 'team') {
+        if (!data.name?.trim()) throw new Error('Name is required');
+        if (!data.position?.trim()) throw new Error('Position is required');
+        if (data.netMonthlyUSD === '' || num(data.netMonthlyUSD) < 0) throw new Error('Net monthly salary is required');
+        const payload = { ...data, netMonthlyUSD: num(data.netMonthlyUSD) };
+        if (modal.mode === 'add') await db.collection('se_team').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        else await db.collection('se_team').doc(data.id).update(payload);
       }
       showToast('Record saved successfully.', 'success');
       closeModal();
@@ -1177,72 +1741,59 @@ function AdminPortal({ onExit }) {
 
   const handleDelete = async (collection, id) => {
     if (!window.confirm('Delete this record permanently? This cannot be undone.')) return;
-    try { 
-      await db.collection(collection).doc(id).delete(); 
-      showToast('Record deleted.', 'info');
-    }
+    try { await db.collection(collection).doc(id).delete(); showToast('Record deleted.', 'info'); }
     catch (err) { showToast('Failed to delete: ' + err.message, 'error'); }
   };
 
-  // ─── VERIFY PAYMENT & CONNECT TO ACCOUNTING ───
   const handleVerifyPayment = async (payment) => {
     if (!window.confirm('Verify this payment and add client to active portfolio?')) return;
     try {
-      await db.collection('se_payments').doc(payment.id).update({
-        status: 'approved',
-        verifiedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
+      await db.collection('se_payments').doc(payment.id).update({ status: 'approved', verifiedAt: firebase.firestore.FieldValue.serverTimestamp() });
       const exists = clients.find(c => (c.email || '').toLowerCase() === (payment.clientEmail || '').toLowerCase());
       if (!exists) {
         await db.collection('se_clients').add({
-          name: payment.clientName || 'Unknown',
-          email: payment.clientEmail || '',
-          phone: payment.phone || '',
-          package: payment.serviceTitle || '',
-          status: 'Active',
+          name: payment.clientName || 'Unknown', email: payment.clientEmail || '',
+          phone: payment.phone || '', package: payment.serviceTitle || '', status: 'Active',
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
       }
-
       const isPkg = isPackagePayment(payment.serviceTitle);
       const expectedAmt = isPkg ? num(payment.amount) / 2 : num(payment.amount);
-
-      // AUTO-LEDGER ENTRY
       await db.collection('se_ledger').add({
-        date: todayStr(),
-        type: 'Income',
+        date: todayStr(), type: 'Income',
         category: isPkg ? 'Commencement Fees' : 'Service Fees',
         desc: `${isPkg ? 'Financial' : 'Direct'} Payment: ${payment.serviceTitle} — ${payment.clientName}`,
-        amount: expectedAmt,
-        reference: payment.ref || payment.id,
+        amount: expectedAmt, reference: payment.ref || payment.id,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-
-      // AUTO-GENERATE INVOICE
       await db.collection('se_invoices').add({
         invoiceNo: `INV-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
         client: payment.clientName || 'Unknown',
         description: `${payment.serviceTitle || 'Package'}`,
-        issueDate: todayStr(),
-        dueDate: addDays(todayStr(), 30),
-        amount: expectedAmt,
-        status: 'Paid',
+        issueDate: todayStr(), dueDate: addDays(todayStr(), 30),
+        amount: expectedAmt, status: 'Paid',
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-
       showToast('Payment verified, ledger updated, invoice generated.', 'success');
-    } catch (err) { 
-      showToast('Failed to verify: ' + err.message, 'error'); 
-    }
+    } catch (err) { showToast('Failed to verify: ' + err.message, 'error'); }
   };
 
   const handleMarkInvoicePaid = async (inv) => {
-    try { 
-      await db.collection('se_invoices').doc(inv.id).update({ status: 'Paid' }); 
-      showToast('Invoice marked as Paid.', 'success');
-    }
+    try { await db.collection('se_invoices').doc(inv.id).update({ status: 'Paid' }); showToast('Invoice marked as Paid.', 'success'); }
     catch (err) { showToast('Failed: ' + err.message, 'error'); }
+  };
+
+  /* seed default team */
+  const handleSeedTeam = async () => {
+    if (!window.confirm('Add the two signed team members (Mwaba Lewis & Carol Kambole) to the team directory?')) return;
+    try {
+      const existingEmails = new Set(team.map(t => (t.name || '').toLowerCase()));
+      for (const m of DEFAULT_TEAM) {
+        if (existingEmails.has(m.name.toLowerCase())) continue;
+        await db.collection('se_team').add({ ...m, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      }
+      showToast('Default team seeded.', 'success');
+    } catch (err) { showToast('Failed to seed team: ' + err.message, 'error'); }
   };
 
   if (authLoading) {
@@ -1274,7 +1825,6 @@ function AdminPortal({ onExit }) {
   return (
     <>
       <div className="admin-layout fadein">
-        {/* TOASTS */}
         <div className="toast-container">
           {toasts.map(t => (
             <div key={t.id} className={`toast ${t.type}`}>
@@ -1327,6 +1877,15 @@ function AdminPortal({ onExit }) {
             <div className={`admin-nav-item ${activeTab==='ledger'?'active':''}`} onClick={() => { setActiveTab('ledger'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-book"></i> Company Ledger</div>
             <div className={`admin-nav-item ${activeTab==='invoices'?'active':''}`} onClick={() => { setActiveTab('invoices'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-file-invoice"></i> Invoicing</div>
             <div className={`admin-nav-item ${activeTab==='statements'?'active':''}`} onClick={() => { setActiveTab('statements'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-file-signature"></i> Financial Statements</div>
+
+            {/* ── NEW: TEAM & PAYROLL ── */}
+            <div className="admin-nav-section" style={{ color:'#1B6CA8' }}>Team & Payroll</div>
+            <div className={`admin-nav-item ${activeTab==='team'?'active':''}`} onClick={() => { setActiveTab('team'); setIsDrawerOpen(false); setSearchTerm(''); }}>
+              <i className="fas fa-user-tie"></i> Team Members
+            </div>
+            <div className={`admin-nav-item ${activeTab==='payslips'?'active':''}`} onClick={() => { setActiveTab('payslips'); setIsDrawerOpen(false); setSearchTerm(''); }}>
+              <i className="fas fa-file-invoice-dollar"></i> Payslips
+            </div>
           </nav>
 
           <div style={{ padding:24, borderTop:'1px solid rgba(255,255,255,0.1)' }}>
@@ -1337,9 +1896,8 @@ function AdminPortal({ onExit }) {
         </aside>
 
         <main className="admin-content">
-          
-          {/* GLOBAL FILTER & SEARCH BAR */}
-          {activeTab !== 'statements' && (
+          {/* Search + Period bar */}
+          {activeTab !== 'statements' && activeTab !== 'team' && activeTab !== 'payslips' && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
               <div className="filter-tabs" style={{ marginBottom: 0 }}>
                 <span style={{ fontSize:11, fontWeight:800, color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em', marginRight:8 }}>Period:</span>
@@ -1347,37 +1905,31 @@ function AdminPortal({ onExit }) {
                   <button key={k} className={`filter-tab ${period===k?'active':''}`} onClick={() => setPeriod(k)}>{label}</button>
                 ))}
               </div>
-              
               <div style={{ width: '100%', maxWidth: 350 }}>
                 <div style={{ position: 'relative', width: '100%' }}>
                   <i className="fas fa-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }}></i>
-                  <input 
-                    type="text" 
-                    placeholder="Search all records (name, amount, date)..." 
-                    className="form-input" 
-                    style={{ paddingLeft: 36, paddingRight: searchTerm ? 36 : 12, borderRadius: 20 }}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  {searchTerm && (
-                    <i 
-                      className="fas fa-times" 
-                      style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', cursor: 'pointer' }}
-                      onClick={() => setSearchTerm('')}
-                      title="Clear search"
-                    ></i>
-                  )}
+                  <input type="text" placeholder="Search all records..." className="form-input" style={{ paddingLeft: 36, paddingRight: searchTerm ? 36 : 12, borderRadius: 20 }} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                  {searchTerm && <i className="fas fa-times" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', cursor: 'pointer' }} onClick={() => setSearchTerm('')}></i>}
                 </div>
-                {/* SEARCH RESULT COUNTER */}
-                {searchTerm && (
-                  <div style={{ fontSize: 11, color: '#E8730F', marginTop: 4, paddingLeft: 8, fontWeight: 600 }}>
-                    Found {activeTab === 'ledger' ? filteredLedger.length : activeTab === 'invoices' ? filteredInvoices.length : activeTab === 'portfolio' ? filteredClients.length : filteredPayments.length} results for "{searchTerm}"
-                  </div>
-                )}
+                {searchTerm && <div style={{ fontSize: 11, color: '#E8730F', marginTop: 4, paddingLeft: 8, fontWeight: 600 }}>Found {activeTab === 'ledger' ? filteredLedger.length : activeTab === 'invoices' ? filteredInvoices.length : activeTab === 'portfolio' ? filteredClients.length : filteredPayments.length} results for "{searchTerm}"</div>}
               </div>
             </div>
           )}
 
+          {/* Search bar for team / payslips */}
+          {(activeTab === 'team' || activeTab === 'payslips') && (
+            <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:20 }}>
+              <div style={{ width:'100%', maxWidth:350 }}>
+                <div style={{ position:'relative', width:'100%' }}>
+                  <i className="fas fa-search" style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', color:'#94A3B8' }}></i>
+                  <input type="text" placeholder={activeTab==='team'?'Search team members...':'Search payslips...'} className="form-input" style={{ paddingLeft:36, paddingRight:searchTerm?36:12, borderRadius:20 }} value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} />
+                  {searchTerm && <i className="fas fa-times" style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', color:'#94A3B8', cursor:'pointer' }} onClick={()=>setSearchTerm('')}></i>}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* DASHBOARD */}
           {activeTab === 'overview' && (
             <div className="fadein">
               <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', marginBottom:8 }}>Finance Dashboard</h1>
@@ -1412,12 +1964,11 @@ function AdminPortal({ onExit }) {
                     <h3 style={{ fontSize:15, fontWeight:800, color:'#0A1F12', margin:0 }}>Cash Position</h3>
                     <span className={`kpi-trend ${calc.netCashflow >= 0 ? 'up' : 'down'}`}>{calc.netCashflow >= 0 ? '▲ Positive' : '▼ Negative'}</span>
                   </div>
-                  <div style={{ fontSize:13, color:'#64748B', marginBottom:8 }}>Net cash flow (Operating + Investing + Financing)</div>
+                  <div style={{ fontSize:13, color:'#64748B', marginBottom:8 }}>Net cash flow</div>
                   <div style={{ fontFamily:'Consolas, monospace', fontSize:22, fontWeight:800, color: calc.netCashflow >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtK(calc.netCashflow)}</div>
                   <div style={{ display:'flex', gap:12, marginTop:16, fontSize:11, color:'#64748B' }}>
                     <span>Operating: <strong style={{ color:'#0A1F12' }}>{fmtK(calc.cfOperating)}</strong></span>
                     <span>Investing: <strong style={{ color:'#0A1F12' }}>{fmtK(calc.cfInvesting)}</strong></span>
-                    <span>Financing: <strong style={{ color:'#0A1F12' }}>{fmtK(calc.cfFinancing)}</strong></span>
                   </div>
                 </div>
                 <div className="admin-card">
@@ -1431,22 +1982,17 @@ function AdminPortal({ onExit }) {
                 </div>
               </div>
 
-              {/* CHARTS ROW */}
               <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))', gap:20, marginBottom:32 }}>
                 <div className="admin-card">
                   <h3 style={{ fontSize:14, fontWeight:800, color:'#0A1F12', marginBottom:16, marginTop:0 }}>Income Breakdown</h3>
                   <div className="chart-container">
-                    {Object.keys(calc.incomeByCategory).length > 0 ? (
-                      <DoughnutChart chartData={calc.incomeByCategory} type="income" />
-                    ) : <div className="empty-state" style={{ padding: 20 }}>No income recorded</div>}
+                    {Object.keys(calc.incomeByCategory).length > 0 ? <DoughnutChart chartData={calc.incomeByCategory} type="income" /> : <div className="empty-state" style={{ padding: 20 }}>No income recorded</div>}
                   </div>
                 </div>
                 <div className="admin-card">
                   <h3 style={{ fontSize:14, fontWeight:800, color:'#0A1F12', marginBottom:16, marginTop:0 }}>Expense Breakdown</h3>
                   <div className="chart-container">
-                    {Object.keys(calc.expenseByCategory).length > 0 ? (
-                      <DoughnutChart chartData={calc.expenseByCategory} type="expense" />
-                    ) : <div className="empty-state" style={{ padding: 20 }}>No expenses recorded</div>}
+                    {Object.keys(calc.expenseByCategory).length > 0 ? <DoughnutChart chartData={calc.expenseByCategory} type="expense" /> : <div className="empty-state" style={{ padding: 20 }}>No expenses recorded</div>}
                   </div>
                 </div>
               </div>
@@ -1476,6 +2022,7 @@ function AdminPortal({ onExit }) {
             </div>
           )}
 
+          {/* ONBOARDING */}
           {activeTab === 'onboarding' && (
             <div className="fadein">
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24 }}>
@@ -1524,6 +2071,7 @@ function AdminPortal({ onExit }) {
             </div>
           )}
 
+          {/* PORTFOLIO */}
           {activeTab === 'portfolio' && (
             <div className="fadein">
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24 }}>
@@ -1532,13 +2080,12 @@ function AdminPortal({ onExit }) {
                   <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{calc.activeClients} active · MRR: <strong>{fmtK(calc.mrr)}</strong></p>
                 </div>
                 <div style={{ display: 'flex', gap: 12 }}>
-                  <button onClick={() => exportToCSV(filteredClients, 'Clients', ['name','email','phone','package','status'])} disabled={isExporting} className="btn-sm" style={{ background: '#E2E8F0', color: '#1E293B' }}>
+                  <button onClick={() => exportToCSV(filteredClients, 'Clients', ['name','email','phone','package','status'])} disabled={isExporting} className="btn-sm btn-gray">
                     {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-file-export"></i>} Export CSV
                   </button>
                   <button onClick={() => openAdd('client')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Client</button>
                 </div>
               </div>
-
               <div className="admin-card">
                 <div style={{ overflowX:'auto' }}>
                   <table className="admin-table">
@@ -1567,6 +2114,7 @@ function AdminPortal({ onExit }) {
             </div>
           )}
 
+          {/* LEDGER */}
           {activeTab === 'ledger' && (
             <div className="fadein">
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
@@ -1575,7 +2123,7 @@ function AdminPortal({ onExit }) {
                   <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{periodLabel} · {filteredLedger.length} entries · Net: <strong style={{ color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtK(calc.netProfit)}</strong></p>
                 </div>
                 <div style={{ display: 'flex', gap: 12 }}>
-                  <button onClick={() => exportToCSV(filteredLedger, 'Ledger', ['date','type','category','desc','amount','reference'])} disabled={isExporting} className="btn-sm" style={{ background: '#E2E8F0', color: '#1E293B' }}>
+                  <button onClick={() => exportToCSV(filteredLedger, 'Ledger', ['date','type','category','desc','amount','reference'])} disabled={isExporting} className="btn-sm btn-gray">
                     {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-file-export"></i>} Export CSV
                   </button>
                   <button onClick={() => openAdd('ledger')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Entry</button>
@@ -1630,6 +2178,7 @@ function AdminPortal({ onExit }) {
             </div>
           )}
 
+          {/* INVOICES */}
           {activeTab === 'invoices' && (
             <div className="fadein">
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
@@ -1638,7 +2187,7 @@ function AdminPortal({ onExit }) {
                   <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{periodLabel} · {calc.invMetrics.count} invoices · Total: <strong>{fmtK(calc.invMetrics.total)}</strong></p>
                 </div>
                 <div style={{ display: 'flex', gap: 12 }}>
-                  <button onClick={() => exportToCSV(filteredInvoices, 'Invoices', ['invoiceNo','client','issueDate','dueDate','amount','status'])} disabled={isExporting} className="btn-sm" style={{ background: '#E2E8F0', color: '#1E293B' }}>
+                  <button onClick={() => exportToCSV(filteredInvoices, 'Invoices', ['invoiceNo','client','issueDate','dueDate','amount','status'])} disabled={isExporting} className="btn-sm btn-gray">
                     {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-file-export"></i>} Export CSV
                   </button>
                   <button onClick={() => openAdd('invoice')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Create Invoice</button>
@@ -1694,12 +2243,13 @@ function AdminPortal({ onExit }) {
             </div>
           )}
 
+          {/* STATEMENTS (unchanged) */}
           {activeTab === 'statements' && (
             <div className="fadein">
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
                 <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Financial Statements</h1>
                 <div style={{ display: 'flex', gap: 12 }}>
-                  <button onClick={downloadPDF} className="btn-sm" style={{ background: '#1B6CA8', color: '#fff' }}><i className="fas fa-download"></i> Download PDF</button>
+                  <button onClick={downloadPDF} className="btn-sm btn-blue"><i className="fas fa-download"></i> Download PDF</button>
                   <div className="filter-tabs" style={{ marginBottom:0 }}>
                     {Object.entries(PERIOD_LABELS).map(([k, label]) => (
                       <button key={k} className={`filter-tab ${period===k?'active':''}`} onClick={() => setPeriod(k)}>{label}</button>
@@ -1779,9 +2329,6 @@ function AdminPortal({ onExit }) {
                       <span>Total Liabilities & Equity</span>
                       <span>{fmtK(calc.netProfit)}</span>
                     </div>
-                    <p style={{ fontSize:11, color:'#94A3B8', textAlign:'center', marginTop:20, fontStyle:'italic' }}>
-                      Note: Simple balance statement — Assets should equal Liabilities + Equity. Timing differences may exist where cash movements are recognised as they occur.
-                    </p>
                   </div>
                 )}
 
@@ -1813,18 +2360,164 @@ function AdminPortal({ onExit }) {
               </div>
             </div>
           )}
+
+          {/* ══════════════ TEAM MEMBERS TAB ══════════════ */}
+          {activeTab === 'team' && (
+            <div className="fadein">
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
+                <div>
+                  <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Team Members</h1>
+                  <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{team.length} member{team.length !== 1 ? 's' : ''} · Total monthly payroll: <strong>US${fmtNum(team.reduce((s,t)=>s+num(t.netMonthlyUSD),0))}</strong></p>
+                </div>
+                <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
+                  {team.length === 0 && (
+                    <button onClick={handleSeedTeam} className="btn-sm btn-blue" style={{ padding:'10px 16px', fontSize:13 }}>
+                      <i className="fas fa-magic"></i> Seed Default Team
+                    </button>
+                  )}
+                  <button onClick={() => openAdd('team')} className="btn-sm btn-add" style={{ padding:'10px 16px', fontSize:13 }}><i className="fas fa-plus"></i> Add Member</button>
+                </div>
+              </div>
+
+              <div className="admin-card">
+                {filteredTeam.length === 0 ? (
+                  <div className="empty-state">
+                    <i className="fas fa-user-tie" style={{ fontSize:32, color:'#CBD5E1', marginBottom:12, display:'block' }}></i>
+                    <p style={{ margin:'0 0 16px' }}>No team members yet.</p>
+                    <button onClick={handleSeedTeam} className="btn-primary" style={{ padding:'12px 24px', fontSize:13 }}><i className="fas fa-magic"></i> Seed Default Team (Mwaba + Carol)</button>
+                  </div>
+                ) : (
+                  <div style={{ overflowX:'auto' }}>
+                    <table className="admin-table">
+                      <thead>
+                        <tr><th>Name</th><th>Position</th><th>Net Monthly (USD)</th><th>Equity</th><th>Employee ID</th><th>Status</th><th>Actions</th></tr>
+                      </thead>
+                      <tbody>
+                        {filteredTeam.map(m => (
+                          <tr key={m.id}>
+                            <td>
+                              <div style={{ fontWeight:700, color:'#0A1F12' }}>{m.name}</div>
+                              {m.email && <div style={{ fontSize:11, color:'#64748B' }}>{m.email}</div>}
+                            </td>
+                            <td style={{ fontSize:12.5 }}>{m.position}</td>
+                            <td style={{ fontWeight:800, color:'#1E7B3C', fontFamily:'Consolas, monospace' }}>${fmtNum(m.netMonthlyUSD)}</td>
+                            <td style={{ fontWeight:600, color:'#E8730F' }}>{m.equity || '—'}</td>
+                            <td style={{ fontSize:12, color:'#64748B', fontFamily:'monospace' }}>{m.employeeId || '—'}</td>
+                            <td><span className={`status-pill ${m.status==='Active'||!m.status?'active':'paused'}`}>{m.status || 'Active'}</span></td>
+                            <td>
+                              <div style={{ display:'flex', gap:6 }}>
+                                <button onClick={() => openPayslipGenerator({ employeeId: m.id, periodMonth: new Date().getMonth(), periodYear: new Date().getFullYear(), payDate: todayStr(), currency:'ZMW', exchangeRate:27.5, earnings:[], deductions:[], employerContributions:[], status:'Draft', preparedBy:'Carol Kambole', preparedByTitle:'Co-founder & Director of Finance & Administration' })} className="btn-sm btn-blue" title="Generate Payslip"><i className="fas fa-file-invoice-dollar"></i></button>
+                                <button onClick={() => openEdit('team', m)} className="btn-sm btn-edit"><i className="fas fa-pen"></i></button>
+                                <button onClick={() => handleDelete('se_team', m.id)} className="btn-sm btn-del"><i className="fas fa-trash"></i></button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ══════════════ PAYSLIPS TAB ══════════════ */}
+          {activeTab === 'payslips' && (
+            <div className="fadein">
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
+                <div>
+                  <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Payslips</h1>
+                  <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>
+                    {payslips.length} payslip{payslips.length !== 1 ? 's' : ''} · {payslips.filter(p=>p.status==='Paid').length} paid · {payslips.filter(p=>p.status!=='Paid').length} draft
+                  </p>
+                </div>
+                <button onClick={() => openPayslipGenerator()} className="btn-primary" style={{ padding:'11px 22px', fontSize:13.5 }} disabled={team.length === 0} title={team.length === 0 ? 'Add a team member first' : ''}>
+                  <i className="fas fa-plus"></i> Generate Payslip
+                </button>
+              </div>
+
+              {team.length === 0 && (
+                <div className="admin-card" style={{ background:'#FEF3C7', border:'1px solid #FDE68A', marginBottom:20 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                    <i className="fas fa-exclamation-triangle" style={{ color:'#92400E', fontSize:20 }}></i>
+                    <div>
+                      <div style={{ fontWeight:800, color:'#92400E', fontSize:13 }}>No team members yet</div>
+                      <div style={{ fontSize:12, color:'#78350F', marginTop:2 }}>Go to <strong>Team Members</strong> and add a member (or seed the defaults) before generating payslips.</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="admin-card">
+                {filteredPayslips.length === 0 ? (
+                  <div className="empty-state">
+                    <i className="fas fa-file-invoice-dollar" style={{ fontSize:32, color:'#CBD5E1', marginBottom:12, display:'block' }}></i>
+                    No payslips yet. Click <strong>Generate Payslip</strong> to create one.
+                  </div>
+                ) : (
+                  <div style={{ overflowX:'auto' }}>
+                    <table className="admin-table">
+                      <thead><tr><th>Ref</th><th>Employee</th><th>Period</th><th>Currency</th><th>Gross</th><th>Deductions</th><th>Net Pay</th><th>Status</th><th>Actions</th></tr></thead>
+                      <tbody>
+                        {filteredPayslips.map(p => {
+                          const t = team.find(tm => tm.id === p.employeeId);
+                          const sym = curSym(p.currency);
+                          return (
+                            <tr key={p.id}>
+                              <td style={{ fontSize:11.5, fontFamily:'monospace', fontWeight:700, color:'#64748B' }}>{p.reference || p.id?.slice(0,8)}</td>
+                              <td>
+                                <div style={{ fontWeight:700 }}>{p.employeeName || t?.name || '—'}</div>
+                                <div style={{ fontSize:11, color:'#64748B' }}>{p.position || t?.position || ''}</div>
+                              </td>
+                              <td style={{ fontSize:12.5, whiteSpace:'nowrap' }}>{p.periodLabel || '—'}</td>
+                              <td><span className={`status-pill ${p.currency==='USD'?'pending':'active'}`}>{p.currency || 'ZMW'}</span></td>
+                              <td style={{ fontFamily:'Consolas, monospace', fontWeight:700 }}>{sym}{fmtNum(p.gross)}</td>
+                              <td style={{ fontFamily:'Consolas, monospace', fontSize:12.5 }}>{sym}{fmtNum(p.totalDeductions)}</td>
+                              <td style={{ fontFamily:'Consolas, monospace', fontWeight:800, color:'#1E7B3C', fontSize:13.5 }}>{sym}{fmtNum(p.netPay)}</td>
+                              <td><span className={`status-pill ${p.status==='Paid'?'active':'draft'}`}>{p.status || 'Draft'}</span></td>
+                              <td>
+                                <div style={{ display:'flex', gap:6 }}>
+                                  <button onClick={() => setViewingPayslip({ payslip: p, team: t })} className="btn-sm btn-blue" title="View / Download"><i className="fas fa-eye"></i></button>
+                                  <button onClick={() => openPayslipGenerator(p)} className="btn-sm btn-edit" title="Edit"><i className="fas fa-pen"></i></button>
+                                  <button onClick={() => handleDelete('se_payslips', p.id)} className="btn-sm btn-del" title="Delete"><i className="fas fa-trash"></i></button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
-      {/* MODAL RENDERED OUTSIDE THE MAIN LAYOUT TO PREVENT SCROLL CONFLICTS */}
+      {/* ══════════════ MODALS ══════════════ */}
       {modal && (
-        <FormModal
-          modal={modal}
-          onClose={closeModal}
-          onSave={saveEntry}
+        <FormModal modal={modal} onClose={closeModal} onSave={saveEntry} saving={saving} error={formError} clients={clients} />
+      )}
+
+      {payslipModal && (
+        <PayslipModal
+          modal={payslipModal}
+          onClose={closePayslipModal}
+          onSave={savePayslip}
+          onDownload={downloadPayslipPDF}
           saving={saving}
           error={formError}
-          clients={clients}
+          teamMembers={team}
+        />
+      )}
+
+      {viewingPayslip && (
+        <PayslipViewModal
+          payslip={viewingPayslip.payslip}
+          team={viewingPayslip.team}
+          onClose={() => setViewingPayslip(null)}
+          onDownload={downloadPayslipPDF}
         />
       )}
     </>
