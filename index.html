@@ -411,7 +411,7 @@ function PayslipDocument({ payslip, team, renderId = 'payslip-render' }) {
             Start<em style={{ fontStyle:'normal', color:'#E8730F' }}>Easy</em> Zambia
           </div>
           <div style={{ fontSize:9.5, letterSpacing:'1.6px', textTransform:'uppercase', color:'#8A6828', fontWeight:700, marginTop:4 }}>
-            Financial Support & Management
+            Confidential Employee Payslip
           </div>
         </div>
         <div style={{ textAlign:'right' }}>
@@ -438,7 +438,7 @@ function PayslipDocument({ payslip, team, renderId = 'payslip-render' }) {
             Pay Date: <strong style={{ color:'#0A1F12' }}>{payslip.payDate || '—'}</strong><br/>
             Period: <strong style={{ color:'#0A1F12' }}>{payslip.periodLabel || '—'}</strong><br/>
             Currency: <strong style={{ color:'#0A1F12' }}>{payslip.currency || 'ZMW'}</strong>
-            {payslip.currency === 'ZMW' && payslip.exchangeRate && (
+            {payslip.exchangeRate && (
               <><br/><span style={{ fontSize:10.5, color:'#888' }}>Rate: 1 USD = ZMW {payslip.exchangeRate}</span></>
             )}
           </div>
@@ -522,7 +522,7 @@ function PayslipDocument({ payslip, team, renderId = 'payslip-render' }) {
 
       <div style={{ marginTop:22, fontSize:9.5, color:'#999', textAlign:'center', fontStyle:'italic', lineHeight:1.6 }}>
         This is a computer-generated payslip. Confidential — for the named employee only.<br/>
-        StartEasy Zambia · Financial Support &amp; Management
+        StartEasy Zambia
       </div>
     </div>
   );
@@ -553,17 +553,38 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
 
   const autoCalc = () => {
     if (!selectedTeam) return;
-    const netUSD = num(selectedTeam.netMonthlyUSD);
+    const targetNetUSD = num(selectedTeam.netMonthlyUSD);
+    const rate = num(data.exchangeRate) || 27.5; 
+    
+    // We always calculate gross-up in ZMW first because ZRA tax bands are based on ZMW
+    const targetNetZMW = targetNetUSD * rate;
+    const grossZMW = calcGrossFromNetZMW(targetNetZMW);
+    const bd = calcZMWBreakdown(grossZMW);
+
     if (data.currency === 'USD') {
-      set('earnings', [{ label: 'Base Salary (USD Contract)', amount: netUSD.toFixed(2) }]);
-      set('deductions', []);
-      set('employerContributions', []);
+      // Convert ZMW calculations back to USD
+      let grossUSD = grossZMW / rate;
+      let napsaUSD = bd.napsaEmp / rate;
+      let nhimaUSD = bd.nhimaEmp / rate;
+      let payeUSD = bd.paye / rate;
+      
+      // Fix small rounding differences to ensure net is EXACTLY the contract amount
+      const calcNetUSD = grossUSD - napsaUSD - nhimaUSD - payeUSD;
+      const diff = targetNetUSD - calcNetUSD;
+      grossUSD += diff;
+
+      set('earnings', [{ label: 'Gross Salary (USD)', amount: grossUSD.toFixed(2) }]);
+      set('deductions', [
+        { label: `NAPSA (5%) @ ${rate}`, amount: napsaUSD.toFixed(2) },
+        { label: `NHIMA (1%) @ ${rate}`, amount: nhimaUSD.toFixed(2) },
+        { label: `PAYE @ ${rate}`, amount: payeUSD.toFixed(2) }
+      ]);
+      set('employerContributions', [
+        { label: `NAPSA Employer (5%) @ ${rate}`, amount: (bd.napsaEmployer / rate).toFixed(2) },
+        { label: `NHIMA Employer (1%) @ ${rate}`, amount: (bd.nhimaEmployer / rate).toFixed(2) }
+      ]);
     } else {
-      const rate = num(data.exchangeRate) || 1;
-      const netZMW = netUSD * rate;
-      const gross = calcGrossFromNetZMW(netZMW);
-      const bd = calcZMWBreakdown(gross);
-      set('earnings', [{ label: 'Gross Salary (ZMW)', amount: gross.toFixed(2) }]);
+      set('earnings', [{ label: 'Gross Salary (ZMW)', amount: grossZMW.toFixed(2) }]);
       set('deductions', [
         { label: 'NAPSA (5%)', amount: bd.napsaEmp.toFixed(2) },
         { label: 'NHIMA (1%)', amount: bd.nhimaEmp.toFixed(2) },
@@ -615,7 +636,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
                 </select>
                 {selectedTeam && (
                   <div style={{ fontSize:11, color:'#1B6CA8', marginTop:6, fontWeight:600 }}>
-                    Contract net: US${fmtNum(selectedTeam.netMonthlyUSD)} / month
+                    Contract Promise: Net US${fmtNum(selectedTeam.netMonthlyUSD)} / month
                   </div>
                 )}
               </div>
@@ -647,16 +668,15 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
                 </div>
               </div>
 
-              {data.currency === 'ZMW' && (
-                <div className="form-group">
-                  <label className="form-label">Exchange Rate (ZMW per USD)</label>
-                  <input type="number" step="0.01" className="form-input" value={data.exchangeRate || ''} onChange={e => set('exchangeRate', e.target.value)} placeholder="e.g. 27.50" />
-                </div>
-              )}
+              <div className="form-group">
+                <label className="form-label">Exchange Rate (ZMW per USD) *</label>
+                <input type="number" step="0.01" className="form-input" value={data.exchangeRate || ''} onChange={e => set('exchangeRate', e.target.value)} placeholder="e.g. 27.50" required />
+                <div style={{ fontSize: 10, color: '#64748B', marginTop: 4 }}>Required for statutory deductions (NAPSA, NHIMA, PAYE).</div>
+              </div>
 
               <div style={{ display:'flex', gap:8, marginBottom:16 }}>
                 <button type="button" onClick={autoCalc} disabled={!selectedTeam} className="btn-sm btn-blue" style={{ flex:1, justifyContent:'center', padding:'10px' }}>
-                  <i className="fas fa-calculator"></i> Auto-Calculate from Contract
+                  <i className="fas fa-calculator"></i> Auto-Calculate (Net to Gross)
                 </button>
               </div>
 
