@@ -1210,7 +1210,34 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
           </div>
           <div className="form-group">
             <label className="form-label">Position / Title *</label>
-            <input type="text" className="form-input" value={data.position || ''} onChange={e => set('position', e.target.value)} required placeholder="e.g. Co-founder & Director of Finance" />
+            <select 
+              className="form-input" 
+              value={data.position || ''} 
+              onChange={e => {
+                const newPos = e.target.value;
+                set('position', newPos);
+                // Auto-select contract based on position
+                if (newPos === 'Principal Founder & Strategic Sponsor') {
+                  set('contractRef', 'Principal Founder Agreement');
+                } else if (newPos && newPos !== 'Other') {
+                  set('contractRef', 'Founder Contributor Agreement');
+                }
+              }} 
+              required
+            >
+              <option value="">— Select Position —</option>
+              <option value="Principal Founder & Strategic Sponsor">Principal Founder & Strategic Sponsor</option>
+              <option value="Co-founder & Chief Executive Officer (CEO)">Co-founder & Chief Executive Officer (CEO)</option>
+              <option value="Co-founder & Chief Digital Marketing Officer (CDMO)">Co-founder & Chief Digital Marketing Officer (CDMO)</option>
+              <option value="Co-founder & Director of Finance & Administration">Co-founder & Director of Finance & Administration</option>
+              <option value="Business Operations & Service Delivery Lead">Business Operations & Service Delivery Lead</option>
+              <option value="Growth, Sales & Partnerships Lead">Growth, Sales & Partnerships Lead</option>
+              <option value="Other Legal/Technical Support Lead">Other Legal/Technical Support Lead</option>
+              <option value="Growth & Client Success Associate">Growth & Client Success Associate</option>
+              <option value="Growth & Outreach Associate">Growth & Outreach Associate</option>
+              <option value="Client Administrative Services Advisor">Client Administrative Services Advisor</option>
+              <option value="Other">Other (Specify in Notes)</option>
+            </select>
           </div>
           <div className="form-row">
             <div className="form-group">
@@ -1233,6 +1260,7 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
                 <option value="">— Select ID —</option>
                 <option value="SE-FND-001">SE-FND-001</option>
                 <option value="SE-FND-002">SE-FND-002</option>
+                <option value="SE-FND-003">SE-FND-003</option>
                 <option value="SE-EMP-001">SE-EMP-001</option>
                 <option value="SE-EMP-002">SE-EMP-002</option>
                 <option value="SE-EMP-003">SE-EMP-003</option>
@@ -1269,7 +1297,6 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
               <option value="">— Select Contract —</option>
               <option value="Principal Founder Agreement">Principal Founder Agreement</option>
               <option value="Founder Contributor Agreement">Founder Contributor Agreement</option>
-              <option value="Monthly Payment Agreement">Monthly Payment Agreement</option>
               <option value="Advisory Agreement">Advisory Agreement</option>
               <option value="Independent Contractor Agreement">Independent Contractor Agreement</option>
             </select>
