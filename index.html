@@ -1553,6 +1553,22 @@ function AdminPortal({ onExit }) {
     return () => { unsubPayments(); unsubLedger(); unsubClients(); unsubInvoices(); unsubTeam(); unsubPayslips(); };
   }, [isAdmin]);
 
+  /* Auto-migrate SE-EMP to SE-RET */
+  useEffect(() => {
+    if (!isAdmin || team.length === 0) return;
+    team.forEach(async (m) => {
+      if (m.employeeId && m.employeeId.includes('SE-EMP')) {
+        try {
+          const newId = m.employeeId.replace('SE-EMP', 'SE-RET');
+          await db.collection('se_team').doc(m.id).update({ employeeId: newId });
+          console.log(`Migrated ${m.name}: ${m.employeeId} -> ${newId}`);
+        } catch (err) {
+          console.error("Migration failed:", err);
+        }
+      }
+    });
+  }, [team, isAdmin]);
+
   const handleLogin = async (e) => {
     e.preventDefault(); setAuthError(''); setAuthLoading(true);
     try { await auth.signInWithEmailAndPassword(email, password); }
