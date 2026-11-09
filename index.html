@@ -306,9 +306,27 @@ const calcPAYE = (taxable) => {
 };
 const calcZMWBreakdown = (gross) => {
   // No NAPSA or NHIMA for independent founders, only PAYE Withholding
-  const paye = calcPAYE(gross);
+  const taxable = gross;
+  
+  let paye = 0;
+  const bandDetails = [];
+  
+  for (const band of ZAMBIA_PAYE_BANDS) {
+    if (taxable > band.min) {
+      const amountInBand = Math.min(taxable, band.max) - band.min;
+      const taxInBand = amountInBand * band.rate;
+      if (taxInBand > 0) {
+        bandDetails.push({
+          label: `PAYE ${band.rate * 100}% (${band.min > 0 ? 'K' + band.min.toLocaleString() : 'First'} - ${band.max === Infinity ? 'Above' : 'K' + band.max.toLocaleString()})`,
+          amount: taxInBand
+        });
+      }
+      paye += taxInBand;
+    }
+  }
+  
   const net = gross - paye;
-  return { gross, paye, net };
+  return { gross, paye, net, bandDetails };
 };
 const calcGrossFromNetZMW = (targetNet) => {
   let lo = Math.max(0, targetNet);
@@ -570,6 +588,20 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
     const grossZMW = calcGrossFromNetZMW(targetNetZMW);
     const bd = calcZMWBreakdown(grossZMW);
 
+    // Build the deductions list from the PAYE bands
+    let calcDeductions = [];
+    if (data.currency === 'USD') {
+      calcDeductions = bd.bandDetails.map(b => ({
+        label: b.label,
+        amount: (b.amount / rate).toFixed(2)
+      }));
+    } else {
+      calcDeductions = bd.bandDetails.map(b => ({
+        label: b.label,
+        amount: b.amount.toFixed(2)
+      }));
+    }
+
     if (data.currency === 'USD') {
       // Convert ZMW calculations back to USD
       let grossUSD = grossZMW / rate;
@@ -581,10 +613,10 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
       grossUSD += diff;
 
       set('earnings', [{ label: 'Gross Retainer (USD)', amount: grossUSD.toFixed(2) }]);
-      set('deductions', [{ label: `PAYE Withholding @ ${rate}`, amount: payeUSD.toFixed(2) }]);
+      set('deductions', calcDeductions);
     } else {
       set('earnings', [{ label: 'Gross Retainer (ZMW)', amount: grossZMW.toFixed(2) }]);
-      set('deductions', [{ label: 'PAYE Withholding', amount: bd.paye.toFixed(2) }]);
+      set('deductions', calcDeductions);
     }
   };
 
