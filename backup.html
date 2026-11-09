@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Financial Support & Management | StartEasy Zambia</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700;1,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<style>
+:root {
+  --forest:#0A1F12; --forest-2:#123A1F; --green:#1E7B3C; --orange:#E8730F; 
+  --orange-2:#F5A623; --light:#F5FAF6; --red:#B8564F; --blue:#1B6CA8;
+}
+html, body { overflow-x: hidden; width: 100%; margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+*, *::before, *::after { box-sizing: inherit; }
+body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; background: var(--light); color: var(--forest); }
+.serif { font-family: 'Playfair Display', Georgia, serif; }
+.fadein { animation: fi .6s cubic-bezier(.22,.61,.36,1) both; }
+@keyframes fi { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+
+/* Header & Nav */
+.site-header { position: sticky; top: 0; z-index: 100; background: rgba(10,31,18,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(245,166,35,.1); width: 100%; }
+.header-content { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 72px; padding: 0 24px; }
+.logo-group { display: flex; align-items: center; gap: 12px; cursor: pointer; text-decoration: none; }
+.logo-mark { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg,#E8730F,#F5A623); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; font-family: 'Playfair Display', serif; flex-shrink:0;}
+.logo-text-sub { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.5); font-weight: 700; }
+.logo-text-main { font-size: 15px; font-weight: 700; color: #fff; }
+.menu-toggle { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; padding: 4px; transition: transform 0.2s; }
+
+/* Mobile Menu Dropdown */
+.mobile-menu-dropdown { position: absolute; top: 72px; left: 0; right: 0; background: #0A1F12; border-bottom: 1px solid rgba(245,166,35,.2); padding: 16px 24px; display: flex; flex-direction: column; gap: 8px; z-index: 99; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: slideDown 0.2s ease; }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+.mobile-menu-dropdown a, .mobile-menu-dropdown button { color: #fff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px 16px; background: rgba(255,255,255,.05); border-radius: 8px; text-align: left; border: 1px solid rgba(255,255,255,.05); display: flex; align-items: center; gap: 12px; cursor: pointer; font-family: inherit; width: 100%; transition: all .2s; }
+.mobile-menu-dropdown a:hover, .mobile-menu-dropdown button:hover { background: rgba(232,115,15,.15); border-color: rgba(232,115,15,.3); color: #F5A623; }
+
+/* Buttons */
+.btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; border-radius: 9px; cursor: pointer; font-family: inherit; font-weight: 700; transition: all .2s; background: linear-gradient(135deg,#E8730F,#F5A623); color: #fff; padding: 14px 28px; font-size: 14.5px; text-decoration: none; box-shadow: 0 10px 26px rgba(232,115,15,.32); }
+.btn-primary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 16px 34px rgba(232,115,15,.45); }
+.btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid rgba(255,255,255,0.2); border-radius: 9px; cursor: pointer; font-family: inherit; font-weight: 700; transition: all .2s; background: transparent; color: #fff; padding: 14px 28px; font-size: 14.5px; text-decoration: none; }
+.btn-ghost:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+/* Sections */
+.section-padding { padding: 80px 24px; }
+.container { max-width: 1240px; margin: 0 auto; width: 100%; }
+
+/* Interactive Elements */
+.gtile { background: #fff; border: 2px solid rgba(10,31,18,.1); border-radius: 12px; padding: 24px; text-align: left; cursor: pointer; font-family: inherit; transition: all .3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; position: relative; }
+.gtile:hover { border-color: #E8730F; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,.07); }
+.gtile.sel { border-color: #E8730F; background: linear-gradient(135deg,rgba(232,115,15,.06),rgba(245,166,35,.03)); box-shadow: 0 0 0 4px rgba(232,115,15,.12); }
+.gtile .ico { width: 44px; height: 44px; border-radius: 10px; background: rgba(232,115,15,.1); color: #E8730F; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; transition: all 0.3s; }
+.gtile.sel .ico { background: #E8730F; color: #fff; }
+.gtile h3 { font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 700; color: #0A1F12; line-height: 1.25; margin: 0; }
+.gtile p { font-size: 13px; color: rgba(10,31,18,.6); line-height: 1.5; margin: 0; }
+
+.pricing-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 32px; display: flex; flex-direction: column; position: relative; transition: all 0.4s ease; }
+.pricing-card.popular { border: 2px solid #E8730F; box-shadow: 0 20px 40px rgba(232,115,15,0.1); }
+.pricing-card.highlighted { border: 2px solid #1E7B3C; box-shadow: 0 0 0 6px rgba(30,123,60,0.15); transform: scale(1.03); z-index: 10; }
+.pricing-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #E8730F; color: #fff; padding: 4px 16px; border-radius: 99px; font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; }
+
+.check-list { list-style: none; padding: 0; margin: 0; }
+.check-list li { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: 14px; color: rgba(10,31,18,0.8); line-height: 1.5; }
+.check-list li i { color: #1E7B3C; margin-top: 3px; font-size: 14px; }
+
+/* Modal Overlay */
+.modal-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: flex-start; justify-content: center; padding: 20px 10px; background: rgba(10,31,18,0.92); backdrop-filter: blur(4px); overflow-y: auto; }
+.modal-content { background: #F5FAF6; border-radius: 12px; width: 100%; max-width: 56rem; box-shadow: 0 30px 80px rgba(0,0,0,.5); margin: auto; }
+.modal-header { background: #0A1F12; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(245,166,35,.15); border-radius: 12px 12px 0 0; }
+.modal-body { padding: 24px 16px; }
+
+/* Legal Document / Letter */
+.el { background:#fff; border:1px solid #D0D0D0; border-radius:8px; padding:40px 50px; font-size:13.5px; line-height:1.8; color:#222; box-shadow: 0 10px 30px rgba(0,0,0,.05); width: 100%; margin: 0 auto; overflow-wrap: break-word; }
+.el .eh{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:18px;border-bottom:3px solid #0A1F12;margin-bottom:24px;flex-wrap:wrap}
+.el .eh .brand{font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:800;color:#0A1F12;letter-spacing:1px}
+.el .eh .brand em{font-style:normal;color:#E8730F}
+.el .eh .sub{font-size:10.5px;color:#8A6828;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-top:4px}
+.el .eh .dt{font-family:'Playfair Display',Georgia,serif;font-size:15px;font-weight:800;color:#E8730F;letter-spacing:1.2px;text-align:right}
+.el .eh .mt{font-size:11.5px;color:#666;text-align:right;margin-top:6px}
+.el h4{font-family:'Playfair Display',Georgia,serif;font-size:16.5px;color:#0A1F12;font-weight:700;margin:28px 0 12px; border-bottom: 1px solid #eee; padding-bottom: 6px;}
+.el h4:first-of-type{margin-top:0}
+.el p{margin:0 0 16px; text-align: justify;}
+.el ul{margin:0 0 18px;padding-left:24px}
+.el li{margin-bottom:12px;font-size:13.5px; text-align: justify;}
+.el .feebox{background:linear-gradient(135deg,#FFF9E6,#FFFCF0);border:1px solid #F0E0A0;border-radius:10px;padding:18px 20px}
+.el .feebox .row{display:flex;justify-content:space-between;gap:14px;padding:8px 0;align-items:baseline;font-size:13px}
+.el .feebox .row+.row{border-top:1px dashed #E0D08A}
+.el .feebox .l{color:#666;font-weight:600}
+.el .feebox .v{font-family:'Playfair Display',Georgia,serif;font-size:18px;font-weight:800;color:#0A1F12;white-space:nowrap}
+.el .feebox .total{margin-top:8px;padding-top:14px;border-top:2px solid #0A1F12;display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+.el .feebox .total .tl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:#8A6828}
+.el .feebox .total .tv{font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:800;color:#E8730F}
+.el .sign{margin-top:36px;padding-top:24px;border-top:1px solid #E0E0E0;display:grid;grid-template-columns:1fr 1fr;gap:40px; width: 100%;}
+.el .sign .sigval{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:#0A1F12;letter-spacing:.04em;font-style:italic;padding-bottom:8px;border-bottom:1px solid #333;margin-bottom:10px;min-height:40px; word-break: break-word;}
+.el .sign .lbl{font-size:11px;color:#666;font-weight:600; text-transform:uppercase; letter-spacing:0.05em; line-height: 1.5;}
+
+.doc-input-line { border-bottom: 1px dashed #999; padding: 0 4px; font-family: inherit; font-size:14px; color: var(--forest); background: #F9FBFA; border-top: none; border-left: none; border-right: none; width: 100%; margin-top: 4px; padding: 8px; transition: all 0.2s;}
+.doc-input-line:focus { background: #fff; border-bottom: 2px solid var(--orange); outline: none; box-shadow: 0 4px 6px -6px rgba(232,115,15,0.5); }
+.doc-input-line:disabled { background: transparent; border-bottom: 1px solid #ccc; color: #333; cursor: default; }
+
+/* Payment / Success Boxes */
+.success-box { background: #fff; padding: 32px 24px; border-radius: 12px; border: 1px solid #eee; text-align: center; }
+.method-card { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.method-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; font-weight: 800; color: #0A1F12; font-size: 15px; }
+.method-header i { font-size: 20px; color: #E8730F; }
+.method-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 13px; }
+.method-row .l { color: #666; font-weight: 600; }
+.method-row .v { font-family: Consolas, monospace; font-weight: 700; color: #0A1F12; }
+
+/* ─── ADMIN ─── */
+.admin-layout { display: flex; flex-direction: column; min-height: 100vh; background: #F8FAFC; }
+.admin-top-bar { background: #fff; border-bottom: 1px solid #E2E8F0; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 30; }
+.admin-hamburger { background: none; border: none; font-size: 20px; color: #0A1F12; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 700; font-family: inherit; }
+.admin-drawer { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #0A1F12; color: #fff; z-index: 50; transform: translateX(-100%); transition: transform 0.3s ease; display: flex; flex-direction: column; box-shadow: 4px 0 24px rgba(0,0,0,0.1); }
+.admin-drawer.open { transform: translateX(0); }
+.admin-drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
+.admin-drawer-overlay.open { opacity: 1; pointer-events: auto; }
+.admin-nav-section { padding: 24px 24px 8px; font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); border-top: 1px solid rgba(255,255,255,0.05); }
+.admin-nav-section:first-child { border-top: none; }
+.admin-nav-item { padding: 12px 24px; display: flex; align-items: center; gap: 12px; font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+.admin-nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.admin-nav-item.active { background: rgba(245,166,35,0.1); color: #F5A623; border-left-color: #F5A623; }
+.admin-content { padding: 32px; flex: 1; width: 100%; max-width: 1400px; margin: 0 auto; }
+.admin-card { background: #fff; border-radius: 12px; border: 1px solid #E2E8F0; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 800px; }
+.admin-table th { text-align: left; padding: 16px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; font-weight: 700; color: #64748B; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; white-space: nowrap; }
+.admin-table td { padding: 16px; border-bottom: 1px solid #F1F5F9; color: #1E293B; font-weight: 500; vertical-align: middle; }
+.admin-table tr:hover { background: #F8FAFC; }
+.status-pill { padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; display: inline-block; }
+.status-pill.pending { background: #FEF3C7; color: #92400E; }
+.status-pill.active { background: #D1FAE5; color: #065F46; }
+.status-pill.overdue { background: #FFE8E5; color: #B8564F; }
+.status-pill.paused { background: #E2E8F0; color: #475569; }
+.empty-state { text-align: center; padding: 40px 20px; color: #94A3B8; font-size: 14px; }
+
+/* Auth Gate */
+.auth-gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0A1F12; padding: 24px; }
+.auth-box { background: #fff; border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 30px 80px rgba(0,0,0,0.4); }
+.auth-input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; margin-bottom: 16px; font-family: inherit; }
+.auth-input:focus { outline: none; border-color: #E8730F; box-shadow: 0 0 0 3px rgba(232,115,15,0.1); }
+
+/* Reports */
+.report-container { background: #fff; border: 1px solid #E2E8F0; border-radius: 8px; padding: 40px; max-width: 800px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.03); font-family: 'Consolas', 'Courier New', monospace; }
+.report-header { text-align: center; margin-bottom: 32px; border-bottom: 2px solid #0A1F12; padding-bottom: 16px; }
+.report-title { font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 800; color: #0A1F12; margin: 0 0 8px 0; }
+.report-subtitle { font-size: 14px; color: #666; margin: 0; }
+.report-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
+.report-row.total { border-top: 2px solid #333; border-bottom: 4px double #333; font-weight: 800; font-size: 15px; margin-top: 8px; padding: 12px 0; }
+.report-row.section-title { font-weight: 800; text-transform: uppercase; margin-top: 24px; border-bottom: 1px solid #ccc; color: #0A1F12; }
+.report-indent { padding-left: 24px; }
+
+/* Form + Filter styles */
+.filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+.filter-tab { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; border: 1px solid #E2E8F0; background: #fff; color: #64748B; transition: all .15s; }
+.filter-tab:hover { border-color: #E8730F; color: #E8730F; }
+.filter-tab.active { background: #0A1F12; color: #fff; border-color: #0A1F12; }
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 11px; font-weight: 800; color: #0A1F12; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+.form-input { width: 100%; padding: 11px 12px; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff; color: #0A1F12; transition: all .15s; }
+.form-input:focus { outline: none; border-color: #E8730F; box-shadow: 0 0 0 3px rgba(232,115,15,0.1); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.btn-sm { padding: 8px 14px; font-size: 12px; border-radius: 6px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-sm:hover { opacity: 0.85; }
+.btn-add { background: #1E7B3C; color: #fff; }
+.btn-edit { background: #F5A623; color: #fff; }
+.btn-del { background: #FFE8E5; color: #B8564F; }
+
+/* Form Modal - Centered and Fixed */
+.modal-form-overlay { position: fixed; inset: 0; z-index: 99999; display: flex; align-items: flex-start; justify-content: center; padding: 20px 16px; background: rgba(10,31,18,0.85); backdrop-filter: blur(8px); overflow-y: auto; }
+.modal-form { background: #fff; border-radius: 12px; width: 100%; max-width: 520px; padding: 28px; margin: auto; box-shadow: 0 30px 80px rgba(0,0,0,.4); position: relative; }
+
+.kpi-trend { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 99px; display: inline-block; }
+.kpi-trend.up { background: #D1FAE5; color: #065F46; }
+.kpi-trend.down { background: #FFE8E5; color: #B8564F; }
+.chart-container { position: relative; height: 220px; width: 100%; }
+
+/* Toasts */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.toast { background: #0A1F12; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideIn 0.3s ease; pointer-events: auto; }
+.toast.success { border-left: 4px solid #1E7B3C; }
+.toast.error { border-left: 4px solid #B8564F; }
+.toast.info { border-left: 4px solid #1B6CA8; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+@media (max-width: 768px) {
+  .admin-content { padding: 16px; }
+  .admin-top-bar { padding: 12px 16px; }
+  .el { padding: 24px 20px; } 
+  .el .eh { flex-direction: column; gap: 12px; } 
+  .el .eh .dt, .el .eh .mt { text-align: left; } 
+  .el .sign { grid-template-columns: 1fr; gap: 24px; }
+  .modal-body { padding: 16px; }
+  .report-container { padding: 20px; }
+  .form-row { grid-template-columns: 1fr; }
+}
+
+/* PRINT STYLES */
+@media print {
+  body { visibility: hidden; background: white; }
+  .print-area { visibility: visible; position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; box-shadow: none; border: none; }
+  .print-area * { visibility: visible; }
+  .admin-top-bar, .admin-drawer, .filter-tabs, .btn-sm, .admin-hamburger, .admin-drawer-overlay { display: none !important; }
+  .admin-content { padding: 0 !important; margin: 0 !important; }
+  .admin-layout { display: block !important; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* ─── FIREBASE ─── */
+const firebaseConfig = {
+  apiKey: "AIzaSyDdEyxvsd2RjgKVYTGYJfYUB_637lV3n5I",
+  authDomain: "starteasy-zambia.firebaseapp.com",
+  projectId: "starteasy-zambia",
+  storageBucket: "starteasy-zambia.firebasestorage.app",
+  messagingSenderId: "54136399237",
+  appId: "1:54136399237:web:2f9f2d7f86bfdfb4be50ec"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* ─── CONSTANTS ─── */
+const WHATSAPP_NUMBER = '260762499581';
+const waUrl = (msg) => `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+const SIGNATORY_NAME = 'Carol Kambole';
+const SIGNATORY_TITLE = 'Co-founder & Director of Finance & Administration, StartEasy Zambia';
+const MAIN_PLATFORM_URL = 'https://www.starteasyzambia.com';
+
+const PACKAGES = [
+  { id:'starter', title:'Financial Starter', price:'K1,000', audience:'For sole traders, startups and microbusinesses.', desc:'Establishing clean financial records and a basic cash position.', features:['Income and expense recording','Sales and purchase tracking','Invoice preparation and payment register','Monthly income and expense summary','Basic cash position report'], outcome:'Organised financial records and a clearer picture of where the money goes.', timeline:'Ongoing monthly' },
+  { id:'control', title:'Business Control', price:'K2,000', audience:'For active SMEs with regular transactions.', popular:true, desc:'Taking full control of cash flow, budgets, and monthly performance.', features:['Everything in Starter, plus:','Monthly budget preparation','Cash-flow monitoring','Receivables and payables tracking','Monthly management report','Budget-versus-actual review','Monthly financial review meeting'], outcome:'Better control over cash flow, expenses and business performance.', timeline:'Ongoing monthly' },
+  { id:'growth', title:'Growth & Financial Planning', price:'K4,000', audience:'For growing SMEs and businesses preparing to expand.', desc:'Forecasting, funding readiness, and strategic financial planning.', features:['Everything in Business Control, plus:','Rolling cash-flow forecasts','Quarterly financial planning','Growth budgets and financial scenarios','Financial performance analysis','Funding-readiness assessment','Preparation of financial info for funders'], outcome:'More informed growth decisions and better-organised financial information.', timeline:'Ongoing monthly' }
+];
+
+const LEDGER_CATEGORIES = {
+  Income: ['Service Fees','Commencement Fees','Consulting Fees','Other Income'],
+  Expense: ['Salaries & Wages','Rent','Utilities','Marketing','Travel','Equipment','Software','Professional Fees','Bank Charges','Other']
+};
+
+const CASHFLOW_CLASS = {
+  'Service Fees':'operating','Commencement Fees':'operating','Consulting Fees':'operating','Other Income':'operating',
+  'Salaries & Wages':'operating','Rent':'operating','Utilities':'operating','Marketing':'operating',
+  'Travel':'operating','Software':'operating','Professional Fees':'operating','Bank Charges':'operating','Other':'operating',
+  'Equipment':'investing'
+};
+
+const PERIOD_LABELS = { month:'This Month', last_month:'Last Month', quarter:'This Quarter', year:'This Year', all:'All Time' };
+
+/* ─── UTILITIES ─── */
+const fmtK = (n) => `K${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+const num = (v) => { const n = parseFloat(String(v || '').replace(/[^\d.-]/g, '')); return isNaN(n) ? 0 : n; };
+const toDate = (raw) => { if (!raw) return null; if (raw.toDate) return raw.toDate(); const d = new Date(raw); return isNaN(d) ? null : d; };
+const dateStr = (raw) => { const d = toDate(raw); return d ? d.toISOString().split('T')[0] : ''; };
+const todayStr = () => new Date().toISOString().split('T')[0];
+const addDays = (dateStr, n) => { const d = new Date(dateStr); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; };
+
+/* ─── BRAND LOGO COMPONENT ─── */
+function BrandLogo({ size = 38, showDirectoryLabel = false }){
+  const [imgError, setImgError] = useState(false);
+  if (!imgError) {
+    return <img src="Logo2.png" alt="StartEasy" onError={() => setImgError(true)} style={{ height: size, maxWidth: size * 5, width: 'auto', objectFit: 'contain', flexShrink: 0, display: 'block' }} />;
+  }
+  return (
+    <span style={{ display:'inline-flex', alignItems:'center', gap:10 }}>
+      <span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:size,height:size,borderRadius:'50%',background:'#fff',boxShadow:'0 4px 12px -4px rgba(10,31,18,.5)',flexShrink:0}}>
+        <span className="serif" style={{fontSize:size*0.5,fontWeight:800,color:'#0A1F12',lineHeight:1}}>S<span style={{color:'#E8730F'}}>E</span></span>
+      </span>
+      {showDirectoryLabel && (
+        <span style={{ textAlign:'left', lineHeight:1 }}>
+          <span style={{display:'block',fontSize:9,letterSpacing:'.18em',textTransform:'uppercase',fontWeight:700,color:'rgba(255,255,255,.35)',marginBottom:4}}>Financial</span>
+          <span style={{display:'block',fontSize:15,fontWeight:700,color:'#fff'}}>Start<em style={{fontStyle:'normal',color:'#F5A623'}}>Easy</em></span>
+        </span>
+      )}
+    </span>
+  );
+}
+
+/* ─── CHART COMPONENT ─── */
+function DoughnutChart({ chartData, type }) {
+  const canvasRef = useRef(null);
+  const chartRef = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current || !window.Chart || !chartData || Object.keys(chartData).length === 0) return;
+    
+    const ctx = canvasRef.current.getContext('2d');
+    if (chartRef.current) chartRef.current.destroy();
+    
+    const labels = Object.keys(chartData);
+    const data = Object.values(chartData);
+    const colors = type === 'income' 
+      ? ['#1E7B3C', '#4CB050', '#F5A623', '#E8730F', '#1B6CA8'] 
+      : ['#B8564F', '#E8730F', '#1B6CA8', '#64748B', '#94A3B8'];
+
+    chartRef.current = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{ data: data, backgroundColor: colors, borderWidth: 0, hoverOffset: 4 }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11, family: 'Inter' } } } }
+      }
+    });
+
+    return () => { if (chartRef.current) chartRef.current.destroy(); };
+  }, [chartData, type]);
+
+  return <canvas ref={canvasRef} />;
+}
+
+/* ─── APP ─── */
+function App() {
+  const [view, setView] = useState('public');
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [form, setForm] = useState({ name:'', email:'', phone:'', business:'', location:'' });
+  const [agreed, setAgreed] = useState(false);
+  const [error, setError] = useState('');
+  const [flowStep, setFlowStep] = useState('draft');
+  const [orientation, setOrientation] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = selectedItem ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [selectedItem]);
+
+  const openEngagement = (item) => {
+    setSelectedItem(item);
+    setForm({ name:'', email:'', phone:'', business:'', location:'' });
+    setAgreed(false); setError(''); setFlowStep('draft');
+  };
+  const closeEngagement = () => setSelectedItem(null);
+
+  const handleExecute = () => {
+    setError('');
+    if (!form.name.trim()) return setError('Please enter your full name to sign.');
+    if (!form.email.trim()) return setError('Please enter your email address.');
+    if (!agreed) return setError('Please confirm you agree to the engagement terms.');
+    setFlowStep('payment');
+  };
+
+  const handleOrientation = (type, targetId) => {
+    setOrientation(type);
+    setTimeout(() => {
+      const el = document.getElementById(targetId);
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.scrollY - 100;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 100);
+  };
+
+  const getFeeBreakdown = (priceStr) => {
+    if (!priceStr || !priceStr.includes('K')) return { total: priceStr, commencement: priceStr, balance:'N/A' };
+    const numMatch = priceStr.match(/[\d,]+/);
+    if (!numMatch) return { total: priceStr, commencement: priceStr, balance:'N/A' };
+    const raw = parseInt(numMatch[0].replace(/,/g,''), 10);
+    const half = raw / 2;
+    return { total: priceStr, commencement: `K${half.toLocaleString()}`, balance: `K${half.toLocaleString()}` };
+  };
+  const fees = selectedItem ? getFeeBreakdown(selectedItem.price) : { total:'', commencement:'', balance:'' };
+
+  if (view === 'admin') return <AdminPortal onExit={() => setView('public')} />;
+
+  return (
+    <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', width:'100%' }}>
+      
+      {/* HEADER */}
+      <header className="site-header">
+        <div className="header-content">
+          <div style={{ display:'flex', alignItems:'center', gap:12, minWidth:0 }}>
+            <a href="#" className="logo-group" onClick={(e)=>{e.preventDefault(); window.scrollTo({top:0, behavior:'smooth'}); setMobileMenuOpen(false);}} title="Back to home">
+              <BrandLogo size={38} showDirectoryLabel={true} />
+            </a>
+            <a href={MAIN_PLATFORM_URL} style={{ display:'inline-flex', alignItems:'center', gap:7, padding:'9px 13px', background:'linear-gradient(135deg,#E8730F,#F5A623)', color:'#fff', borderRadius:'9px', fontSize:'12px', fontWeight:'800', textDecoration:'none', boxShadow:'0 8px 18px -8px rgba(232,115,15,.6)', whiteSpace:'nowrap', flexShrink:0 }}>
+              <i className="fas fa-arrow-left" style={{ fontSize:11 }}></i>
+              <span>Back to Platform</span>
+            </a>
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
+            <a href="#contact" className="btn-primary hidden sm:inline-flex" style={{ padding:'10px 20px', fontSize:13 }}>Get Started</a>
+            <button className="menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              <i className={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
+            </button>
+          </div>
+        </div>
+
+        {/* MOBILE DROPDOWN MENU */}
+        {mobileMenuOpen && (
+          <div className="mobile-menu-dropdown">
+            <a href="#home" onClick={() => setMobileMenuOpen(false)}><i className="fas fa-home" style={{width:16}}></i> Home</a>
+            <a href="#packages" onClick={() => setMobileMenuOpen(false)}><i className="fas fa-box-open" style={{width:16}}></i> Packages</a>
+            <a href="#contact" onClick={() => setMobileMenuOpen(false)}><i className="fas fa-envelope" style={{width:16}}></i> Contact</a>
+            <button onClick={() => { setMobileMenuOpen(false); setView('admin'); }}>
+              <i className="fas fa-lock" style={{width:16}}></i> Admin Portal
+            </button>
+          </div>
+        )}
+      </header>
+
+      <main style={{ flex:1, background:'#F5FAF6', width:'100%' }}>
+        <section id="home" className="fadein" style={{ background:'linear-gradient(135deg,#0A1F12 0%,#123A1F 100%)', color:'#fff', padding:'80px 24px', textAlign:'center', width:'100%' }}>
+          <div className="container" style={{ maxWidth:900 }}>
+            <span style={{ display:'inline-block', background:'rgba(232,115,15,0.2)', color:'#F5A623', padding:'6px 16px', borderRadius:99, fontSize:11, fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:24 }}>Financial Support & Management</span>
+            <h1 className="serif" style={{ fontSize:'clamp(2.2rem,5vw,3.5rem)', lineHeight:1.1, marginBottom:24 }}>Take control of your <br/><em style={{ fontStyle:'italic', color:'#F5A623' }}>business finances.</em></h1>
+            <h2 style={{ fontSize:'clamp(1.1rem,2.5vw,1.4rem)', fontWeight:600, color:'rgba(255,255,255,0.9)', marginBottom:24 }}>Make better decisions. Plan for growth.</h2>
+            <p style={{ fontSize:16, lineHeight:1.7, color:'rgba(255,255,255,0.75)', marginBottom:40, maxWidth:750, margin:'0 auto 40px' }}>We provide practical financial management and administrative support to help entrepreneurs and businesses organise their financial records, monitor cash flow, manage expenses and prepare for growth.</p>
+            <div style={{ display:'flex', gap:16, justifyContent:'center', flexWrap:'wrap' }}>
+              <a href="#orientation" className="btn-primary">Find Your Plan <i className="fas fa-arrow-right" style={{ fontSize:12 }}></i></a>
+              <a href="#packages" className="btn-ghost">View All Packages</a>
+            </div>
+          </div>
+        </section>
+
+        <section id="orientation" className="section-padding" style={{ background:'#fff', borderBottom:'1px solid #eee' }}>
+          <div className="container" style={{ maxWidth:900, textAlign:'center' }}>
+            <h2 className="serif" style={{ fontSize:28, color:'#0A1F12', marginBottom:12 }}>Where is your business right now?</h2>
+            <p style={{ fontSize:15, color:'rgba(10,31,18,0.6)', marginBottom:40 }}>Select the option that best describes you, and we'll highlight the perfect plan.</p>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(250px, 1fr))', gap:20 }}>
+              <button className={`gtile ${orientation==='starter'?'sel':''}`} onClick={() => handleOrientation('starter','pkg-starter')}>
+                <div className="ico"><i className="fas fa-seedling"></i></div>
+                <h3>Just Starting Out</h3>
+                <p>I'm a sole trader or new microbusiness trying to get my records in order.</p>
+              </button>
+              <button className={`gtile ${orientation==='control'?'sel':''}`} onClick={() => handleOrientation('control','pkg-control')}>
+                <div className="ico"><i className="fas fa-store"></i></div>
+                <h3>Active Business</h3>
+                <p>I'm an SME with regular transactions and need better control over cash flow.</p>
+              </button>
+              <button className={`gtile ${orientation==='growth'?'sel':''}`} onClick={() => handleOrientation('growth','pkg-growth')}>
+                <div className="ico"><i className="fas fa-chart-line"></i></div>
+                <h3>Preparing to Expand</h3>
+                <p>I'm growing and need forecasts, budgets, and funding readiness.</p>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section id="packages" className="section-padding">
+          <div className="container">
+            <div style={{ textAlign:'center', marginBottom:60 }}>
+              <h2 className="serif" style={{ fontSize:32, color:'#0A1F12', marginBottom:16 }}>Monthly Support Packages</h2>
+              <p style={{ fontSize:15, color:'rgba(10,31,18,0.6)', maxWidth:650, margin:'0 auto' }}>Choose the level of support that matches your business requirements.</p>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:24, alignItems:'stretch' }}>
+              {PACKAGES.map(pkg => (
+                <div key={pkg.id} id={`pkg-${pkg.id}`} className={`pricing-card ${pkg.popular?'popular':''} ${orientation===pkg.id?'highlighted':''}`}>
+                  {pkg.popular && <div className="pricing-badge">Most Popular</div>}
+                  <h3 style={{ fontSize:20, fontWeight:800, color:'#0A1F12', marginBottom:4 }}>{pkg.title}</h3>
+                  <p style={{ fontSize:13, color:'rgba(10,31,18,0.6)', marginBottom:16 }}>{pkg.audience}</p>
+                  <div style={{ fontSize:24, fontWeight:800, color:'#E8730F', marginBottom:24 }}>{pkg.price} <span style={{ fontSize:14, fontWeight:500, color:'#666' }}>/ month</span></div>
+                  <ul className="check-list" style={{ flexGrow:1 }}>
+                    {pkg.features.map((f,i) => <li key={i}><i className={`fas fa-check-circle ${f.includes('Everything')?'text-orange-500':''}`}></i> {f}</li>)}
+                  </ul>
+                  <div style={{ marginTop:24, paddingTop:16, borderTop:'1px solid #eee', fontSize:13, fontStyle:'italic', color:'#555', marginBottom:20 }}><strong>Outcome:</strong> {pkg.outcome}</div>
+                  <button onClick={() => openEngagement(pkg)} className="btn-primary" style={{ width:'100%' }}>Select Plan</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="contact" style={{ background:'#0A1F12', padding:'60px 24px', textAlign:'center' }}>
+          <div className="container">
+            <h2 className="serif" style={{ fontSize:28, color:'#fff', marginBottom:16 }}>Ready to take control?</h2>
+            <p style={{ fontSize:15, color:'rgba(255,255,255,0.7)', marginBottom:32, maxWidth:600, margin:'0 auto 32px' }}>Let's discuss how we can support your financial administration.</p>
+            <a href={waUrl('Hello StartEasy, I would like to discuss Financial Support for my business.')} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ fontSize:15, padding:'14px 32px' }}>
+              <i className="fab fa-whatsapp" style={{ marginRight:8 }}></i> Chat with an Officer
+            </a>
+          </div>
+        </section>
+      </main>
+
+      <footer style={{ background:'#0A1F12', padding:'32px 24px', textAlign:'center', borderTop:'1px solid rgba(255,255,255,0.1)' }}>
+        <p style={{ color:'rgba(255,255,255,0.4)', fontSize:13, marginBottom:16 }}>© {new Date().getFullYear()} StartEasy Zambia. All rights reserved.</p>
+        <button onClick={() => setView('admin')} style={{ background:'none', border:'1px solid rgba(255,255,255,0.2)', color:'#fff', padding:'10px 20px', borderRadius:8, fontSize:12, fontWeight:700, cursor:'pointer', display:'inline-flex', alignItems:'center', gap:8 }}>
+          <i className="fas fa-lock"></i> Admin Portal (Accounting & Finance)
+        </button>
+      </footer>
+
+      {selectedItem && (
+        <div className="modal-overlay" onClick={closeEngagement}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                <span style={{ width:8, height:8, borderRadius:'50%', background:'#F5A623' }}></span>
+                <span style={{ fontSize:11, letterSpacing:'.2em', textTransform:'uppercase', fontWeight:700, color:'#F5A623' }}>{flowStep==='draft'?'Draft Engagement Letter & Agreement':'Executed Engagement Agreement'}</span>
+              </div>
+              <button onClick={closeEngagement} style={{ background:'none', border:'none', color:'rgba(255,255,255,.5)', cursor:'pointer', padding:8 }}><i className="fas fa-times" style={{ fontSize:18 }}></i></button>
+            </div>
+            <div className="modal-body" style={{ background:'#F5FAF6' }}>
+              <div className="el" style={{ position:'relative' }}>
+                {flowStep==='payment' && <div style={{ position:'absolute', top:'30%', left:'50%', transform:'translate(-50%, -50%) rotate(-30deg)', fontSize:80, fontWeight:900, color:'rgba(30,123,60,0.08)', pointerEvents:'none', zIndex:0, whiteSpace:'nowrap', fontFamily:'Playfair Display' }}>EXECUTED</div>}
+                <div className="eh" style={{ position:'relative', zIndex:1 }}>
+                  <div><div className="brand">Start<em>Easy Zambia</em></div><div className="sub">Financial Support Engagement</div></div>
+                  <div><div className="dt">ENGAGEMENT LETTER</div><div className="mt">{new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}<br/>Ref: SE-FIN-{new Date().getFullYear()}-{Math.floor(Math.random()*9000)+1000}</div></div>
+                </div>
+                <div style={{ position:'relative', zIndex:1 }}>
+                  
+                  {/* Formal Letter Header */}
+                  <div style={{ marginBottom: 24, paddingBottom: 16, borderBottom: '1px dashed #eee' }}>
+                    <p style={{ margin: '0 0 8px', fontSize: 13.5, color: '#666' }}><strong>To:</strong></p>
+                    <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 700, color: '#0A1F12' }}>{form.name || '[Client Name]'}</p>
+                    <p style={{ margin: '0 0 4px', fontSize: 13, color: '#555' }}>{form.business || '[Business Name]'}</p>
+                    <p style={{ margin: '0', fontSize: 13, color: '#555' }}>{form.email || '[Client Email]'}</p>
+                  </div>
+
+                  <p style={{ marginBottom: 20, fontSize: 14 }}>Dear <strong>{form.name || '[Client Name]'}</strong>,</p>
+                  
+                  <p>Thank you for choosing StartEasy Zambia. We are pleased to submit this formal Engagement Letter and Agreement for your consideration.</p>
+                  <p>This document outlines the scope of services, compensation, and terms under which we will provide the <strong>{selectedItem.title}</strong> service to you and your business.</p>
+
+                  <h4 style={{ marginTop: 32 }}>1. Scope of Service</h4>
+                  <p>The Company hereby agrees to provide the following financial support service: <strong>{selectedItem.title}</strong>.</p>
+                  <p>{selectedItem.desc || "Dedicated execution of the requested financial task."}</p>
+                  <p><strong>Specifically, the Company will deliver:</strong></p>
+                  <ul>{selectedItem.features.map((f,i) => <li key={i}>{f}</li>)}</ul>
+                  
+                  <h4>2. Compensation</h4>
+                  <p>In consideration of the services rendered, the Client shall pay the Company the following fee:</p>
+                  <div className="feebox">
+                    <div className="row"><span className="l">Total Service Fee</span><span className="v">{fees.total}</span></div>
+                    <div className="row"><span className="l">Commencement Fee (50%)</span><span className="v">{fees.commencement}</span></div>
+                    <div className="row"><span className="l">Balance (50% due on delivery)</span><span className="v">{fees.balance}</span></div>
+                    <div className="total"><span className="tl">Due on acceptance</span><span className="tv">{fees.commencement}</span></div>
+                  </div>
+                  <p style={{ fontSize:11.5, color:'#666', fontStyle:'italic', marginTop:8 }}>All amounts are StartEasy service fees for work only. They are separate from and do not include any government or regulator fee.</p>
+                  
+                  <h4>3. Terms and Conditions</h4>
+                  <ul>
+                    <li><strong>No Employment Relationship:</strong> This Agreement does not create an employer-employee relationship. The Company operates as an independent contractor.</li>
+                    <li><strong>Confidentiality:</strong> The Company will have access to sensitive financial data. We will never disclose this information to third parties.</li>
+                    <li><strong>Limitation of Liability:</strong> The Company provides administrative and management support. We are not a licensed accounting or audit firm. We do not provide legal or tax advisory services.</li>
+                    <li><strong>Payment Terms:</strong> The commencement fee (50%) is due upon acceptance to initiate work. The balance (50%) is due upon delivery of the agreed deliverables.</li>
+                    <li><strong>Termination:</strong> Either party may terminate this agreement with 30 days written notice.</li>
+                  </ul>
+
+                  <h4>4. Acceptance and Signature</h4>
+                  <p>By signing below, the Client acknowledges that they have read, understood, and agree to be bound by the terms of this Agreement. Please complete your details in the box below to execute.</p>
+                  
+                  <div className="sign">
+                    <div><div className="sigval" style={{ color:'#1B6CA8' }}>{SIGNATORY_NAME}</div><div className="lbl">{SIGNATORY_TITLE}</div></div>
+                    <div><div className="sigval" style={{ color:'#E8730F' }}>{form.name || '_________________________'}</div><div className="lbl">For the Client</div></div>
+                  </div>
+                </div>
+              </div>
+
+              {flowStep==='draft' ? (
+                <div style={{ marginTop:24, background:'#fff', padding:24, borderRadius:12, border:'1px solid #eee' }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 16, color: '#0A1F12' }}>Sign & Execute</h3>
+                  
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom: 16 }}>
+                    <div><label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: '#666', marginBottom: 4, display: 'block' }}>Full Name *</label><input className="form-input" value={form.name} onChange={e => setForm({...form, name:e.target.value})} placeholder="Your full name" /></div>
+                    <div><label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: '#666', marginBottom: 4, display: 'block' }}>Email Address *</label><input className="form-input" type="email" value={form.email} onChange={e => setForm({...form, email:e.target.value})} placeholder="you@company.com" /></div>
+                  </div>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom: 20 }}>
+                    <div><label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: '#666', marginBottom: 4, display: 'block' }}>Business Name</label><input className="form-input" value={form.business} onChange={e => setForm({...form, business:e.target.value})} placeholder="If applicable" /></div>
+                    <div><label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: '#666', marginBottom: 4, display: 'block' }}>Phone Number</label><input className="form-input" value={form.phone} onChange={e => setForm({...form, phone:e.target.value})} placeholder="+260..." /></div>
+                  </div>
+
+                  <label style={{ display:'flex', gap:12, alignItems:'flex-start', fontSize:13, color:'rgba(10,31,18,.85)', cursor:'pointer', lineHeight:1.6 }}>
+                    <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ width:20, height:20, accentColor:'#E8730F', flexShrink:0, marginTop:2 }} />
+                    <span>I have read, understood, and agree to the terms of this engagement letter. I confirm that I am authorized to sign on behalf of my business.</span>
+                  </label>
+                  {error && <div style={{ background:'#FFE8E5', color:'#B8564F', padding:12, borderRadius:6, marginTop:16, fontSize:13, fontWeight:600 }}>{error}</div>}
+                  <div style={{ display:'flex', flexDirection:'column', gap:12, marginTop:20 }}>
+                    <button onClick={handleExecute} className="btn-primary" style={{ width:'100%', padding:'16px' }}><i className="fas fa-file-signature"></i> Execute Agreement & Proceed to Payment</button>
+                    <button onClick={closeEngagement} style={{ width:'100%', padding:'16px', background:'#fff', border:'1px solid #ccc', borderRadius:9, fontWeight:600, cursor:'pointer' }}>Cancel</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="success-box fadein">
+                  <div style={{ width:64, height:64, borderRadius:'50%', background:'#EAF7EE', color:'#1E7B3C', display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, margin:'0 auto 24px' }}><i className="fas fa-check-circle"></i></div>
+                  <h2 className="serif" style={{ fontSize:24, color:'#0A1F12', marginBottom:12 }}>Agreement Executed!</h2>
+                  <p style={{ fontSize:14, color:'rgba(10,31,18,0.7)', marginBottom:24, lineHeight:1.6 }}>Your engagement letter is now locked and awaiting the <strong>Commencement Fee of {fees.commencement}</strong>. Please select a payment method below and send the transaction reference to our officer on WhatsApp.</p>
+                  <div style={{ textAlign:'left', marginBottom:24 }}>
+                    <div className="method-card">
+                      <div className="method-header"><i className="fas fa-mobile-alt"></i> Airtel Money / MTN MoMo</div>
+                      <div className="method-row"><span className="l">Recipient Name</span><span className="v">Carol Kambole</span></div>
+                      <div className="method-row"><span className="l">Airtel Number</span><span className="v">+260 975 914 001</span></div>
+                      <div className="method-row"><span className="l">MTN Number</span><span className="v">076 852 6191</span></div>
+                    </div>
+                    <div className="method-card">
+                      <div className="method-header"><i className="fas fa-university"></i> Bank Transfer</div>
+                      <div className="method-row"><span className="l">Bank</span><span className="v">Standard Chartered</span></div>
+                      <div className="method-row"><span className="l">Account Name</span><span className="v">StartEasy (Carol Kambole)</span></div>
+                      <div className="method-row"><span className="l">Account Number</span><span className="v">0152502166700</span></div>
+                    </div>
+                  </div>
+                  <a href={waUrl(`*EXECUTED ENGAGEMENT PROPOSAL*\n\n*Client:* ${form.name}\n*Email:* ${form.email}\n*Phone:* ${form.phone || 'N/A'}\n\n*Service:* ${selectedItem.title}\n*Commencement Fee Due:* ${fees.commencement}\n\nI have executed the agreement. Here is my payment proof:`)} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display:'flex', width:'100%', marginBottom:12, background:'#25D366', boxShadow:'0 10px 26px rgba(37,211,102,.32)', justifyContent:'center', padding:'16px' }}>
+                    <i className="fab fa-whatsapp" style={{ fontSize:18 }}></i> Send Payment Proof on WhatsApp
+                  </a>
+                  <button onClick={closeEngagement} style={{ background:'none', border:'none', color:'#666', textDecoration:'underline', cursor:'pointer', fontSize:13, fontWeight:600 }}>Close and return</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FORM MODAL
+   ═══════════════════════════════════════════════════════════════════ */
+function FormModal({ modal, onClose, onSave, saving, error, clients }) {
+  const [data, setData] = useState(modal.data);
+  const set = (k, v) => setData(d => ({...d, [k]: v}));
+
+  const renderFields = () => {
+    if (modal.type === 'ledger') {
+      return (
+        <>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Date *</label>
+              <input type="date" className="form-input" value={data.date || ''} onChange={e => set('date', e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Type *</label>
+              <select className="form-input" value={data.type || 'Income'} onChange={e => { set('type', e.target.value); set('category', ''); }}>
+                <option value="Income">Income</option>
+                <option value="Expense">Expense</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Description *</label>
+            <input type="text" className="form-input" value={data.desc || ''} onChange={e => set('desc', e.target.value)} placeholder="e.g. Monthly service fee — Client X" required />
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Category</label>
+              <select className="form-input" value={data.category || ''} onChange={e => set('category', e.target.value)}>
+                <option value="">— Select —</option>
+                {(LEDGER_CATEGORIES[data.type] || []).map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Amount (K) *</label>
+              <input type="number" step="0.01" min="0" className="form-input" value={data.amount || ''} onChange={e => set('amount', e.target.value)} placeholder="0.00" required />
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Reference / Notes</label>
+            <input type="text" className="form-input" value={data.reference || ''} onChange={e => set('reference', e.target.value)} placeholder="e.g. Receipt No., Client Ref" />
+          </div>
+        </>
+      );
+    }
+    if (modal.type === 'invoice') {
+      return (
+        <>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Invoice No.</label>
+              <input type="text" className="form-input" value={data.invoiceNo || ''} readOnly style={{ background:'#F8FAFC', fontFamily:'monospace', fontWeight:700 }} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Status</label>
+              <select className="form-input" value={data.status || 'Pending'} onChange={e => set('status', e.target.value)}>
+                <option value="Pending">Pending</option>
+                <option value="Paid">Paid</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Client Name *</label>
+            <input type="text" list="client-list" className="form-input" value={data.client || ''} onChange={e => set('client', e.target.value)} placeholder="Type or select client..." required />
+            <datalist id="client-list">
+              {clients.map(c => <option key={c.id} value={c.name} />)}
+            </datalist>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Description</label>
+            <input type="text" className="form-input" value={data.description || ''} onChange={e => set('description', e.target.value)} placeholder="e.g. Monthly retainer — Business Control" />
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Issue Date *</label>
+              <input type="date" className="form-input" value={data.issueDate || ''} onChange={e => set('issueDate', e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Due Date *</label>
+              <input type="date" className="form-input" value={data.dueDate || ''} onChange={e => set('dueDate', e.target.value)} required />
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Amount (K) *</label>
+            <input type="number" step="0.01" min="0" className="form-input" value={data.amount || ''} onChange={e => set('amount', e.target.value)} placeholder="0.00" required />
+          </div>
+        </>
+      );
+    }
+    if (modal.type === 'client') {
+      return (
+        <>
+          <div className="form-group">
+            <label className="form-label">Full Name *</label>
+            <input type="text" className="form-input" value={data.name || ''} onChange={e => set('name', e.target.value)} required />
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Email *</label>
+              <input type="email" className="form-input" value={data.email || ''} onChange={e => set('email', e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Phone</label>
+              <input type="text" className="form-input" value={data.phone || ''} onChange={e => set('phone', e.target.value)} />
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Package *</label>
+              <select className="form-input" value={data.package || ''} onChange={e => set('package', e.target.value)} required>
+                <option value="">— Select —</option>
+                <option value="Financial Starter">Financial Starter — K1,000</option>
+                <option value="Business Control">Business Control — K2,000</option>
+                <option value="Growth & Financial Planning">Growth & Financial Planning — K4,000</option>
+                <option value="Directory Service">Directory Service</option>
+                <option value="Venture Service">Venture Service</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Status</label>
+              <select className="form-input" value={data.status || 'Active'} onChange={e => set('status', e.target.value)}>
+                <option value="Active">Active</option>
+                <option value="Paused">Paused</option>
+                <option value="Ended">Ended</option>
+              </select>
+            </div>
+          </div>
+        </>
+      );
+    }
+    if (modal.type === 'payment') {
+      return (
+        <>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Client Name *</label>
+              <input type="text" className="form-input" value={data.clientName || ''} onChange={e => set('clientName', e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Client Email *</label>
+              <input type="email" className="form-input" value={data.clientEmail || ''} onChange={e => set('clientEmail', e.target.value)} required />
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Service Package *</label>
+            <select className="form-input" value={data.serviceTitle || ''} onChange={e => set('serviceTitle', e.target.value)} required>
+              <option value="">— Select —</option>
+              {PACKAGES.map(p => <option key={p.id} value={p.title}>{p.title} — {p.price}</option>)}
+              <option value="Directory Service">Directory Service (Manual)</option>
+              <option value="Venture Service">Venture Service (Manual)</option>
+            </select>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Amount (K) *</label>
+              <input type="text" className="form-input" value={data.amount || ''} onChange={e => set('amount', e.target.value)} placeholder="e.g. K2,000" required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Status</label>
+              <select className="form-input" value={data.status || 'under_review'} onChange={e => set('status', e.target.value)}>
+                <option value="under_review">Under Review</option>
+                <option value="approved">Approved</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Phone</label>
+            <input type="text" className="form-input" value={data.phone || ''} onChange={e => set('phone', e.target.value)} />
+          </div>
+        </>
+      );
+    }
+    return null;
+  };
+
+  const titleMap = { ledger:'Ledger Entry', invoice:'Invoice', client:'Client', payment:'Payment' };
+
+  return (
+    <div className="modal-form-overlay" onClick={onClose}>
+      <div className="modal-form" onClick={e => e.stopPropagation()}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20 }}>
+          <h3>{modal.mode === 'add' ? 'Add' : 'Edit'} {titleMap[modal.type]}</h3>
+          <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'#666', fontSize:18 }}><i className="fas fa-times"></i></button>
+        </div>
+        {error && <div style={{ background:'#FFE8E5', color:'#B8564F', padding:12, borderRadius:8, fontSize:13, marginBottom:16, fontWeight:600 }}>{error}</div>}
+        <form onSubmit={e => { e.preventDefault(); onSave(data); }}>
+          {renderFields()}
+          <div style={{ display:'flex', gap:12, marginTop:24 }}>
+            <button type="submit" disabled={saving} className="btn-primary" style={{ flex:1, justifyContent:'center' }}>
+              {saving ? <><i className="fas fa-circle-notch fa-spin"></i> Saving...</> : <><i className="fas fa-save"></i> {modal.mode === 'add' ? 'Create' : 'Update'}</>}
+            </button>
+            <button type="button" onClick={onClose} style={{ padding:'14px 24px', background:'#fff', border:'1px solid #ccc', borderRadius:9, fontWeight:600, cursor:'pointer' }}>Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ADMIN PORTAL
+   ═══════════════════════════════════════════════════════════════════ */
+function AdminPortal({ onExit }) {
+  const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(true);
+
+  const [payments, setPayments] = useState([]);
+  const [ledger, setLedger] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
+
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [statementTab, setStatementTab] = useState('income');
+  const [period, setPeriod] = useState('all');
+  const [modal, setModal] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
+
+  // TOASTS STATE
+  const [toasts, setToasts] = useState([]);
+  const showToast = (message, type = 'success') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+  };
+
+  // LOCK BODY SCROLL WHEN MODAL IS OPEN
+  useEffect(() => {
+    if (modal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [modal]);
+
+  useEffect(() => {
+    const unsub = auth.onAuthStateChanged(async (u) => {
+      if (u) {
+        setUser(u);
+        try {
+          const snap = await db.collection('se_admins').doc(u.uid).get();
+          setIsAdmin(snap.exists);
+          if (!snap.exists) setAuthError('Access denied. You are not an authorized admin.');
+        } catch (e) { setAuthError('Error verifying admin status: ' + e.message); }
+      } else {
+        setUser(null); setIsAdmin(false);
+      }
+      setAuthLoading(false);
+    });
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const unsubPayments = db.collection('se_payments').orderBy('submittedAt','desc').limit(100).onSnapshot(snap => {
+      const raw = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const filtered = raw.filter(p => {
+        const e = (p.clientEmail || '').toLowerCase();
+        const n = (p.clientName || '').toLowerCase();
+        const s = (p.serviceTitle || '').toLowerCase();
+        const badE = ['naisainga@gmail.com','lewismwaba@gmail.com','moneyard2@gmail.com'];
+        const badN = ['lewis mwaba','mwaba lewis','katongo mercy'];
+        return !badE.includes(e) && !badN.includes(n) && !s.includes('buyer access subscription');
+      });
+      setPayments(filtered);
+    }, err => console.error(err));
+
+    const unsubLedger = db.collection('se_ledger').orderBy('date','desc').onSnapshot(snap => {
+      setLedger(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, err => console.error(err));
+
+    const unsubClients = db.collection('se_clients').onSnapshot(snap => {
+      setClients(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, err => console.error(err));
+
+    const unsubInvoices = db.collection('se_invoices').onSnapshot(snap => {
+      setInvoices(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, err => console.error(err));
+
+    setLoadingData(false);
+    return () => { unsubPayments(); unsubLedger(); unsubClients(); unsubInvoices(); };
+  }, [isAdmin]);
+
+  const handleLogin = async (e) => {
+    e.preventDefault(); setAuthError(''); setAuthLoading(true);
+    try { await auth.signInWithEmailAndPassword(email, password); }
+    catch (err) { setAuthError(err.message); setAuthLoading(false); }
+  };
+  const handleLogout = () => auth.signOut();
+
+  // ─── DIRECT PDF DOWNLOAD (html2pdf) ───
+  const downloadPDF = () => {
+    const element = document.getElementById('print-area');
+    if (!element) return;
+    showToast('Generating PDF...', 'info');
+
+    const opt = {
+      margin:       0.5,
+      filename:     `StartEasy_Statement_${todayStr()}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    
+    window.html2pdf().set(opt).from(element).save().then(() => {
+      showToast('PDF Downloaded successfully!', 'success');
+    });
+  };
+
+  // ─── IMPROVED CSV EXPORT ───
+  const exportToCSV = (data, filename, headers) => {
+    if (!data || !data.length) return showToast("No data to export.", "error");
+    
+    setIsExporting(true);
+    setTimeout(() => {
+      try {
+        const csvRows = [];
+        csvRows.push(headers.join(','));
+        
+        for (const row of data) {
+          const values = headers.map(header => {
+            let val = row[header];
+            if (val === undefined || val === null) val = '';
+            return `"${String(val).replace(/"/g, '""')}"`;
+          });
+          csvRows.push(values.join(','));
+        }
+        
+        const csvString = csvRows.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        
+        if (navigator.msSaveBlob) {
+          navigator.msSaveBlob(blob, `${filename}_${todayStr()}.csv`);
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${filename}_${todayStr()}.csv`;
+          a.style.display = 'none';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+        
+        showToast(`${filename} exported successfully!`, 'success');
+      } catch (err) {
+        showToast("Failed to export CSV.", "error");
+      } finally {
+        setIsExporting(false);
+      }
+    }, 500);
+  };
+
+  const filterByPeriod = (items, dateField = 'date') => {
+    if (period === 'all') return items;
+    const now = new Date();
+    return items.filter(item => {
+      const d = toDate(item[dateField]);
+      if (!d) return false;
+      if (period === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      if (period === 'last_month') {
+        const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        return d.getMonth() === lm.getMonth() && d.getFullYear() === lm.getFullYear();
+      }
+      if (period === 'quarter') return Math.floor(d.getMonth()/3) === Math.floor(now.getMonth()/3) && d.getFullYear() === now.getFullYear();
+      if (period === 'year') return d.getFullYear() === now.getFullYear();
+      return true;
+    });
+  };
+
+  const applySearch = (items) => {
+    if (!searchTerm) return items;
+    const lowerSearch = searchTerm.toLowerCase();
+    return items.filter(item => {
+      return Object.values(item).some(val => 
+        String(val || '').toLowerCase().includes(lowerSearch)
+      );
+    });
+  };
+
+  const isPackagePayment = (title) => {
+      if (!title) return false;
+      const t = title.toLowerCase();
+      return t.includes('financial starter') || t.includes('business control') || t.includes('growth & financial planning');
+  };
+
+  const periodLedger = useMemo(() => filterByPeriod(ledger, 'date'), [ledger, period]);
+  const periodInvoices = useMemo(() => filterByPeriod(invoices, 'issueDate'), [invoices, period]);
+  const periodPayments = useMemo(() => filterByPeriod(payments, 'submittedAt'), [payments, period]);
+
+  const filteredLedger = useMemo(() => applySearch(periodLedger), [periodLedger, searchTerm]);
+  const filteredInvoices = useMemo(() => applySearch(periodInvoices), [periodInvoices, searchTerm]);
+  const filteredPayments = useMemo(() => applySearch(periodPayments), [periodPayments, searchTerm]);
+  const filteredClients = useMemo(() => applySearch(clients), [clients, searchTerm]);
+  
+  const periodLabel = PERIOD_LABELS[period];
+
+  // Calculations strictly use Period Data
+  const calc = useMemo(() => {
+    const income = periodLedger.filter(l => l.type === 'Income');
+    const expense = periodLedger.filter(l => l.type === 'Expense');
+    const totalIncome = income.reduce((s, l) => s + num(l.amount), 0);
+    const totalExpense = expense.reduce((s, l) => s + num(l.amount), 0);
+    const netProfit = totalIncome - totalExpense;
+    const profitMargin = totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0;
+    const expenseRatio = totalIncome > 0 ? (totalExpense / totalIncome) * 100 : 0;
+
+    const incomeByCategory = {};
+    income.forEach(l => { const c = l.category || 'Other Income'; incomeByCategory[c] = (incomeByCategory[c] || 0) + num(l.amount); });
+    const expenseByCategory = {};
+    expense.forEach(l => { const c = l.category || 'Other'; expenseByCategory[c] = (expenseByCategory[c] || 0) + num(l.amount); });
+
+    const cashflow = { operating: { in: 0, out: 0 }, investing: { in: 0, out: 0 }, financing: { in: 0, out: 0 } };
+    periodLedger.forEach(l => {
+      const cls = CASHFLOW_CLASS[l.category] || 'operating';
+      const v = num(l.amount);
+      if (l.type === 'Income') cashflow[cls].in += v;
+      else cashflow[cls].out += v;
+    });
+    const cfOperating = cashflow.operating.in - cashflow.operating.out;
+    const cfInvesting = cashflow.investing.in - cashflow.investing.out;
+    const cfFinancing = cashflow.financing.in - cashflow.financing.out;
+    const netCashflow = cfOperating + cfInvesting + cfFinancing;
+
+    const approvedPmts = periodPayments.filter(p => p.status === 'approved');
+    const finPmts = approvedPmts.filter(p => isPackagePayment(p.serviceTitle));
+    const dirPmts = approvedPmts.filter(p => !isPackagePayment(p.serviceTitle));
+    
+    const finCollected = finPmts.reduce((s, p) => s + num(p.amount) / 2, 0);
+    const dirCollected = dirPmts.reduce((s, p) => s + num(p.amount), 0);
+    
+    const commencementCollected = finCollected + dirCollected;
+    const totalRevenue = totalIncome + commencementCollected;
+
+    const invMetrics = { total:0, paid:0, pending:0, overdue:0, count:0 };
+    periodInvoices.forEach(inv => {
+      const amt = num(inv.amount);
+      invMetrics.total += amt; invMetrics.count += 1;
+      const st = getInvoiceStatus(inv);
+      if (st === 'Paid') invMetrics.paid += amt;
+      else if (st === 'Overdue') invMetrics.overdue += amt;
+      else invMetrics.pending += amt;
+    });
+
+    const pkgPrice = { 'Financial Starter': 1000, 'Business Control': 2000, 'Growth & Financial Planning': 4000 };
+    const activeClients = clients.filter(c => (c.status || 'Active') === 'Active');
+    const mrr = activeClients.reduce((s, c) => s + (pkgPrice[c.package] || 0), 0);
+
+    return {
+      totalIncome, totalExpense, netProfit, profitMargin, expenseRatio,
+      incomeByCategory, expenseByCategory,
+      cashflow, cfOperating, cfInvesting, cfFinancing, netCashflow,
+      commencementCollected, totalRevenue, dirCollected, finCollected,
+      invMetrics, mrr, activeClients: activeClients.length, totalClients: clients.length
+    };
+  }, [periodLedger, periodInvoices, periodPayments, clients]);
+
+  const pendingPayments = payments.filter(p => p.status === 'under_review' || !p.status);
+
+  const getInvoiceStatus = (inv) => {
+    if (inv.status === 'Paid') return 'Paid';
+    const due = toDate(inv.dueDate);
+    if (!due) return 'Pending';
+    return due < new Date() ? 'Overdue' : 'Pending';
+  };
+  
+  const nextInvoiceNo = (list) => {
+    const year = new Date().getFullYear();
+    const maxNum = list.filter(i => (i.invoiceNo || '').startsWith(`INV-${year}-`))
+      .reduce((m, i) => Math.max(m, parseInt((i.invoiceNo || '').split('-')[2]) || 0), 0);
+    return `INV-${year}-${String(maxNum + 1).padStart(4, '0')}`;
+  };
+
+  const openAdd = (type) => {
+    const today = todayStr();
+    let data = {};
+    if (type === 'ledger') data = { date: today, type: 'Income', desc: '', category: 'Service Fees', amount: '', reference: '' };
+    if (type === 'invoice') data = { invoiceNo: nextInvoiceNo(invoices), client: '', description: '', issueDate: today, dueDate: addDays(today, 30), amount: '', status: 'Pending' };
+    if (type === 'client') data = { name: '', email: '', phone: '', package: 'Business Control', status: 'Active' };
+    if (type === 'payment') data = { clientName: '', clientEmail: '', phone: '', serviceTitle: '', amount: '', status: 'under_review' };
+    setModal({ type, mode: 'add', data });
+    setFormError('');
+  };
+  const openEdit = (type, data) => {
+    setModal({ type, mode: 'edit', data: { ...data } });
+    setFormError('');
+  };
+  const closeModal = () => { setModal(null); setFormError(''); };
+
+  const saveEntry = async (data) => {
+    setFormError(''); setSaving(true);
+    try {
+      if (modal.type === 'ledger') {
+        if (!data.desc?.trim()) throw new Error('Description is required');
+        if (!data.amount || num(data.amount) <= 0) throw new Error('Amount must be greater than zero');
+        const payload = { ...data, amount: num(data.amount) };
+        if (modal.mode === 'add') {
+          await db.collection('se_ledger').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        } else {
+          await db.collection('se_ledger').doc(data.id).update(payload);
+        }
+      }
+      if (modal.type === 'invoice') {
+        if (!data.client?.trim()) throw new Error('Client name is required');
+        if (!data.amount || num(data.amount) <= 0) throw new Error('Amount must be greater than zero');
+        if (!data.issueDate || !data.dueDate) throw new Error('Issue and due date are required');
+        const payload = { ...data, amount: num(data.amount) };
+        if (modal.mode === 'add') {
+          await db.collection('se_invoices').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        } else {
+          await db.collection('se_invoices').doc(data.id).update(payload);
+        }
+      }
+      if (modal.type === 'client') {
+        if (!data.name?.trim()) throw new Error('Name is required');
+        if (!data.email?.trim()) throw new Error('Email is required');
+        if (modal.mode === 'add') {
+          await db.collection('se_clients').add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        } else {
+          await db.collection('se_clients').doc(data.id).update(data);
+        }
+      }
+      if (modal.type === 'payment') {
+        if (!data.clientName?.trim()) throw new Error('Client name is required');
+        if (!data.clientEmail?.trim()) throw new Error('Client email is required');
+        if (!data.serviceTitle) throw new Error('Service package is required');
+        if (!data.amount) throw new Error('Amount is required');
+        if (modal.mode === 'add') {
+          await db.collection('se_payments').add({ ...data, submittedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        } else {
+          await db.collection('se_payments').doc(data.id).update(data);
+        }
+      }
+      showToast('Record saved successfully.', 'success');
+      closeModal();
+    } catch (err) {
+      setFormError(err.message);
+      showToast('Failed to save record.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (collection, id) => {
+    if (!window.confirm('Delete this record permanently? This cannot be undone.')) return;
+    try { 
+      await db.collection(collection).doc(id).delete(); 
+      showToast('Record deleted.', 'info');
+    }
+    catch (err) { showToast('Failed to delete: ' + err.message, 'error'); }
+  };
+
+  // ─── VERIFY PAYMENT & CONNECT TO ACCOUNTING ───
+  const handleVerifyPayment = async (payment) => {
+    if (!window.confirm('Verify this payment and add client to active portfolio?')) return;
+    try {
+      await db.collection('se_payments').doc(payment.id).update({
+        status: 'approved',
+        verifiedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      const exists = clients.find(c => (c.email || '').toLowerCase() === (payment.clientEmail || '').toLowerCase());
+      if (!exists) {
+        await db.collection('se_clients').add({
+          name: payment.clientName || 'Unknown',
+          email: payment.clientEmail || '',
+          phone: payment.phone || '',
+          package: payment.serviceTitle || '',
+          status: 'Active',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+
+      const isPkg = isPackagePayment(payment.serviceTitle);
+      const expectedAmt = isPkg ? num(payment.amount) / 2 : num(payment.amount);
+
+      // AUTO-LEDGER ENTRY
+      await db.collection('se_ledger').add({
+        date: todayStr(),
+        type: 'Income',
+        category: isPkg ? 'Commencement Fees' : 'Service Fees',
+        desc: `${isPkg ? 'Financial' : 'Direct'} Payment: ${payment.serviceTitle} — ${payment.clientName}`,
+        amount: expectedAmt,
+        reference: payment.ref || payment.id,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // AUTO-GENERATE INVOICE
+      await db.collection('se_invoices').add({
+        invoiceNo: `INV-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
+        client: payment.clientName || 'Unknown',
+        description: `${payment.serviceTitle || 'Package'}`,
+        issueDate: todayStr(),
+        dueDate: addDays(todayStr(), 30),
+        amount: expectedAmt,
+        status: 'Paid',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      showToast('Payment verified, ledger updated, invoice generated.', 'success');
+    } catch (err) { 
+      showToast('Failed to verify: ' + err.message, 'error'); 
+    }
+  };
+
+  const handleMarkInvoicePaid = async (inv) => {
+    try { 
+      await db.collection('se_invoices').doc(inv.id).update({ status: 'Paid' }); 
+      showToast('Invoice marked as Paid.', 'success');
+    }
+    catch (err) { showToast('Failed: ' + err.message, 'error'); }
+  };
+
+  if (authLoading) {
+    return <div className="auth-gate"><i className="fas fa-circle-notch fa-spin" style={{ color:'#F5A623', fontSize:32 }}></i></div>;
+  }
+  if (!user || !isAdmin) {
+    return (
+      <div className="auth-gate fadein">
+        <div className="auth-box">
+          <div style={{ textAlign:'center', marginBottom:24 }}>
+            <div className="logo-mark" style={{ margin:'0 auto 16px', width:48, height:48, fontSize:22 }}>S</div>
+            <h2 className="serif" style={{ fontSize:24, color:'#0A1F12', margin:0 }}>Finance Admin Portal</h2>
+            <p style={{ fontSize:14, color:'rgba(10,31,18,0.6)', marginTop:8 }}>Authorized personnel only</p>
+          </div>
+          {authError && <div style={{ background:'#FFE8E5', color:'#B8564F', padding:12, borderRadius:8, fontSize:13, marginBottom:16, fontWeight:600 }}><i className="fas fa-exclamation-circle"></i> {authError}</div>}
+          <form onSubmit={handleLogin}>
+            <label style={{ display:'block', fontSize:12, fontWeight:700, color:'#0A1F12', marginBottom:6 }}>Admin Email</label>
+            <input type="email" className="auth-input" value={email} onChange={e => setEmail(e.target.value)} required placeholder="admin@starteasyzambia.com" />
+            <label style={{ display:'block', fontSize:12, fontWeight:700, color:'#0A1F12', marginBottom:6 }}>Password</label>
+            <input type="password" className="auth-input" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••••" />
+            <button type="submit" className="btn-primary" style={{ width:'100%', padding:'14px', marginTop:8 }}><i className="fas fa-lock-open"></i> Secure Login</button>
+          </form>
+          <button onClick={onExit} style={{ width:'100%', background:'none', border:'none', color:'#666', fontSize:13, marginTop:16, cursor:'pointer', textDecoration:'underline' }}>Return to Public Page</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="admin-layout fadein">
+        {/* TOASTS */}
+        <div className="toast-container">
+          {toasts.map(t => (
+            <div key={t.id} className={`toast ${t.type}`}>
+              <i className={`fas ${t.type === 'success' ? 'fa-check-circle' : t.type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}`} style={{ color: t.type === 'success' ? '#1E7B3C' : t.type === 'error' ? '#B8564F' : '#1B6CA8' }}></i>
+              {t.message}
+            </div>
+          ))}
+        </div>
+
+        <div className="admin-top-bar">
+          <div style={{ display:'flex', alignItems:'center', gap:16 }}>
+            <button className="admin-hamburger" onClick={() => setIsDrawerOpen(true)}>
+              <i className="fas fa-bars"></i>
+              <span className="hidden sm:inline">StartEasy Finance</span>
+            </button>
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:16 }}>
+            <span className="hidden sm:inline" style={{ fontSize:13, fontWeight:600, color:'rgba(10,31,18,0.6)' }}>{user.email}</span>
+            <button onClick={handleLogout} style={{ background:'rgba(184,86,79,0.1)', border:'1px solid #B8564F', color:'#B8564F', padding:'8px 16px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', gap:6 }}>
+              <i className="fas fa-sign-out-alt"></i> <span className="hidden sm:inline">Sign Out</span>
+            </button>
+          </div>
+        </div>
+
+        <div className={`admin-drawer-overlay ${isDrawerOpen ? 'open' : ''}`} onClick={() => setIsDrawerOpen(false)}></div>
+
+        <aside className={`admin-drawer ${isDrawerOpen ? 'open' : ''}`}>
+          <div style={{ padding:24, borderBottom:'1px solid rgba(255,255,255,0.1)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+              <div className="logo-mark" style={{ width:32, height:32, fontSize:16 }}>S</div>
+              <div>
+                <div style={{ fontSize:8, letterSpacing:'0.15em', textTransform:'uppercase', color:'rgba(255,255,255,0.5)', fontWeight:700 }}>Accounting & Finance</div>
+                <div style={{ fontSize:14, fontWeight:700, color:'#fff' }}>StartEasy Zambia</div>
+              </div>
+            </div>
+            <button onClick={() => setIsDrawerOpen(false)} style={{ background:'none', border:'none', color:'#fff', cursor:'pointer', fontSize:18 }}><i className="fas fa-times"></i></button>
+          </div>
+
+          <nav style={{ flex:1, overflowY:'auto' }}>
+            <div className="admin-nav-section">Overview</div>
+            <div className={`admin-nav-item ${activeTab==='overview'?'active':''}`} onClick={() => { setActiveTab('overview'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-chart-pie"></i> Dashboard</div>
+
+            <div className="admin-nav-section" style={{ color:'#F5A623' }}>Client Operations</div>
+            <div className={`admin-nav-item ${activeTab==='onboarding'?'active':''}`} onClick={() => { setActiveTab('onboarding'); setIsDrawerOpen(false); setSearchTerm(''); }}>
+              <i className="fas fa-money-check-alt"></i> Onboarding Queue {pendingPayments.length > 0 && <span style={{ background:'#B8564F', color:'#fff', borderRadius:99, padding:'2px 8px', fontSize:10, marginLeft:'auto' }}>{pendingPayments.length}</span>}
+            </div>
+            <div className={`admin-nav-item ${activeTab==='portfolio'?'active':''}`} onClick={() => { setActiveTab('portfolio'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-users"></i> Client Portfolio</div>
+
+            <div className="admin-nav-section" style={{ color:'#4CB050' }}>Company Finance</div>
+            <div className={`admin-nav-item ${activeTab==='ledger'?'active':''}`} onClick={() => { setActiveTab('ledger'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-book"></i> Company Ledger</div>
+            <div className={`admin-nav-item ${activeTab==='invoices'?'active':''}`} onClick={() => { setActiveTab('invoices'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-file-invoice"></i> Invoicing</div>
+            <div className={`admin-nav-item ${activeTab==='statements'?'active':''}`} onClick={() => { setActiveTab('statements'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-file-signature"></i> Financial Statements</div>
+          </nav>
+
+          <div style={{ padding:24, borderTop:'1px solid rgba(255,255,255,0.1)' }}>
+            <button onClick={handleLogout} style={{ width:'100%', background:'rgba(184,86,79,0.2)', border:'1px solid #B8564F', color:'#FFB4A8', padding:'10px', borderRadius:8, fontSize:13, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
+              <i className="fas fa-sign-out-alt"></i> Sign Out
+            </button>
+          </div>
+        </aside>
+
+        <main className="admin-content">
+          
+          {/* GLOBAL FILTER & SEARCH BAR */}
+          {activeTab !== 'statements' && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
+              <div className="filter-tabs" style={{ marginBottom: 0 }}>
+                <span style={{ fontSize:11, fontWeight:800, color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em', marginRight:8 }}>Period:</span>
+                {Object.entries(PERIOD_LABELS).map(([k, label]) => (
+                  <button key={k} className={`filter-tab ${period===k?'active':''}`} onClick={() => setPeriod(k)}>{label}</button>
+                ))}
+              </div>
+              
+              <div style={{ width: '100%', maxWidth: 350 }}>
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <i className="fas fa-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }}></i>
+                  <input 
+                    type="text" 
+                    placeholder="Search all records (name, amount, date)..." 
+                    className="form-input" 
+                    style={{ paddingLeft: 36, paddingRight: searchTerm ? 36 : 12, borderRadius: 20 }}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  {searchTerm && (
+                    <i 
+                      className="fas fa-times" 
+                      style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', cursor: 'pointer' }}
+                      onClick={() => setSearchTerm('')}
+                      title="Clear search"
+                    ></i>
+                  )}
+                </div>
+                {/* SEARCH RESULT COUNTER */}
+                {searchTerm && (
+                  <div style={{ fontSize: 11, color: '#E8730F', marginTop: 4, paddingLeft: 8, fontWeight: 600 }}>
+                    Found {activeTab === 'ledger' ? filteredLedger.length : activeTab === 'invoices' ? filteredInvoices.length : activeTab === 'portfolio' ? filteredClients.length : filteredPayments.length} results for "{searchTerm}"
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'overview' && (
+            <div className="fadein">
+              <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', marginBottom:8 }}>Finance Dashboard</h1>
+              <p style={{ fontSize:13, color:'#64748B', marginBottom:24 }}>Snapshot · {periodLabel}</p>
+
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:20, marginBottom:32 }}>
+                <div className="admin-card">
+                  <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Gross Revenue</div>
+                  <div className="serif" style={{ fontSize:30, fontWeight:800, color:'#1E7B3C' }}>{fmtK(calc.totalRevenue)}</div>
+                  <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Ledger + Verified Payments</div>
+                </div>
+                <div className="admin-card">
+                  <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Net Profit</div>
+                  <div className="serif" style={{ fontSize:30, fontWeight:800, color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtK(calc.netProfit)}</div>
+                  <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Revenue − Expenses</div>
+                </div>
+                <div className="admin-card">
+                  <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Profit Margin</div>
+                  <div className="serif" style={{ fontSize:30, fontWeight:800, color: calc.profitMargin >= 20 ? '#1E7B3C' : calc.profitMargin >= 0 ? '#E8730F' : '#B8564F' }}>{calc.profitMargin.toFixed(1)}%</div>
+                  <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Net Profit ÷ Total Income</div>
+                </div>
+                <div className="admin-card">
+                  <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Active Clients</div>
+                  <div className="serif" style={{ fontSize:30, fontWeight:800, color:'#0A1F12' }}>{calc.activeClients}</div>
+                  <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>MRR: <strong>{fmtK(calc.mrr)}</strong></div>
+                </div>
+              </div>
+
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))', gap:20, marginBottom:32 }}>
+                <div className="admin-card">
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+                    <h3 style={{ fontSize:15, fontWeight:800, color:'#0A1F12', margin:0 }}>Cash Position</h3>
+                    <span className={`kpi-trend ${calc.netCashflow >= 0 ? 'up' : 'down'}`}>{calc.netCashflow >= 0 ? '▲ Positive' : '▼ Negative'}</span>
+                  </div>
+                  <div style={{ fontSize:13, color:'#64748B', marginBottom:8 }}>Net cash flow (Operating + Investing + Financing)</div>
+                  <div style={{ fontFamily:'Consolas, monospace', fontSize:22, fontWeight:800, color: calc.netCashflow >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtK(calc.netCashflow)}</div>
+                  <div style={{ display:'flex', gap:12, marginTop:16, fontSize:11, color:'#64748B' }}>
+                    <span>Operating: <strong style={{ color:'#0A1F12' }}>{fmtK(calc.cfOperating)}</strong></span>
+                    <span>Investing: <strong style={{ color:'#0A1F12' }}>{fmtK(calc.cfInvesting)}</strong></span>
+                    <span>Financing: <strong style={{ color:'#0A1F12' }}>{fmtK(calc.cfFinancing)}</strong></span>
+                  </div>
+                </div>
+                <div className="admin-card">
+                  <h3 style={{ fontSize:15, fontWeight:800, color:'#0A1F12', marginBottom:16, marginTop:0 }}>Invoices (AR Aging)</h3>
+                  <div style={{ fontSize:13, color:'#64748B', marginBottom:8 }}>{calc.invMetrics.count} invoices · {fmtK(calc.invMetrics.total)} total</div>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, marginTop:12 }}>
+                    <div><div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Paid</div><div style={{ fontSize:16, fontWeight:800, color:'#1E7B3C' }}>{fmtK(calc.invMetrics.paid)}</div></div>
+                    <div><div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Pending</div><div style={{ fontSize:16, fontWeight:800, color:'#E8730F' }}>{fmtK(calc.invMetrics.pending)}</div></div>
+                    <div><div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Overdue</div><div style={{ fontSize:16, fontWeight:800, color:'#B8564F' }}>{fmtK(calc.invMetrics.overdue)}</div></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CHARTS ROW */}
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))', gap:20, marginBottom:32 }}>
+                <div className="admin-card">
+                  <h3 style={{ fontSize:14, fontWeight:800, color:'#0A1F12', marginBottom:16, marginTop:0 }}>Income Breakdown</h3>
+                  <div className="chart-container">
+                    {Object.keys(calc.incomeByCategory).length > 0 ? (
+                      <DoughnutChart chartData={calc.incomeByCategory} type="income" />
+                    ) : <div className="empty-state" style={{ padding: 20 }}>No income recorded</div>}
+                  </div>
+                </div>
+                <div className="admin-card">
+                  <h3 style={{ fontSize:14, fontWeight:800, color:'#0A1F12', marginBottom:16, marginTop:0 }}>Expense Breakdown</h3>
+                  <div className="chart-container">
+                    {Object.keys(calc.expenseByCategory).length > 0 ? (
+                      <DoughnutChart chartData={calc.expenseByCategory} type="expense" />
+                    ) : <div className="empty-state" style={{ padding: 20 }}>No expenses recorded</div>}
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-card">
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+                  <h2 style={{ fontSize:16, fontWeight:800, color:'#0A1F12', margin:0 }}>Recent Payments</h2>
+                  <button onClick={() => openAdd('payment')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Manual</button>
+                </div>
+                <div style={{ overflowX:'auto' }}>
+                  <table className="admin-table">
+                    <thead><tr><th>Client</th><th>Service</th><th>Amount</th><th>Status</th></tr></thead>
+                    <tbody>
+                      {filteredPayments.slice(0,5).map(p => (
+                        <tr key={p.id}>
+                          <td style={{ fontWeight:700 }}>{p.clientName || 'Unknown'}</td>
+                          <td>{p.serviceTitle || 'N/A'}</td>
+                          <td style={{ fontWeight:700 }}>{p.amount || 'N/A'}</td>
+                          <td><span className={`status-pill ${p.status==='approved'?'active':'pending'}`}>{p.status==='approved'?'Active':'Under Review'}</span></td>
+                        </tr>
+                      ))}
+                      {filteredPayments.length === 0 && <tr><td colSpan="4" className="empty-state">No payments recorded yet.</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'onboarding' && (
+            <div className="fadein">
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24 }}>
+                <div>
+                  <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Onboarding Queue</h1>
+                  <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{pendingPayments.length} pending · {periodLabel}</p>
+                </div>
+                <button onClick={() => openAdd('payment')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Payment</button>
+              </div>
+
+              <div className="admin-card">
+                {loadingData ? (
+                  <div className="empty-state"><i className="fas fa-circle-notch fa-spin" style={{ color:'#E8730F', fontSize:24 }}></i></div>
+                ) : filteredPayments.length === 0 ? (
+                  <div className="empty-state"><i className="fas fa-check-circle" style={{ fontSize:32, color:'#1E7B3C', marginBottom:12, display:'block' }}></i>No payments found.</div>
+                ) : (
+                  <div style={{ overflowX:'auto' }}>
+                    <table className="admin-table">
+                      <thead><tr><th>Client</th><th>Service</th><th>Total Fee</th><th>Verify Amount</th><th>Status</th><th>Actions</th></tr></thead>
+                      <tbody>
+                        {filteredPayments.map(p => {
+                          const isPkg = isPackagePayment(p.serviceTitle);
+                          const expectedAmt = isPkg ? num(p.amount) / 2 : num(p.amount);
+                          return (
+                            <tr key={p.id}>
+                              <td><div style={{ fontWeight:700 }}>{p.clientName || 'Unknown'}</div><div style={{ fontSize:11, color:'rgba(10,31,18,0.5)' }}>{p.clientEmail}</div></td>
+                              <td>{p.serviceTitle || 'N/A'}</td>
+                              <td style={{ fontWeight:700 }}>{p.amount || 'N/A'}</td>
+                              <td style={{ fontWeight:800, color:'#E8730F' }}>{fmtK(expectedAmt)}</td>
+                              <td><span className={`status-pill ${p.status==='approved'?'active':'pending'}`}>{p.status==='approved'?'Active':'Under Review'}</span></td>
+                              <td>
+                                <div style={{ display:'flex', gap:6 }}>
+                                  {p.status !== 'approved' && <button onClick={() => handleVerifyPayment(p)} className="btn-sm btn-add" title="Verify & Sync to Ledger"><i className="fas fa-check"></i></button>}
+                                  <button onClick={() => openEdit('payment', p)} className="btn-sm btn-edit" title="Edit"><i className="fas fa-pen"></i></button>
+                                  <button onClick={() => handleDelete('se_payments', p.id)} className="btn-sm btn-del" title="Delete"><i className="fas fa-trash"></i></button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'portfolio' && (
+            <div className="fadein">
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24 }}>
+                <div>
+                  <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Client Portfolio</h1>
+                  <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{calc.activeClients} active · MRR: <strong>{fmtK(calc.mrr)}</strong></p>
+                </div>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <button onClick={() => exportToCSV(filteredClients, 'Clients', ['name','email','phone','package','status'])} disabled={isExporting} className="btn-sm" style={{ background: '#E2E8F0', color: '#1E293B' }}>
+                    {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-file-export"></i>} Export CSV
+                  </button>
+                  <button onClick={() => openAdd('client')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Client</button>
+                </div>
+              </div>
+
+              <div className="admin-card">
+                <div style={{ overflowX:'auto' }}>
+                  <table className="admin-table">
+                    <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Package</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                      {filteredClients.map(c => (
+                        <tr key={c.id}>
+                          <td style={{ fontWeight:700 }}>{c.name}</td>
+                          <td>{c.email}</td>
+                          <td>{c.phone || '—'}</td>
+                          <td style={{ fontWeight:600, color:'#1B6CA8' }}>{c.package}</td>
+                          <td><span className={`status-pill ${c.status==='Active'||!c.status?'active':c.status==='Paused'?'paused':'pending'}`}>{c.status || 'Active'}</span></td>
+                          <td>
+                            <div style={{ display:'flex', gap:6 }}>
+                              <button onClick={() => openEdit('client', c)} className="btn-sm btn-edit"><i className="fas fa-pen"></i></button>
+                              <button onClick={() => handleDelete('se_clients', c.id)} className="btn-sm btn-del"><i className="fas fa-trash"></i></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredClients.length === 0 && <tr><td colSpan="6" className="empty-state">No clients found.</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'ledger' && (
+            <div className="fadein">
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
+                <div>
+                  <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Company Ledger</h1>
+                  <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{periodLabel} · {filteredLedger.length} entries · Net: <strong style={{ color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtK(calc.netProfit)}</strong></p>
+                </div>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <button onClick={() => exportToCSV(filteredLedger, 'Ledger', ['date','type','category','desc','amount','reference'])} disabled={isExporting} className="btn-sm" style={{ background: '#E2E8F0', color: '#1E293B' }}>
+                    {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-file-export"></i>} Export CSV
+                  </button>
+                  <button onClick={() => openAdd('ledger')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Add Entry</button>
+                </div>
+              </div>
+
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:16, marginBottom:24 }}>
+                <div className="admin-card" style={{ padding:16 }}>
+                  <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Total Income</div>
+                  <div style={{ fontSize:22, fontWeight:800, color:'#1E7B3C', marginTop:4 }}>{fmtK(calc.totalIncome)}</div>
+                </div>
+                <div className="admin-card" style={{ padding:16 }}>
+                  <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Total Expenses</div>
+                  <div style={{ fontSize:22, fontWeight:800, color:'#B8564F', marginTop:4 }}>{fmtK(calc.totalExpense)}</div>
+                </div>
+                <div className="admin-card" style={{ padding:16 }}>
+                  <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Net Profit</div>
+                  <div style={{ fontSize:22, fontWeight:800, color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F', marginTop:4 }}>{fmtK(calc.netProfit)}</div>
+                </div>
+                <div className="admin-card" style={{ padding:16 }}>
+                  <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Expense Ratio</div>
+                  <div style={{ fontSize:22, fontWeight:800, color:'#E8730F', marginTop:4 }}>{calc.expenseRatio.toFixed(1)}%</div>
+                </div>
+              </div>
+
+              <div className="admin-card">
+                <div style={{ overflowX:'auto' }}>
+                  <table className="admin-table">
+                    <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th>Amount</th><th>Ref</th><th>Actions</th></tr></thead>
+                    <tbody>
+                      {filteredLedger.map(t => (
+                        <tr key={t.id}>
+                          <td style={{ whiteSpace:'nowrap', fontSize:12 }}>{dateStr(t.date) || '—'}</td>
+                          <td style={{ fontWeight:600 }}>{t.desc}</td>
+                          <td style={{ fontSize:12, color:'#64748B' }}>{t.category || '—'}</td>
+                          <td><span style={{ fontSize:11, fontWeight:800, color: t.type === 'Income' ? '#1E7B3C' : '#B8564F' }}>{(t.type || '').toUpperCase()}</span></td>
+                          <td style={{ fontWeight:800, color: t.type === 'Income' ? '#1E7B3C' : '#0A1F12' }}>{t.type === 'Income' ? '+' : '−'} {fmtK(t.amount)}</td>
+                          <td style={{ fontSize:11, color:'#64748B' }}>{t.reference || '—'}</td>
+                          <td>
+                            <div style={{ display:'flex', gap:6 }}>
+                              <button onClick={() => openEdit('ledger', t)} className="btn-sm btn-edit"><i className="fas fa-pen"></i></button>
+                              <button onClick={() => handleDelete('se_ledger', t.id)} className="btn-sm btn-del"><i className="fas fa-trash"></i></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredLedger.length === 0 && <tr><td colSpan="7" className="empty-state">No ledger entries found.</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'invoices' && (
+            <div className="fadein">
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
+                <div>
+                  <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Invoicing</h1>
+                  <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{periodLabel} · {calc.invMetrics.count} invoices · Total: <strong>{fmtK(calc.invMetrics.total)}</strong></p>
+                </div>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <button onClick={() => exportToCSV(filteredInvoices, 'Invoices', ['invoiceNo','client','issueDate','dueDate','amount','status'])} disabled={isExporting} className="btn-sm" style={{ background: '#E2E8F0', color: '#1E293B' }}>
+                    {isExporting ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-file-export"></i>} Export CSV
+                  </button>
+                  <button onClick={() => openAdd('invoice')} className="btn-sm btn-add"><i className="fas fa-plus"></i> Create Invoice</button>
+                </div>
+              </div>
+
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:16, marginBottom:24 }}>
+                <div className="admin-card" style={{ padding:16 }}>
+                  <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Paid</div>
+                  <div style={{ fontSize:22, fontWeight:800, color:'#1E7B3C', marginTop:4 }}>{fmtK(calc.invMetrics.paid)}</div>
+                </div>
+                <div className="admin-card" style={{ padding:16 }}>
+                  <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Pending</div>
+                  <div style={{ fontSize:22, fontWeight:800, color:'#E8730F', marginTop:4 }}>{fmtK(calc.invMetrics.pending)}</div>
+                </div>
+                <div className="admin-card" style={{ padding:16 }}>
+                  <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Overdue</div>
+                  <div style={{ fontSize:22, fontWeight:800, color:'#B8564F', marginTop:4 }}>{fmtK(calc.invMetrics.overdue)}</div>
+                </div>
+              </div>
+
+              <div className="admin-card">
+                <div style={{ overflowX:'auto' }}>
+                  <table className="admin-table">
+                    <thead><tr><th>Invoice No</th><th>Client</th><th>Issue Date</th><th>Due Date</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                      {filteredInvoices.map(inv => {
+                        const status = getInvoiceStatus(inv);
+                        const pillClass = status === 'Paid' ? 'active' : status === 'Overdue' ? 'overdue' : 'pending';
+                        return (
+                          <tr key={inv.id}>
+                            <td style={{ fontWeight:700, fontFamily:'monospace', fontSize:12 }}>{inv.invoiceNo}</td>
+                            <td style={{ fontWeight:600 }}>{inv.client}</td>
+                            <td style={{ fontSize:12 }}>{dateStr(inv.issueDate) || '—'}</td>
+                            <td style={{ fontSize:12 }}>{dateStr(inv.dueDate) || '—'}</td>
+                            <td style={{ fontWeight:700 }}>{fmtK(inv.amount)}</td>
+                            <td><span className={`status-pill ${pillClass}`}>{status}</span></td>
+                            <td>
+                              <div style={{ display:'flex', gap:6 }}>
+                                {status !== 'Paid' && <button onClick={() => handleMarkInvoicePaid(inv)} className="btn-sm btn-add" title="Mark as Paid"><i className="fas fa-check"></i></button>}
+                                <button onClick={() => openEdit('invoice', inv)} className="btn-sm btn-edit"><i className="fas fa-pen"></i></button>
+                                <button onClick={() => handleDelete('se_invoices', inv.id)} className="btn-sm btn-del"><i className="fas fa-trash"></i></button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {filteredInvoices.length === 0 && <tr><td colSpan="7" className="empty-state">No invoices found.</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'statements' && (
+            <div className="fadein">
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
+                <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Financial Statements</h1>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <button onClick={downloadPDF} className="btn-sm" style={{ background: '#1B6CA8', color: '#fff' }}><i className="fas fa-download"></i> Download PDF</button>
+                  <div className="filter-tabs" style={{ marginBottom:0 }}>
+                    {Object.entries(PERIOD_LABELS).map(([k, label]) => (
+                      <button key={k} className={`filter-tab ${period===k?'active':''}`} onClick={() => setPeriod(k)}>{label}</button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display:'flex', gap:8, marginBottom:24, flexWrap:'wrap' }}>
+                {[['income','Income Statement'],['balance','Balance Sheet'],['cashflow','Cash Flow']].map(([k, label]) => (
+                  <button key={k} onClick={() => setStatementTab(k)} style={{ padding:'10px 20px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', border: statementTab === k ? 'none' : '1px solid #E2E8F0', background: statementTab === k ? '#0A1F12' : '#fff', color: statementTab === k ? '#fff' : '#64748B' }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              <div id="print-area" className="report-container">
+                <div className="report-header">
+                  <h2 className="report-title">StartEasy Zambia</h2>
+                  <p className="report-subtitle">
+                    {statementTab === 'income' ? 'Income Statement (Profit & Loss)' : statementTab === 'balance' ? 'Statement of Financial Position (Balance Sheet)' : 'Statement of Cash Flows'} <br/>
+                    For Period: {periodLabel} · {new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' })}
+                  </p>
+                </div>
+
+                {statementTab === 'income' && (
+                  <div>
+                    <div className="report-row section-title">Revenue</div>
+                    <div className="report-row report-indent"><span>Ledger Income</span><span>{fmtK(calc.totalIncome)}</span></div>
+                    <div className="report-row report-indent"><span>Verified Financial Commencements (50%)</span><span>{fmtK(calc.finCollected)}</span></div>
+                    <div className="report-row report-indent"><span>Venture & Directory Service Fees (100%)</span><span>{fmtK(calc.dirCollected)}</span></div>
+                    <div className="report-row total"><span>Total Revenue</span><span>{fmtK(calc.totalRevenue)}</span></div>
+
+                    <div className="report-row section-title">Income Breakdown by Category</div>
+                    {Object.entries(calc.incomeByCategory).map(([cat, val]) => (
+                      <div key={cat} className="report-row report-indent"><span>{cat}</span><span>{fmtK(val)}</span></div>
+                    ))}
+                    {Object.keys(calc.incomeByCategory).length === 0 && <div className="report-row report-indent" style={{ color:'#94A3B8', fontStyle:'italic' }}><span>No income recorded</span><span>{fmtK(0)}</span></div>}
+
+                    <div className="report-row section-title">Operating Expenses</div>
+                    {Object.entries(calc.expenseByCategory).map(([cat, val]) => (
+                      <div key={cat} className="report-row report-indent"><span>{cat}</span><span>({fmtK(val)})</span></div>
+                    ))}
+                    {Object.keys(calc.expenseByCategory).length === 0 && <div className="report-row report-indent" style={{ color:'#94A3B8', fontStyle:'italic' }}><span>No expenses recorded</span><span>({fmtK(0)})</span></div>}
+                    <div className="report-row total"><span>Total Operating Expenses</span><span>({fmtK(calc.totalExpense)})</span></div>
+
+                    <div className="report-row" style={{ marginTop:20, paddingTop:16, borderTop:'1px solid #ccc', fontSize:13, color:'#64748B' }}>
+                      <span>Gross Profit Margin</span><span>{calc.profitMargin.toFixed(2)}%</span>
+                    </div>
+                    <div className="report-row" style={{ fontSize:13, color:'#64748B' }}>
+                      <span>Expense Ratio</span><span>{calc.expenseRatio.toFixed(2)}%</span>
+                    </div>
+
+                    <div className="report-row total" style={{ fontSize:18, color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F' }}>
+                      <span>Net Income (Profit / Loss)</span>
+                      <span>{fmtK(calc.netProfit)}</span>
+                    </div>
+                  </div>
+                )}
+
+                {statementTab === 'balance' && (
+                  <div>
+                    <div className="report-row section-title">Assets</div>
+                    <div className="report-row report-indent"><span>Cash & Cash Equivalents</span><span>{fmtK(Math.max(0, calc.netCashflow))}</span></div>
+                    <div className="report-row report-indent"><span>Accounts Receivable (Outstanding Invoices)</span><span>{fmtK(calc.invMetrics.pending + calc.invMetrics.overdue)}</span></div>
+                    <div className="report-row total"><span>Total Assets</span><span>{fmtK(Math.max(0, calc.netCashflow) + calc.invMetrics.pending + calc.invMetrics.overdue)}</span></div>
+
+                    <div className="report-row section-title">Liabilities</div>
+                    <div className="report-row report-indent"><span>Accounts Payable</span><span>{fmtK(0)}</span></div>
+                    <div className="report-row total"><span>Total Liabilities</span><span>{fmtK(0)}</span></div>
+
+                    <div className="report-row section-title">Equity</div>
+                    <div className="report-row report-indent"><span>Retained Earnings (Net Income)</span><span>{fmtK(calc.netProfit)}</span></div>
+                    <div className="report-row total"><span>Total Equity</span><span>{fmtK(calc.netProfit)}</span></div>
+
+                    <div className="report-row total" style={{ borderTop:'2px solid #333', borderBottom:'4px double #333', fontSize:16 }}>
+                      <span>Total Liabilities & Equity</span>
+                      <span>{fmtK(calc.netProfit)}</span>
+                    </div>
+                    <p style={{ fontSize:11, color:'#94A3B8', textAlign:'center', marginTop:20, fontStyle:'italic' }}>
+                      Note: Simple balance statement — Assets should equal Liabilities + Equity. Timing differences may exist where cash movements are recognised as they occur.
+                    </p>
+                  </div>
+                )}
+
+                {statementTab === 'cashflow' && (
+                  <div>
+                    <div className="report-row section-title">Operating Activities</div>
+                    <div className="report-row report-indent"><span>Cash Inflows (Operating)</span><span>{fmtK(calc.cashflow.operating.in)}</span></div>
+                    <div className="report-row report-indent"><span>Cash Outflows (Operating)</span><span>({fmtK(calc.cashflow.operating.out)})</span></div>
+                    <div className="report-row total"><span>Net Cash from Operating Activities</span><span>{fmtK(calc.cfOperating)}</span></div>
+
+                    <div className="report-row section-title">Investing Activities</div>
+                    <div className="report-row report-indent"><span>Cash Inflows (Investing)</span><span>{fmtK(calc.cashflow.investing.in)}</span></div>
+                    <div className="report-row report-indent"><span>Cash Outflows (Investing)</span><span>({fmtK(calc.cashflow.investing.out)})</span></div>
+                    <div className="report-row total"><span>Net Cash from Investing Activities</span><span>{fmtK(calc.cfInvesting)}</span></div>
+
+                    <div className="report-row section-title">Financing Activities</div>
+                    <div className="report-row report-indent"><span>Cash Inflows (Financing)</span><span>{fmtK(calc.cashflow.financing.in)}</span></div>
+                    <div className="report-row report-indent"><span>Cash Outflows (Financing)</span><span>({fmtK(calc.cashflow.financing.out)})</span></div>
+                    <div className="report-row total"><span>Net Cash from Financing Activities</span><span>{fmtK(calc.cfFinancing)}</span></div>
+
+                    <div className="report-row total" style={{ fontSize:18, color: calc.netCashflow >= 0 ? '#1E7B3C' : '#B8564F' }}>
+                      <span>Net Increase / (Decrease) in Cash</span>
+                      <span>{fmtK(calc.netCashflow)}</span>
+                    </div>
+                    <div className="report-row report-indent" style={{ marginTop:12, borderTop:'1px solid #ccc', paddingTop:12 }}><span>Cash at Beginning of Period</span><span>{fmtK(0)}</span></div>
+                    <div className="report-row total" style={{ fontSize:16 }}><span>Cash at End of Period</span><span>{fmtK(calc.netCashflow)}</span></div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* MODAL RENDERED OUTSIDE THE MAIN LAYOUT TO PREVENT SCROLL CONFLICTS */}
+      {modal && (
+        <FormModal
+          modal={modal}
+          onClose={closeModal}
+          onSave={saveEntry}
+          saving={saving}
+          error={formError}
+          clients={clients}
+        />
+      )}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
