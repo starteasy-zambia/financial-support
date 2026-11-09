@@ -1029,7 +1029,7 @@ function App() {
 /* ═══════════════════════════════════════════════════════════════════
    FORM MODAL (existing + NEW team type)
    ═══════════════════════════════════════════════════════════════════ */
-function FormModal({ modal, onClose, onSave, saving, error, clients }) {
+function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
   const [data, setData] = useState(modal.data);
   const set = (k, v) => setData(d => ({...d, [k]: v}));
 
@@ -1255,16 +1255,9 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
               <input type="number" step="0.01" min="0" className="form-input" value={data.netMonthlyUSD ?? ''} onChange={e => set('netMonthlyUSD', e.target.value)} required placeholder="e.g. 1725" />
             </div>
             <div className="form-group">
-              <label className="form-label">Team / Founder ID</label>
-              <select className="form-input" value={data.employeeId || ''} onChange={e => set('employeeId', e.target.value)}>
-                <option value="">— Select ID —</option>
-                <option value="SE-FND-001">SE-FND-001</option>
-                <option value="SE-FND-002">SE-FND-002</option>
-                <option value="SE-FND-003">SE-FND-003</option>
-                <option value="SE-EMP-001">SE-EMP-001</option>
-                <option value="SE-EMP-002">SE-EMP-002</option>
-                <option value="SE-EMP-003">SE-EMP-003</option>
-              </select>
+              <label className="form-label">Team / Founder ID (Auto-generated)</label>
+              <input type="text" className="form-input" value={data.employeeId || ''} onChange={e => set('employeeId', e.target.value)} placeholder="e.g. SE-EMP-001" />
+              <div style={{ fontSize: 10, color: '#64748B', marginTop: 4 }}>You can edit this to match your HR records.</div>
             </div>
           </div>
           <div className="form-row">
@@ -1282,24 +1275,40 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
           </div>
           <div className="form-group">
             <label className="form-label">Payment Method / Notes</label>
-            <select className="form-input" value={data.paymentNotes || ''} onChange={e => set('paymentNotes', e.target.value)}>
+            <select className="form-input" value={['Bank Transfer - Standard Chartered', 'Bank Transfer - Other Bank', 'Mobile Money - Airtel', 'Mobile Money - MTN', 'Cash / Cheque'].includes(data.paymentNotes) ? data.paymentNotes : (data.paymentNotes ? 'Other' : '')} onChange={e => {
+              const val = e.target.value;
+              if (val === 'Other') set('paymentNotes', ' ');
+              else set('paymentNotes', val);
+            }}>
               <option value="">— Select Payment Method —</option>
               <option value="Bank Transfer - Standard Chartered">Bank Transfer - Standard Chartered</option>
               <option value="Bank Transfer - Other Bank">Bank Transfer - Other Bank</option>
               <option value="Mobile Money - Airtel">Mobile Money - Airtel</option>
               <option value="Mobile Money - MTN">Mobile Money - MTN</option>
               <option value="Cash / Cheque">Cash / Cheque</option>
+              <option value="Other">Other (Specify...)</option>
             </select>
+            {(data.paymentNotes === 'Other' || (data.paymentNotes && !['Bank Transfer - Standard Chartered', 'Bank Transfer - Other Bank', 'Mobile Money - Airtel', 'Mobile Money - MTN', 'Cash / Cheque'].includes(data.paymentNotes))) && (
+              <input type="text" className="form-input" style={{ marginTop: 8 }} value={data.paymentNotes === 'Other' ? '' : data.paymentNotes} onChange={e => set('paymentNotes', e.target.value)} placeholder="Type custom payment method..." />
+            )}
           </div>
           <div className="form-group">
             <label className="form-label">Contract Reference</label>
-            <select className="form-input" value={data.contractRef || ''} onChange={e => set('contractRef', e.target.value)}>
+            <select className="form-input" value={['Principal Founder Agreement', 'Founder Contributor Agreement', 'Advisory Agreement', 'Independent Contractor Agreement'].includes(data.contractRef) ? data.contractRef : (data.contractRef ? 'Other' : '')} onChange={e => {
+              const val = e.target.value;
+              if (val === 'Other') set('contractRef', ' ');
+              else set('contractRef', val);
+            }}>
               <option value="">— Select Contract —</option>
               <option value="Principal Founder Agreement">Principal Founder Agreement</option>
               <option value="Founder Contributor Agreement">Founder Contributor Agreement</option>
               <option value="Advisory Agreement">Advisory Agreement</option>
               <option value="Independent Contractor Agreement">Independent Contractor Agreement</option>
+              <option value="Other">Other (Specify...)</option>
             </select>
+            {(data.contractRef === 'Other' || (data.contractRef && !['Principal Founder Agreement', 'Founder Contributor Agreement', 'Advisory Agreement', 'Independent Contractor Agreement'].includes(data.contractRef))) && (
+              <input type="text" className="form-input" style={{ marginTop: 8 }} value={data.contractRef === 'Other' ? '' : data.contractRef} onChange={e => set('contractRef', e.target.value)} placeholder="Type custom contract reference..." />
+            )}
           </div>
         </>
       );
@@ -1627,7 +1636,17 @@ function AdminPortal({ onExit }) {
     if (type === 'invoice') data = { invoiceNo: nextInvoiceNo(invoices), client: '', description: '', issueDate: today, dueDate: addDays(today, 30), amount: '', status: 'Pending' };
     if (type === 'client') data = { name: '', email: '', phone: '', package: 'Business Control', status: 'Active' };
     if (type === 'payment') data = { clientName: '', clientEmail: '', phone: '', serviceTitle: '', amount: '', status: 'under_review' };
-    if (type === 'team') data = { name: '', position: '', email: '', phone: '', netMonthlyUSD: '', employeeId: '', equity: '', status: 'Active', paymentNotes: '', contractRef: '' };
+    
+    if (type === 'team') {
+      const existingIds = team.map(t => t.employeeId || '');
+      const maxEmp = existingIds.reduce((max, id) => {
+        const match = id.match(/SE-EMP-(\d+)/i);
+        return match ? Math.max(max, parseInt(match[1])) : max;
+      }, 0);
+      const nextId = `SE-EMP-${String(maxEmp + 1).padStart(3, '0')}`;
+      data = { name: '', position: '', email: '', phone: '', netMonthlyUSD: '', employeeId: nextId, equity: '', status: 'Active', paymentNotes: '', contractRef: '' };
+    }
+
     setModal({ type, mode: 'add', data });
     setFormError('');
   };
@@ -2508,7 +2527,7 @@ function AdminPortal({ onExit }) {
 
       {/* ══════════════ MODALS ══════════════ */}
       {modal && (
-        <FormModal modal={modal} onClose={closeModal} onSave={saveEntry} saving={saving} error={formError} clients={clients} />
+        <FormModal modal={modal} onClose={closeModal} onSave={saveEntry} saving={saving} error={formError} clients={clients} team={team} />
       )}
 
       {payslipModal && (
