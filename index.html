@@ -258,19 +258,19 @@ const PACKAGES = [
 
 const LEDGER_CATEGORIES = {
   Income: ['Service Fees','Commencement Fees','Consulting Fees','Other Income'],
-  Expense: ['Salaries & Wages','Rent','Utilities','Marketing','Travel','Equipment','Software','Professional Fees','Bank Charges','Other']
+  Expense: ['Retainers & Fees','Rent','Utilities','Marketing','Travel','Equipment','Software','Professional Fees','Bank Charges','Other']
 };
 
 const CASHFLOW_CLASS = {
   'Service Fees':'operating','Commencement Fees':'operating','Consulting Fees':'operating','Other Income':'operating',
-  'Salaries & Wages':'operating','Rent':'operating','Utilities':'operating','Marketing':'operating',
+  'Retainers & Fees':'operating','Rent':'operating','Utilities':'operating','Marketing':'operating',
   'Travel':'operating','Software':'operating','Professional Fees':'operating','Bank Charges':'operating','Other':'operating',
   'Equipment':'investing'
 };
 
 const PERIOD_LABELS = { month:'This Month', last_month:'Last Month', quarter:'This Quarter', year:'This Year', all:'All Time' };
 
-/* ─── PAYROLL / PAYSLIP CONSTANTS ─── */
+/* ─── PAYROLL / REMITTANCE CONSTANTS ─── */
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const ZAMBIA_PAYE_BANDS = [
   { min: 0, max: 5100, rate: 0 },
@@ -278,9 +278,6 @@ const ZAMBIA_PAYE_BANDS = [
   { min: 7100, max: 9900, rate: 0.30 },
   { min: 9900, max: Infinity, rate: 0.37 }
 ];
-const NAPSA_CEILING = 29800;
-const NAPSA_RATE = 0.05;
-const NHIMA_RATE = 0.01;
 
 const DEFAULT_TEAM = [
   { name:'Mwaba Lewis', position:'Principal Founder & Strategic Sponsor', netMonthlyUSD:1725, equity:'50%', email:'', phone:'', employeeId:'SE-EMP-001', status:'Active', paymentNotes:'Monthly Payment Agreement · Principal Founder', contractRef:'MONTHLY PAYMENT AGREEMENT_ LEWIS' },
@@ -308,14 +305,10 @@ const calcPAYE = (taxable) => {
   return tax;
 };
 const calcZMWBreakdown = (gross) => {
-  const napsaEmp = Math.min(gross, NAPSA_CEILING) * NAPSA_RATE;
-  const nhimaEmp = gross * NHIMA_RATE;
-  const taxable = gross - napsaEmp - nhimaEmp;
-  const paye = calcPAYE(taxable);
-  const net = gross - napsaEmp - nhimaEmp - paye;
-  const napsaEmployer = Math.min(gross, NAPSA_CEILING) * NAPSA_RATE;
-  const nhimaEmployer = gross * NHIMA_RATE;
-  return { gross, napsaEmp, nhimaEmp, paye, net, napsaEmployer, nhimaEmployer };
+  // No NAPSA or NHIMA for independent contractors, only PAYE Withholding
+  const paye = calcPAYE(gross);
+  const net = gross - paye;
+  return { gross, paye, net };
 };
 const calcGrossFromNetZMW = (targetNet) => {
   let lo = Math.max(0, targetNet);
@@ -384,14 +377,14 @@ function DoughnutChart({ chartData, type }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   PAYSLIP DOCUMENT — printable, branded payslip
+   REMITTANCE DOCUMENT — printable, branded compensation slip
    ═══════════════════════════════════════════════════════════════════ */
-function PayslipDocument({ payslip, team, renderId = 'payslip-render' }) {
+function RemittanceDocument({ payslip, team, renderId = 'payslip-render' }) {
   const sym = curSym(payslip.currency);
   const totalEarnings = (payslip.earnings || []).reduce((s, e) => s + num(e.amount), 0);
   const totalDeductions = (payslip.deductions || []).reduce((s, d) => s + num(d.amount), 0);
   const net = totalEarnings - totalDeductions;
-  const empName = team?.name || payslip.employeeName || 'Employee';
+  const empName = team?.name || payslip.employeeName || 'Contractor';
   const empPos = team?.position || payslip.position || '';
   const empId = team?.employeeId || payslip.employeeId || '—';
   const empEmail = team?.email || payslip.email || '';
@@ -411,11 +404,11 @@ function PayslipDocument({ payslip, team, renderId = 'payslip-render' }) {
             Start<em style={{ fontStyle:'normal', color:'#E8730F' }}>Easy</em> Zambia
           </div>
           <div style={{ fontSize:9.5, letterSpacing:'1.6px', textTransform:'uppercase', color:'#8A6828', fontWeight:700, marginTop:4 }}>
-            Confidential Employee Payslip
+            Confidential Contractor Remittance
           </div>
         </div>
         <div style={{ textAlign:'right' }}>
-          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:800, color:'#E8730F', letterSpacing:'1.2px' }}>PAYSLIP</div>
+          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:800, color:'#E8730F', letterSpacing:'1.2px' }}>REMITTANCE</div>
           <div style={{ fontSize:10.5, color:'#666', marginTop:4, lineHeight:1.5 }}>
             {payslip.periodLabel || '—'}<br/>
             Ref: {refNo}
@@ -426,7 +419,7 @@ function PayslipDocument({ payslip, team, renderId = 'payslip-render' }) {
       {/* Employee & Payment info */}
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:20 }}>
         <div>
-          <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:6 }}>Employee</div>
+          <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:6 }}>Contractor / Recipient</div>
           <div style={{ fontSize:14.5, fontWeight:700, color:'#0A1F12' }}>{empName}</div>
           <div style={{ fontSize:11.5, color:'#555', marginTop:2 }}>{empPos}</div>
           <div style={{ fontSize:10.5, color:'#777', marginTop:6 }}>ID: {empId}</div>
@@ -448,21 +441,21 @@ function PayslipDocument({ payslip, team, renderId = 'payslip-render' }) {
       {/* Earnings / Deductions tables */}
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:0, border:'1px solid #ddd', borderRadius:6, overflow:'hidden' }}>
         <div>
-          <div style={{ background:'#0A1F12', color:'#fff', padding:'9px 14px', fontSize:10.5, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.06em' }}>Earnings</div>
+          <div style={{ background:'#0A1F12', color:'#fff', padding:'9px 14px', fontSize:10.5, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.06em' }}>Compensation</div>
           {(payslip.earnings || []).map((e, i) => (
             <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'8px 14px', borderBottom:'1px solid #f0f0f0', fontSize:12 }}>
               <span style={{ color:'#555' }}>{e.label || '—'}</span>
               <span style={{ fontWeight:600, fontFamily:'Consolas, monospace' }}>{sym}{fmtNum(e.amount)}</span>
             </div>
           ))}
-          {(payslip.earnings || []).length === 0 && <div style={{ padding:'10px 14px', fontSize:11.5, color:'#999', fontStyle:'italic' }}>No earnings</div>}
+          {(payslip.earnings || []).length === 0 && <div style={{ padding:'10px 14px', fontSize:11.5, color:'#999', fontStyle:'italic' }}>No compensation</div>}
           <div style={{ display:'flex', justifyContent:'space-between', padding:'10px 14px', background:'#F0F7F2', borderTop:'2px solid #0A1F12', fontSize:12, fontWeight:800 }}>
-            <span>Gross Earnings</span>
+            <span>Gross Compensation</span>
             <span style={{ fontFamily:'Consolas, monospace' }}>{sym}{fmtNum(totalEarnings)}</span>
           </div>
         </div>
         <div style={{ borderLeft:'1px solid #ddd' }}>
-          <div style={{ background:'#B8564F', color:'#fff', padding:'9px 14px', fontSize:10.5, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.06em' }}>Deductions</div>
+          <div style={{ background:'#B8564F', color:'#fff', padding:'9px 14px', fontSize:10.5, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.06em' }}>Withholding / Deductions</div>
           {(payslip.deductions || []).map((d, i) => (
             <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'8px 14px', borderBottom:'1px solid #f0f0f0', fontSize:12 }}>
               <span style={{ color:'#555' }}>{d.label || '—'}</span>
@@ -471,7 +464,7 @@ function PayslipDocument({ payslip, team, renderId = 'payslip-render' }) {
           ))}
           {(payslip.deductions || []).length === 0 && <div style={{ padding:'10px 14px', fontSize:11.5, color:'#999', fontStyle:'italic' }}>No deductions</div>}
           <div style={{ display:'flex', justifyContent:'space-between', padding:'10px 14px', background:'#FDF2F1', borderTop:'2px solid #B8564F', fontSize:12, fontWeight:800 }}>
-            <span>Total Deductions</span>
+            <span>Total Withholding</span>
             <span style={{ fontFamily:'Consolas, monospace' }}>{sym}{fmtNum(totalDeductions)}</span>
           </div>
         </div>
@@ -480,28 +473,13 @@ function PayslipDocument({ payslip, team, renderId = 'payslip-render' }) {
       {/* Net pay highlight */}
       <div style={{ marginTop:18, background:'linear-gradient(135deg,#0A1F12,#123A1F)', color:'#fff', padding:'18px 22px', borderRadius:10, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
         <div>
-          <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:'0.16em', textTransform:'uppercase', color:'#F5A623', marginBottom:4 }}>Net Pay</div>
-          <div style={{ fontSize:10.5, color:'rgba(255,255,255,0.6)' }}>Amount paid to employee</div>
+          <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:'0.16em', textTransform:'uppercase', color:'#F5A623', marginBottom:4 }}>Net Remittance</div>
+          <div style={{ fontSize:10.5, color:'rgba(255,255,255,0.6)' }}>Amount paid to contractor</div>
         </div>
         <div style={{ fontFamily:"'Playfair Display',serif", fontSize:28, fontWeight:800, color:'#F5A623' }}>
           {sym}{fmtNum(net)}
         </div>
       </div>
-
-      {/* Employer contributions */}
-      {(payslip.employerContributions || []).length > 0 && (
-        <div style={{ marginTop:18 }}>
-          <div style={{ fontSize:10, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:8 }}>Employer Contributions (not deducted from net)</div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-            {(payslip.employerContributions || []).map((c, i) => (
-              <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'6px 12px', background:'#F8FAFC', borderRadius:4, fontSize:11.5, border:'1px solid #eee' }}>
-                <span style={{ color:'#555' }}>{c.label || '—'}</span>
-                <span style={{ fontFamily:'Consolas, monospace', fontWeight:600 }}>{sym}{fmtNum(c.amount)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Footer signatures */}
       <div style={{ marginTop:28, paddingTop:18, borderTop:'1px solid #ddd', display:'grid', gridTemplateColumns:'1fr 1fr', gap:36 }}>
@@ -521,7 +499,8 @@ function PayslipDocument({ payslip, team, renderId = 'payslip-render' }) {
       </div>
 
       <div style={{ marginTop:22, fontSize:9.5, color:'#999', textAlign:'center', fontStyle:'italic', lineHeight:1.6 }}>
-        This is a computer-generated payslip. Confidential — for the named employee only.<br/>
+        This remittance is for professional services rendered under a Monthly Payment Agreement.<br/>
+        It does not constitute an employment contract and does not create an employer-employee relationship.<br/>
         StartEasy Zambia
       </div>
     </div>
@@ -564,36 +543,18 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
     if (data.currency === 'USD') {
       // Convert ZMW calculations back to USD
       let grossUSD = grossZMW / rate;
-      let napsaUSD = bd.napsaEmp / rate;
-      let nhimaUSD = bd.nhimaEmp / rate;
       let payeUSD = bd.paye / rate;
       
       // Fix small rounding differences to ensure net is EXACTLY the contract amount
-      const calcNetUSD = grossUSD - napsaUSD - nhimaUSD - payeUSD;
+      const calcNetUSD = grossUSD - payeUSD;
       const diff = targetNetUSD - calcNetUSD;
       grossUSD += diff;
 
-      set('earnings', [{ label: 'Gross Salary (USD)', amount: grossUSD.toFixed(2) }]);
-      set('deductions', [
-        { label: `NAPSA (5%) @ ${rate}`, amount: napsaUSD.toFixed(2) },
-        { label: `NHIMA (1%) @ ${rate}`, amount: nhimaUSD.toFixed(2) },
-        { label: `PAYE @ ${rate}`, amount: payeUSD.toFixed(2) }
-      ]);
-      set('employerContributions', [
-        { label: `NAPSA Employer (5%) @ ${rate}`, amount: (bd.napsaEmployer / rate).toFixed(2) },
-        { label: `NHIMA Employer (1%) @ ${rate}`, amount: (bd.nhimaEmployer / rate).toFixed(2) }
-      ]);
+      set('earnings', [{ label: 'Gross Retainer (USD)', amount: grossUSD.toFixed(2) }]);
+      set('deductions', [{ label: `PAYE Withholding @ ${rate}`, amount: payeUSD.toFixed(2) }]);
     } else {
-      set('earnings', [{ label: 'Gross Salary (ZMW)', amount: grossZMW.toFixed(2) }]);
-      set('deductions', [
-        { label: 'NAPSA (5%)', amount: bd.napsaEmp.toFixed(2) },
-        { label: 'NHIMA (1%)', amount: bd.nhimaEmp.toFixed(2) },
-        { label: 'PAYE', amount: bd.paye.toFixed(2) }
-      ]);
-      set('employerContributions', [
-        { label: 'NAPSA Employer (5%)', amount: bd.napsaEmployer.toFixed(2) },
-        { label: 'NHIMA Employer (1%)', amount: bd.nhimaEmployer.toFixed(2) }
-      ]);
+      set('earnings', [{ label: 'Gross Retainer (ZMW)', amount: grossZMW.toFixed(2) }]);
+      set('deductions', [{ label: 'PAYE Withholding', amount: bd.paye.toFixed(2) }]);
     }
   };
 
@@ -613,9 +574,9 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20 }}>
           <div>
             <h3 style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:22, color:'#0A1F12' }}>
-              {modal.mode === 'add' ? 'Generate Payslip' : 'Edit Payslip'}
+              {modal.mode === 'add' ? 'Generate Remittance Advice' : 'Edit Remittance Advice'}
             </h3>
-            <p style={{ margin:'4px 0 0', fontSize:12, color:'#64748B' }}>Fill in the fields — the payslip updates live.</p>
+            <p style={{ margin:'4px 0 0', fontSize:12, color:'#64748B' }}>Fill in the fields — the document updates live.</p>
           </div>
           <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'#666', fontSize:18 }}><i className="fas fa-times"></i></button>
         </div>
@@ -627,7 +588,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
             {/* LEFT COLUMN: form */}
             <div>
               <div className="form-group">
-                <label className="form-label">Employee *</label>
+                <label className="form-label">Contractor / Founder *</label>
                 <select className="form-input" value={data.employeeId || ''} onChange={e => set('employeeId', e.target.value)} required>
                   <option value="">— Select team member —</option>
                   {teamMembers.map(t => (
@@ -671,7 +632,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
               <div className="form-group">
                 <label className="form-label">Exchange Rate (ZMW per USD) *</label>
                 <input type="number" step="0.01" className="form-input" value={data.exchangeRate || ''} onChange={e => set('exchangeRate', e.target.value)} placeholder="e.g. 27.50" required />
-                <div style={{ fontSize: 10, color: '#64748B', marginTop: 4 }}>Required for statutory deductions (NAPSA, NHIMA, PAYE).</div>
+                <div style={{ fontSize: 10, color: '#64748B', marginTop: 4 }}>Required for PAYE Withholding calculations.</div>
               </div>
 
               <div style={{ display:'flex', gap:8, marginBottom:16 }}>
@@ -683,7 +644,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
               {/* Earnings */}
               <div style={{ marginBottom:16 }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-                  <label className="form-label" style={{ margin:0 }}>Earnings</label>
+                  <label className="form-label" style={{ margin:0 }}>Compensation (Earnings)</label>
                   <button type="button" onClick={() => addItem('earnings')} className="btn-sm btn-add" style={{ padding:'3px 10px' }}><i className="fas fa-plus"></i> Add</button>
                 </div>
                 {(data.earnings || []).map((e, i) => (
@@ -699,7 +660,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
               {/* Deductions */}
               <div style={{ marginBottom:16 }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-                  <label className="form-label" style={{ margin:0 }}>Deductions</label>
+                  <label className="form-label" style={{ margin:0 }}>Withholding (Deductions)</label>
                   <button type="button" onClick={() => addItem('deductions')} className="btn-sm btn-add" style={{ padding:'3px 10px' }}><i className="fas fa-plus"></i> Add</button>
                 </div>
                 {(data.deductions || []).map((d, i) => (
@@ -710,22 +671,6 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
                   </div>
                 ))}
                 {(data.deductions || []).length === 0 && <div style={{ fontSize:11.5, color:'#999', fontStyle:'italic', padding:'4px 0' }}>No deductions</div>}
-              </div>
-
-              {/* Employer contributions */}
-              <div style={{ marginBottom:16 }}>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-                  <label className="form-label" style={{ margin:0 }}>Employer Contributions</label>
-                  <button type="button" onClick={() => addItem('employerContributions')} className="btn-sm btn-add" style={{ padding:'3px 10px' }}><i className="fas fa-plus"></i> Add</button>
-                </div>
-                {(data.employerContributions || []).map((c, i) => (
-                  <div key={i} style={{ display:'flex', gap:6, marginBottom:6 }}>
-                    <input className="form-input" placeholder="Label" value={c.label} onChange={ev => updateList('employerContributions', i, 'label', ev.target.value)} style={{ flex:2, fontSize:12, padding:'8px 10px' }} />
-                    <input type="number" step="0.01" className="form-input" placeholder="0.00" value={c.amount} onChange={ev => updateList('employerContributions', i, 'amount', ev.target.value)} style={{ flex:1, fontSize:12, padding:'8px 10px' }} />
-                    <button type="button" onClick={() => removeItem('employerContributions', i)} className="btn-sm btn-del" style={{ padding:'0 10px' }}><i className="fas fa-times"></i></button>
-                  </div>
-                ))}
-                {(data.employerContributions || []).length === 0 && <div style={{ fontSize:11.5, color:'#999', fontStyle:'italic', padding:'4px 0' }}>Optional</div>}
               </div>
 
               <div className="form-row">
@@ -743,7 +688,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
               </div>
 
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', background:'#F0F7F2', borderRadius:8, padding:'12px 16px', marginTop:8 }}>
-                <span style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', color:'#1E7B3C', letterSpacing:'0.05em' }}>Net Pay</span>
+                <span style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', color:'#1E7B3C', letterSpacing:'0.05em' }}>Net Remittance</span>
                 <span style={{ fontFamily:'Consolas, monospace', fontSize:18, fontWeight:800, color:'#1E7B3C' }}>{sym}{fmtNum(netPay)}</span>
               </div>
             </div>
@@ -758,7 +703,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
               </div>
               {showPreview && (
                 <div style={{ maxHeight:'70vh', overflow:'auto', border:'1px dashed #CBD5E1', borderRadius:8, padding:10, background:'#F8FAFC' }}>
-                  <PayslipDocument payslip={previewPayslip} team={selectedTeam} renderId="payslip-live-preview" />
+                  <RemittanceDocument payslip={previewPayslip} team={selectedTeam} renderId="payslip-live-preview" />
                 </div>
               )}
             </div>
@@ -766,7 +711,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
 
           <div style={{ display:'flex', gap:10, marginTop:24, flexWrap:'wrap' }}>
             <button type="submit" disabled={saving} className="btn-primary" style={{ flex:1, justifyContent:'center', minWidth:160 }}>
-              {saving ? <><i className="fas fa-circle-notch fa-spin"></i> Saving...</> : <><i className="fas fa-save"></i> {modal.mode === 'add' ? 'Save Payslip' : 'Update Payslip'}</>}
+              {saving ? <><i className="fas fa-circle-notch fa-spin"></i> Saving...</> : <><i className="fas fa-save"></i> {modal.mode === 'add' ? 'Save Remittance' : 'Update Remittance'}</>}
             </button>
             <button type="button" onClick={() => onDownload(previewPayslip, selectedTeam, 'payslip-live-preview')} className="btn-sm btn-blue" style={{ padding:'12px 20px', fontSize:13 }}>
               <i className="fas fa-download"></i> Download PDF
@@ -787,7 +732,7 @@ function PayslipViewModal({ payslip, team, onClose, onDownload }) {
     <div className="modal-form-overlay" onClick={onClose}>
       <div className="modal-form wide" onClick={e => e.stopPropagation()} style={{ padding:24 }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
-          <h3 style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:20, color:'#0A1F12' }}>Payslip Preview</h3>
+          <h3 style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:20, color:'#0A1F12' }}>Remittance Preview</h3>
           <div style={{ display:'flex', gap:8 }}>
             <button onClick={() => onDownload(payslip, team, 'payslip-view-render')} className="btn-sm btn-blue" style={{ padding:'9px 16px', fontSize:13 }}>
               <i className="fas fa-download"></i> Download PDF
@@ -796,7 +741,7 @@ function PayslipViewModal({ payslip, team, onClose, onDownload }) {
           </div>
         </div>
         <div style={{ maxHeight:'80vh', overflow:'auto', background:'#F8FAFC', borderRadius:8, padding:16 }}>
-          <PayslipDocument payslip={payslip} team={team} renderId="payslip-view-render" />
+          <RemittanceDocument payslip={payslip} team={team} renderId="payslip-view-render" />
         </div>
       </div>
     </div>
@@ -1279,11 +1224,11 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Net Monthly (USD) *</label>
+              <label className="form-label">Net Monthly Retainer (USD) *</label>
               <input type="number" step="0.01" min="0" className="form-input" value={data.netMonthlyUSD ?? ''} onChange={e => set('netMonthlyUSD', e.target.value)} required placeholder="e.g. 1725" />
             </div>
             <div className="form-group">
-              <label className="form-label">Employee ID</label>
+              <label className="form-label">Contractor ID</label>
               <input type="text" className="form-input" value={data.employeeId || ''} onChange={e => set('employeeId', e.target.value)} placeholder="e.g. SE-EMP-001" />
             </div>
           </div>
@@ -1339,7 +1284,7 @@ function FormModal({ modal, onClose, onSave, saving, error, clients }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   ADMIN PORTAL — with Team & Payslips
+   ADMIN PORTAL — with Team & Remittance Advices
    ═══════════════════════════════════════════════════════════════════ */
 function AdminPortal({ onExit }) {
   const [user, setUser] = useState(null);
@@ -1468,20 +1413,20 @@ function AdminPortal({ onExit }) {
   /* ─── PDF: Payslip ─── */
   const downloadPayslipPDF = (payslip, teamMember, renderId) => {
     const element = document.getElementById(renderId || 'payslip-view-render');
-    if (!element) { showToast('Payslip not ready. Try again.', 'error'); return; }
-    const empName = (teamMember?.name || payslip?.employeeName || 'Employee').replace(/\s+/g,'_');
+    if (!element) { showToast('Remittance not ready. Try again.', 'error'); return; }
+    const empName = (teamMember?.name || payslip?.employeeName || 'Contractor').replace(/\s+/g,'_');
     const periodLabel = (payslip?.periodLabel || 'Period').replace(/\s+/g,'_');
-    showToast('Generating payslip PDF...', 'info');
+    showToast('Generating remittance PDF...', 'info');
     window.html2pdf().set({
       margin:       0.3,
-      filename:     `Payslip_${empName}_${periodLabel}.pdf`,
+      filename:     `Remittance_${empName}_${periodLabel}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
       jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
     }).from(element).save().then(() => {
-      showToast('Payslip downloaded successfully!', 'success');
+      showToast('Remittance downloaded successfully!', 'success');
     }).catch(() => {
-      showToast('Failed to generate payslip PDF.', 'error');
+      showToast('Failed to generate remittance PDF.', 'error');
     });
   };
 
@@ -1659,7 +1604,6 @@ function AdminPortal({ onExit }) {
           exchangeRate: 27.5,
           earnings: [],
           deductions: [],
-          employerContributions: [],
           status: 'Draft',
           preparedBy: 'Carol Kambole',
           preparedByTitle: 'Co-founder & Director of Finance & Administration'
@@ -1674,10 +1618,10 @@ function AdminPortal({ onExit }) {
   const savePayslip = async (data) => {
     setFormError(''); setSaving(true);
     try {
-      if (!data.employeeId) throw new Error('Please select an employee.');
+      if (!data.employeeId) throw new Error('Please select a contractor.');
       const teamMember = team.find(t => t.id === data.employeeId);
       const totalEarnings = (data.earnings || []).reduce((s, e) => s + num(e.amount), 0);
-      if (totalEarnings <= 0) throw new Error('Earnings must be greater than zero. Try Auto-Calculate.');
+      if (totalEarnings <= 0) throw new Error('Compensation must be greater than zero. Try Auto-Calculate.');
 
       const payload = {
         ...data,
@@ -1694,15 +1638,15 @@ function AdminPortal({ onExit }) {
 
       if (payslipModal.mode === 'add') {
         await db.collection('se_payslips').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        showToast('Payslip saved.', 'success');
+        showToast('Remittance saved.', 'success');
       } else {
         await db.collection('se_payslips').doc(data.id).update(payload);
-        showToast('Payslip updated.', 'success');
+        showToast('Remittance updated.', 'success');
       }
       closePayslipModal();
     } catch (err) {
       setFormError(err.message);
-      showToast('Failed to save payslip.', 'error');
+      showToast('Failed to save remittance.', 'error');
     } finally {
       setSaving(false);
     }
@@ -1744,7 +1688,7 @@ function AdminPortal({ onExit }) {
       if (modal.type === 'team') {
         if (!data.name?.trim()) throw new Error('Name is required');
         if (!data.position?.trim()) throw new Error('Position is required');
-        if (data.netMonthlyUSD === '' || num(data.netMonthlyUSD) < 0) throw new Error('Net monthly salary is required');
+        if (data.netMonthlyUSD === '' || num(data.netMonthlyUSD) < 0) throw new Error('Net monthly retainer is required');
         const payload = { ...data, netMonthlyUSD: num(data.netMonthlyUSD) };
         if (modal.mode === 'add') await db.collection('se_team').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         else await db.collection('se_team').doc(data.id).update(payload);
@@ -1898,13 +1842,12 @@ function AdminPortal({ onExit }) {
             <div className={`admin-nav-item ${activeTab==='invoices'?'active':''}`} onClick={() => { setActiveTab('invoices'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-file-invoice"></i> Invoicing</div>
             <div className={`admin-nav-item ${activeTab==='statements'?'active':''}`} onClick={() => { setActiveTab('statements'); setIsDrawerOpen(false); setSearchTerm(''); }}><i className="fas fa-file-signature"></i> Financial Statements</div>
 
-            {/* ── NEW: TEAM & PAYROLL ── */}
-            <div className="admin-nav-section" style={{ color:'#1B6CA8' }}>Team & Payroll</div>
+            <div className="admin-nav-section" style={{ color:'#1B6CA8' }}>Contractors & Retainers</div>
             <div className={`admin-nav-item ${activeTab==='team'?'active':''}`} onClick={() => { setActiveTab('team'); setIsDrawerOpen(false); setSearchTerm(''); }}>
               <i className="fas fa-user-tie"></i> Team Members
             </div>
             <div className={`admin-nav-item ${activeTab==='payslips'?'active':''}`} onClick={() => { setActiveTab('payslips'); setIsDrawerOpen(false); setSearchTerm(''); }}>
-              <i className="fas fa-file-invoice-dollar"></i> Payslips
+              <i className="fas fa-file-invoice-dollar"></i> Remittances
             </div>
           </nav>
 
@@ -1942,7 +1885,7 @@ function AdminPortal({ onExit }) {
               <div style={{ width:'100%', maxWidth:350 }}>
                 <div style={{ position:'relative', width:'100%' }}>
                   <i className="fas fa-search" style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', color:'#94A3B8' }}></i>
-                  <input type="text" placeholder={activeTab==='team'?'Search team members...':'Search payslips...'} className="form-input" style={{ paddingLeft:36, paddingRight:searchTerm?36:12, borderRadius:20 }} value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} />
+                  <input type="text" placeholder={activeTab==='team'?'Search team members...':'Search remittances...'} className="form-input" style={{ paddingLeft:36, paddingRight:searchTerm?36:12, borderRadius:20 }} value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} />
                   {searchTerm && <i className="fas fa-times" style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', color:'#94A3B8', cursor:'pointer' }} onClick={()=>setSearchTerm('')}></i>}
                 </div>
               </div>
@@ -2386,8 +2329,8 @@ function AdminPortal({ onExit }) {
             <div className="fadein">
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
                 <div>
-                  <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Team Members</h1>
-                  <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{team.length} member{team.length !== 1 ? 's' : ''} · Total monthly payroll: <strong>US${fmtNum(team.reduce((s,t)=>s+num(t.netMonthlyUSD),0))}</strong></p>
+                  <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Contractors & Founders</h1>
+                  <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{team.length} member{team.length !== 1 ? 's' : ''} · Total monthly retainers: <strong>US${fmtNum(team.reduce((s,t)=>s+num(t.netMonthlyUSD),0))}</strong></p>
                 </div>
                 <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
                   {team.length === 0 && (
@@ -2410,7 +2353,7 @@ function AdminPortal({ onExit }) {
                   <div style={{ overflowX:'auto' }}>
                     <table className="admin-table">
                       <thead>
-                        <tr><th>Name</th><th>Position</th><th>Net Monthly (USD)</th><th>Equity</th><th>Employee ID</th><th>Status</th><th>Actions</th></tr>
+                        <tr><th>Name</th><th>Position</th><th>Net Monthly (USD)</th><th>Equity</th><th>Contractor ID</th><th>Status</th><th>Actions</th></tr>
                       </thead>
                       <tbody>
                         {filteredTeam.map(m => (
@@ -2426,7 +2369,7 @@ function AdminPortal({ onExit }) {
                             <td><span className={`status-pill ${m.status==='Active'||!m.status?'active':'paused'}`}>{m.status || 'Active'}</span></td>
                             <td>
                               <div style={{ display:'flex', gap:6 }}>
-                                <button onClick={() => openPayslipGenerator({ employeeId: m.id, periodMonth: new Date().getMonth(), periodYear: new Date().getFullYear(), payDate: todayStr(), currency:'ZMW', exchangeRate:27.5, earnings:[], deductions:[], employerContributions:[], status:'Draft', preparedBy:'Carol Kambole', preparedByTitle:'Co-founder & Director of Finance & Administration' })} className="btn-sm btn-blue" title="Generate Payslip"><i className="fas fa-file-invoice-dollar"></i></button>
+                                <button onClick={() => openPayslipGenerator({ employeeId: m.id, periodMonth: new Date().getMonth(), periodYear: new Date().getFullYear(), payDate: todayStr(), currency:'ZMW', exchangeRate:27.5, earnings:[], deductions:[], status:'Draft', preparedBy:'Carol Kambole', preparedByTitle:'Co-founder & Director of Finance & Administration' })} className="btn-sm btn-blue" title="Generate Remittance"><i className="fas fa-file-invoice-dollar"></i></button>
                                 <button onClick={() => openEdit('team', m)} className="btn-sm btn-edit"><i className="fas fa-pen"></i></button>
                                 <button onClick={() => handleDelete('se_team', m.id)} className="btn-sm btn-del"><i className="fas fa-trash"></i></button>
                               </div>
@@ -2441,18 +2384,18 @@ function AdminPortal({ onExit }) {
             </div>
           )}
 
-          {/* ══════════════ PAYSLIPS TAB ══════════════ */}
+          {/* ══════════════ REMITTANCES TAB ══════════════ */}
           {activeTab === 'payslips' && (
             <div className="fadein">
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
                 <div>
-                  <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Payslips</h1>
+                  <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Remittance Advices</h1>
                   <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>
-                    {payslips.length} payslip{payslips.length !== 1 ? 's' : ''} · {payslips.filter(p=>p.status==='Paid').length} paid · {payslips.filter(p=>p.status!=='Paid').length} draft
+                    {payslips.length} document{payslips.length !== 1 ? 's' : ''} · {payslips.filter(p=>p.status==='Paid').length} paid · {payslips.filter(p=>p.status!=='Paid').length} draft
                   </p>
                 </div>
-                <button onClick={() => openPayslipGenerator()} className="btn-primary" style={{ padding:'11px 22px', fontSize:13.5 }} disabled={team.length === 0} title={team.length === 0 ? 'Add a team member first' : ''}>
-                  <i className="fas fa-plus"></i> Generate Payslip
+                <button onClick={() => openPayslipGenerator()} className="btn-primary" style={{ padding:'11px 22px', fontSize:13.5 }} disabled={team.length === 0} title={team.length === 0 ? 'Add a contractor first' : ''}>
+                  <i className="fas fa-plus"></i> Generate Remittance
                 </button>
               </div>
 
@@ -2461,8 +2404,8 @@ function AdminPortal({ onExit }) {
                   <div style={{ display:'flex', alignItems:'center', gap:12 }}>
                     <i className="fas fa-exclamation-triangle" style={{ color:'#92400E', fontSize:20 }}></i>
                     <div>
-                      <div style={{ fontWeight:800, color:'#92400E', fontSize:13 }}>No team members yet</div>
-                      <div style={{ fontSize:12, color:'#78350F', marginTop:2 }}>Go to <strong>Team Members</strong> and add a member (or seed the defaults) before generating payslips.</div>
+                      <div style={{ fontWeight:800, color:'#92400E', fontSize:13 }}>No contractors yet</div>
+                      <div style={{ fontSize:12, color:'#78350F', marginTop:2 }}>Go to <strong>Contractors & Founders</strong> and add a member (or seed the defaults) before generating remittances.</div>
                     </div>
                   </div>
                 </div>
@@ -2472,12 +2415,12 @@ function AdminPortal({ onExit }) {
                 {filteredPayslips.length === 0 ? (
                   <div className="empty-state">
                     <i className="fas fa-file-invoice-dollar" style={{ fontSize:32, color:'#CBD5E1', marginBottom:12, display:'block' }}></i>
-                    No payslips yet. Click <strong>Generate Payslip</strong> to create one.
+                    No remittances yet. Click <strong>Generate Remittance</strong> to create one.
                   </div>
                 ) : (
                   <div style={{ overflowX:'auto' }}>
                     <table className="admin-table">
-                      <thead><tr><th>Ref</th><th>Employee</th><th>Period</th><th>Currency</th><th>Gross</th><th>Deductions</th><th>Net Pay</th><th>Status</th><th>Actions</th></tr></thead>
+                      <thead><tr><th>Ref</th><th>Contractor</th><th>Period</th><th>Currency</th><th>Gross</th><th>Withholding</th><th>Net Pay</th><th>Status</th><th>Actions</th></tr></thead>
                       <tbody>
                         {filteredPayslips.map(p => {
                           const t = team.find(tm => tm.id === p.employeeId);
