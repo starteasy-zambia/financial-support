@@ -402,16 +402,19 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
      secondaryAmountText = `≈ K${fmtNum(zmwEq)} ZMW (Contract Equivalent)`;
   }
 
-  // Dynamic Legal Disclaimer based on position
-  const posLower = empPos.toLowerCase();
-  let legalFooter = '';
-  if (posLower.includes('principal founder')) {
-    legalFooter = 'This advice is for strategic leadership and advisory services rendered under the Principal Founder Agreement. It does not constitute an employment contract and does not create an employer-employee relationship.';
-  } else if (posLower.includes('founder')) {
-    legalFooter = 'This advice is for services rendered under the Founder Contributor Agreement. It does not constitute an employment contract and does not create an employer-employee relationship.';
-  } else {
-    legalFooter = 'This advice is for professional services rendered. It does not constitute an employment contract and does not create an employer-employee relationship.';
+  // Dynamic Legal Disclaimer based on Contract / Position
+  const contractRef = team?.contractRef || payslip.contractRef || '';
+  let agreementName = 'the applicable agreement';
+  
+  if (contractRef) {
+    agreementName = contractRef;
+  } else if ((empPos || '').toLowerCase().includes('principal founder')) {
+    agreementName = 'the Principal Founder Agreement';
+  } else if ((empPos || '').toLowerCase().includes('founder')) {
+    agreementName = 'the Founder Contributor Agreement';
   }
+  
+  const legalFooter = `This fixed monthly retainer is for the services & responsibilities captured in ${agreementName}. It does not constitute an employment contract and does not create an employer-employee relationship.`;
 
   return (
     <div id={renderId} style={{
