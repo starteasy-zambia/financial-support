@@ -1686,24 +1686,24 @@ function AdminPortal({ onExit }) {
   /* open payslip generator */
   const openPayslipGenerator = (existing) => {
     const now = new Date();
-    if (existing) {
+    if (existing && existing.id) {
       setPayslipModal({ mode: 'edit', data: { ...existing } });
     } else {
       const firstTeam = team[0];
       setPayslipModal({
         mode: 'add',
         data: {
-          employeeId: firstTeam?.id || '',
-          periodMonth: now.getMonth(),
-          periodYear: now.getFullYear(),
-          payDate: todayStr(),
-          currency: 'ZMW',
-          exchangeRate: 27.5,
-          earnings: [],
-          deductions: [],
-          status: 'Draft',
-          preparedBy: 'Carol Kambole',
-          preparedByTitle: 'Co-founder & Director of Finance & Administration'
+          employeeId: existing?.employeeId || firstTeam?.id || '',
+          periodMonth: existing?.periodMonth ?? now.getMonth(),
+          periodYear: existing?.periodYear || now.getFullYear(),
+          payDate: existing?.payDate || todayStr(),
+          currency: existing?.currency || 'ZMW',
+          exchangeRate: existing?.exchangeRate || 27.5,
+          earnings: existing?.earnings || [],
+          deductions: existing?.deductions || [],
+          status: existing?.status || 'Draft',
+          preparedBy: existing?.preparedBy || 'Carol Kambole',
+          preparedByTitle: existing?.preparedByTitle || 'Co-founder & Director of Finance & Administration'
         }
       });
     }
@@ -1720,8 +1720,9 @@ function AdminPortal({ onExit }) {
       const totalEarnings = (data.earnings || []).reduce((s, e) => s + num(e.amount), 0);
       if (totalEarnings <= 0) throw new Error('Retainer amount must be greater than zero. Try Auto-Calculate.');
 
+      const { id, ...cleanData } = data;
       const payload = {
-        ...data,
+        ...cleanData,
         employeeName: teamMember?.name || '',
         position: teamMember?.position || '',
         employeeId: teamMember?.employeeId || '',
@@ -1737,7 +1738,7 @@ function AdminPortal({ onExit }) {
         await db.collection('se_payslips').add({ ...payload, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         showToast('Retainer advice saved.', 'success');
       } else {
-        await db.collection('se_payslips').doc(data.id).update(payload);
+        await db.collection('se_payslips').doc(id).update(payload);
         showToast('Retainer advice updated.', 'success');
       }
       closePayslipModal();
