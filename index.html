@@ -286,8 +286,8 @@ const NHIMA_RATE = 0.01;
 const SDL_RATE = 0.005; // Skills Development Levy
 
 const DEFAULT_TEAM = [
-  { name:'Mwaba Lewis', position:'Principal Founder & Strategic Sponsor', netMonthlyUSD:1725, equity:'50%', email:'', phone:'', employeeId:'SE-RET-001', status:'Active', paymentNotes:'Bank Transfer - Standard Chartered', contractRef:'Monthly Payment Agreement', employmentType:'founder' },
-  { name:'Carol Kambole', position:'Co-founder & Director of Finance & Administration', netMonthlyUSD:600, equity:'6%', email:'', phone:'', employeeId:'SE-RET-002', status:'Active', paymentNotes:'Bank Transfer - Standard Chartered', contractRef:'Monthly Payment Agreement', employmentType:'founder' }
+  { name:'Mwaba Lewis', position:'Principal Founder & Strategic Sponsor', netMonthlyUSD:1725, equity:'50%', email:'', phone:'', employeeId:'SE-RET-001', status:'Active', paymentNotes:'Bank Transfer - Standard Chartered', contractRef:'Principal Founder Agreement', employmentType:'principal_founder' },
+  { name:'Carol Kambole', position:'Co-founder & Director of Finance & Administration', netMonthlyUSD:600, equity:'6%', email:'', phone:'', employeeId:'SE-RET-002', status:'Active', paymentNotes:'Bank Transfer - Standard Chartered', contractRef:'Founder Contributor Agreement', employmentType:'contributor' }
 ];
 
 const DEFAULT_VENDORS = [
@@ -304,7 +304,7 @@ const addDays = (dateStr, n) => { const d = new Date(dateStr); d.setDate(d.getDa
 const fmtNum = (n) => num(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const curSym = (currency) => currency === 'USD' ? '$' : 'K';
 
-/* PAYE + gross-up helpers (Handles both Founder and Employee logic) */
+/* PAYE + gross-up helpers (Handles both Contributor and Employee logic) */
 const calcPAYE = (taxable) => {
   let tax = 0;
   for (const band of ZAMBIA_PAYE_BANDS) {
@@ -422,7 +422,7 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
   const net = totalEarnings - totalDeductions;
   const totalCostToCompany = totalEarnings + totalEmployerCosts;
   
-  const empName = team?.name || payslip.employeeName || 'Founder / Team';
+  const empName = team?.name || payslip.employeeName || 'Team Member';
   const empPos = team?.position || payslip.position || '';
   const empId = team?.employeeId || payslip.employeeId || '—';
   const empEmail = team?.email || payslip.email || '';
@@ -449,7 +449,8 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
   }
 
   // Suggested Legal Disclaimer
-  const legalFooter = `This monthly retainer is processed in accordance with the Monthly Payment Agreement entered into between ${empName} and StartEasy Zambia, covering their responsibilities as ${empPos}. It does not constitute an employment contract and does not create an employer–employee relationship.`;
+  const contractRef = team?.contractRef || payslip.contractRef || 'the applicable agreement';
+  const legalFooter = `This monthly retainer is processed in accordance with the ${contractRef} entered into between ${empName} and StartEasy Zambia, covering their responsibilities as ${empPos}. It does not constitute an employment contract and does not create an employer–employee relationship.`;
 
   return (
     <div id={renderId} style={{
@@ -480,7 +481,7 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
       {/* Employee & Payment info */}
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:20 }}>
         <div>
-          <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:6 }}>Founder / Recipient</div>
+          <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:6 }}>Recipient</div>
           <div style={{ fontSize:14.5, fontWeight:700, color:'#0A1F12' }}>{empName}</div>
           <div style={{ fontSize:11.5, color:'#555', marginTop:2 }}>{empPos}</div>
           <div style={{ fontSize:10.5, color:'#777', marginTop:6 }}>Reference ID: {empId}</div>
@@ -716,7 +717,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
             {/* LEFT COLUMN: form */}
             <div>
               <div className="form-group">
-                <label className="form-label">Founder / Team Member *</label>
+                <label className="form-label">Team Member *</label>
                 <select className="form-input" value={data.employeeId || ''} onChange={e => set('employeeId', e.target.value)} required>
                   <option value="">— Select team member —</option>
                   {teamMembers.map(t => (
@@ -1366,8 +1367,9 @@ function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
           </div>
           <div className="form-group">
             <label className="form-label">Engagement Type *</label>
-            <select className="form-input" value={data.employmentType || 'founder'} onChange={e => set('employmentType', e.target.value)} required>
-              <option value="founder">Founder / Advisory (Retainer)</option>
+            <select className="form-input" value={data.employmentType || 'contributor'} onChange={e => set('employmentType', e.target.value)} required>
+              <option value="principal_founder">Principal Founder</option>
+              <option value="contributor">Contributor</option>
               <option value="employee">Standard Employee (PAYE + NAPSA/NHIMA)</option>
             </select>
           </div>
@@ -1748,7 +1750,7 @@ function AdminPortal({ onExit }) {
   const downloadPayslipPDF = (payslip, teamMember, renderId) => {
     const element = document.getElementById(renderId || 'payslip-view-render');
     if (!element) { showToast('Retainer advice not ready. Try again.', 'error'); return; }
-    const empName = (teamMember?.name || payslip?.employeeName || 'Founder').replace(/\s+/g,'_');
+    const empName = (teamMember?.name || payslip?.employeeName || 'Team').replace(/\s+/g,'_');
     const periodLabel = (payslip?.periodLabel || 'Period').replace(/\s+/g,'_');
     showToast('Generating retainer advice PDF...', 'info');
     window.html2pdf().set({
@@ -1957,7 +1959,7 @@ function AdminPortal({ onExit }) {
         return match ? Math.max(max, parseInt(match[1])) : max;
       }, 0);
       const nextId = `SE-RET-${String(maxRet + 1).padStart(3, '0')}`;
-      data = { name: '', employmentType: 'founder', position: '', email: '', phone: '', netMonthlyUSD: '', employeeId: nextId, equity: '', status: 'Active', bankName: '', bankAccount: '', contractRef: '' };
+      data = { name: '', employmentType: 'contributor', position: '', email: '', phone: '', netMonthlyUSD: '', employeeId: nextId, equity: '', status: 'Active', bankName: '', bankAccount: '', contractRef: '' };
     }
 
     setModal({ type, mode: 'add', data });
@@ -2048,7 +2050,7 @@ function AdminPortal({ onExit }) {
   const savePayslip = async (data) => {
     setFormError(''); setSaving(true);
     try {
-      if (!data.employeeId) throw new Error('Please select a founder/team member.');
+      if (!data.employeeId) throw new Error('Please select a team member.');
       const teamMember = team.find(t => t.id === data.employeeId);
       const totalEarnings = (data.earnings || []).reduce((s, e) => s + num(e.amount), 0);
       if (totalEarnings <= 0) throw new Error('Retainer amount must be greater than zero. Try Auto-Calculate.');
@@ -2839,7 +2841,15 @@ function AdminPortal({ onExit }) {
                               <div style={{ fontWeight:700, color:'#0A1F12' }}>{m.name}</div>
                               {m.email && <div style={{ fontSize:11, color:'#64748B' }}>{m.email}</div>}
                             </td>
-                            <td><span style={{ fontSize:11, fontWeight:700, padding:'3px 8px', borderRadius:4, background: m.employmentType === 'employee' ? '#DBEAFE' : '#FEF3C7', color: m.employmentType === 'employee' ? '#1E40AF' : '#92400E' }}>{m.employmentType === 'employee' ? 'Employee' : 'Founder'}</span></td>
+                            <td>
+                              <span style={{ 
+                                fontSize:11, fontWeight:700, padding:'3px 8px', borderRadius:4, 
+                                background: m.employmentType === 'employee' ? '#DBEAFE' : m.employmentType === 'principal_founder' ? '#FEF3C7' : '#F1F5F9', 
+                                color: m.employmentType === 'employee' ? '#1E40AF' : m.employmentType === 'principal_founder' ? '#92400E' : '#475569' 
+                              }}>
+                                {m.employmentType === 'employee' ? 'Employee' : m.employmentType === 'principal_founder' ? 'Principal Founder' : 'Contributor'}
+                              </span>
+                            </td>
                             <td style={{ fontSize:12.5 }}>{m.position}</td>
                             <td style={{ fontWeight:800, color:'#1E7B3C', fontFamily:'Consolas, monospace' }}>${fmtNum(m.netMonthlyUSD)}</td>
                             <td style={{ fontSize:12, color:'#64748B', fontFamily:'monospace' }}>{m.employeeId || '—'}</td>
