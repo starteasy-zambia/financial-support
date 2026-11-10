@@ -26,6 +26,7 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 .serif { font-family: 'Playfair Display', Georgia, serif; }
 .fadein { animation: fi .6s cubic-bezier(.22,.61,.36,1) both; }
 @keyframes fi { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+@keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
 
 /* Header & Nav */
 .site-header { position: sticky; top: 0; z-index: 100; background: rgba(10,31,18,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(245,166,35,.1); width: 100%; }
@@ -296,6 +297,11 @@ const DEFAULT_VENDORS = [
 
 /* ─── UTILITIES ─── */
 const fmtK = (n) => `K${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+const fmtKAccounting = (n) => {
+  const val = Number(n || 0);
+  if (val < 0) return `(K${Math.abs(val).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })})`;
+  return `K${val.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+};
 const num = (v) => { const n = parseFloat(String(v || '').replace(/[^\d.-]/g, '')); return isNaN(n) ? 0 : n; };
 const toDate = (raw) => { if (!raw) return null; if (raw.toDate) return raw.toDate(); const d = new Date(raw); return isNaN(d) ? null : d; };
 const dateStr = (raw) => { const d = toDate(raw); return d ? d.toISOString().split('T')[0] : ''; };
@@ -1852,6 +1858,13 @@ function AdminPortal({ onExit }) {
     return t.includes('financial starter') || t.includes('business control') || t.includes('growth & financial planning');
   };
 
+  const getInvoiceStatus = (inv) => {
+    if (inv.status === 'Paid') return 'Paid';
+    const due = toDate(inv.dueDate);
+    if (!due) return 'Pending';
+    return due < new Date() ? 'Overdue' : 'Pending';
+  };
+
   const periodLedger = useMemo(() => filterByPeriod(ledger, 'date'), [ledger, period]);
   const periodInvoices = useMemo(() => filterByPeriod(invoices, 'issueDate'), [invoices, period]);
   const periodPayments = useMemo(() => filterByPeriod(payments, 'submittedAt'), [payments, period]);
@@ -1894,14 +1907,6 @@ function AdminPortal({ onExit }) {
     const cfFinancing = cashflow.financing.in - cashflow.financing.out;
     const netCashflow = cfOperating + cfInvesting + cfFinancing;
 
-    const approvedPmts = periodPayments.filter(p => p.status === 'approved');
-    const finPmts = approvedPmts.filter(p => isPackagePayment(p.serviceTitle));
-    const dirPmts = approvedPmts.filter(p => !isPackagePayment(p.serviceTitle));
-    const finCollected = finPmts.reduce((s, p) => s + num(p.amount) / 2, 0);
-    const dirCollected = dirPmts.reduce((s, p) => s + num(p.amount), 0);
-    const commencementCollected = finCollected + dirCollected;
-    const totalRevenue = totalIncome + commencementCollected; // Operating Revenue
-
     const invMetrics = { total:0, paid:0, pending:0, overdue:0, count:0 };
     periodInvoices.forEach(inv => {
       const amt = num(inv.amount);
@@ -1916,23 +1921,24 @@ function AdminPortal({ onExit }) {
     const activeClients = clients.filter(c => (c.status || 'Active') === 'Active');
     const mrr = activeClients.reduce((s, c) => s + (pkgPrice[c.package] || 0), 0);
 
+    // ─── BALANCE SHEET LOGIC & BALANCING FIGURE ───
+    const totalAssets = netCashflow + invMetrics.pending + invMetrics.overdue;
+    const totalLiabilities = vendors.reduce((s,v)=>s+num(v.totalLiability)-num(v.amountPaid),0);
+    
+    // Automatically calculate Retained Earnings to balance the sheet
+    const retainedEarnings = totalAssets - totalLiabilities - totalFinancing;
+
     return {
       totalIncome, totalExpense, totalFinancing, netProfit, profitMargin, expenseRatio,
       incomeByCategory, expenseByCategory,
       cashflow, cfOperating, cfInvesting, cfFinancing, netCashflow,
-      commencementCollected, totalRevenue, dirCollected, finCollected,
-      invMetrics, mrr, activeClients: activeClients.length, totalClients: clients.length
+      totalRevenue: totalIncome, // FIXED: Removed double counting of verified payments
+      invMetrics, mrr, activeClients: activeClients.length, totalClients: clients.length,
+      totalAssets, totalLiabilities, retainedEarnings // Added for balanced sheet
     };
-  }, [periodLedger, periodInvoices, periodPayments, clients]);
+  }, [periodLedger, periodInvoices, periodPayments, clients, vendors]);
 
   const pendingPayments = payments.filter(p => p.status === 'under_review' || !p.status);
-
-  const getInvoiceStatus = (inv) => {
-    if (inv.status === 'Paid') return 'Paid';
-    const due = toDate(inv.dueDate);
-    if (!due) return 'Pending';
-    return due < new Date() ? 'Overdue' : 'Pending';
-  };
 
   const nextInvoiceNo = (list) => {
     const year = new Date().getFullYear();
@@ -2282,6 +2288,10 @@ function AdminPortal({ onExit }) {
               <i className="fas fa-bars"></i>
               <span className="hidden sm:inline">StartEasy Finance</span>
             </button>
+            {/* ─── LIVE INDICATOR BADGE ─── */}
+            <div style={{ display:'flex', alignItems:'center', gap:6, background:'rgba(30,123,60,0.1)', padding:'4px 12px', borderRadius:99, fontSize:11, fontWeight:800, color:'#1E7B3C', border:'1px solid rgba(30,123,60,0.2)' }}>
+              <span style={{ width:6, height:6, borderRadius:'50%', background:'#1E7B3C', animation:'pulse 1.5s infinite' }}></span> LIVE DATA
+            </div>
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:16 }}>
             <span className="hidden sm:inline" style={{ fontSize:13, fontWeight:600, color:'rgba(10,31,18,0.6)' }}>{user.email}</span>
@@ -2377,7 +2387,7 @@ function AdminPortal({ onExit }) {
                 <div className="admin-card">
                   <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Operating Revenue</div>
                   <div className="serif" style={{ fontSize:30, fontWeight:800, color:'#1E7B3C' }}>{fmtK(calc.totalRevenue)}</div>
-                  <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Ledger Income + Payments</div>
+                  <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>From Ledger</div>
                 </div>
                 <div className="admin-card">
                   <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Capital / Funding Raised</div>
@@ -2386,7 +2396,7 @@ function AdminPortal({ onExit }) {
                 </div>
                 <div className="admin-card">
                   <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Net Profit</div>
-                  <div className="serif" style={{ fontSize:30, fontWeight:800, color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtK(calc.netProfit)}</div>
+                  <div className="serif" style={{ fontSize:30, fontWeight:800, color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtKAccounting(calc.netProfit)}</div>
                   <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Revenue − Expenses</div>
                 </div>
                 <div className="admin-card">
@@ -2403,10 +2413,10 @@ function AdminPortal({ onExit }) {
                     <span className={`kpi-trend ${calc.netCashflow >= 0 ? 'up' : 'down'}`}>{calc.netCashflow >= 0 ? '▲ Positive' : '▼ Negative'}</span>
                   </div>
                   <div style={{ fontSize:13, color:'#64748B', marginBottom:8 }}>Net cash flow</div>
-                  <div style={{ fontFamily:'Consolas, monospace', fontSize:22, fontWeight:800, color: calc.netCashflow >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtK(calc.netCashflow)}</div>
+                  <div style={{ fontFamily:'Consolas, monospace', fontSize:22, fontWeight:800, color: calc.netCashflow >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtKAccounting(calc.netCashflow)}</div>
                   <div style={{ display:'flex', gap:12, marginTop:16, fontSize:11, color:'#64748B' }}>
-                    <span>Operating: <strong style={{ color:'#0A1F12' }}>{fmtK(calc.cfOperating)}</strong></span>
-                    <span>Financing: <strong style={{ color:'#0A1F12' }}>{fmtK(calc.cfFinancing)}</strong></span>
+                    <span>Operating: <strong style={{ color:'#0A1F12' }}>{fmtKAccounting(calc.cfOperating)}</strong></span>
+                    <span>Financing: <strong style={{ color:'#0A1F12' }}>{fmtKAccounting(calc.cfFinancing)}</strong></span>
                   </div>
                 </div>
                 <div className="admin-card">
@@ -2558,7 +2568,7 @@ function AdminPortal({ onExit }) {
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
                 <div>
                   <h1 className="serif" style={{ fontSize:28, fontWeight:800, color:'#0A1F12', margin:0 }}>Company Ledger</h1>
-                  <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{periodLabel} · {filteredLedger.length} entries · Net: <strong style={{ color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtK(calc.netProfit)}</strong></p>
+                  <p style={{ fontSize:13, color:'#64748B', margin:'4px 0 0' }}>{periodLabel} · {filteredLedger.length} entries · Net: <strong style={{ color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtKAccounting(calc.netProfit)}</strong></p>
                 </div>
                 <div style={{ display: 'flex', gap: 12 }}>
                   <button onClick={() => exportToCSV(filteredLedger, 'Ledger', ['date','type','category','desc','amount','reference'])} disabled={isExporting} className="btn-sm btn-gray">
@@ -2684,7 +2694,7 @@ function AdminPortal({ onExit }) {
             </div>
           )}
 
-          {/* STATEMENTS (unchanged) */}
+          {/* STATEMENTS */}
           {activeTab === 'statements' && (
             <div className="fadein">
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24, flexWrap:'wrap', gap:12 }}>
@@ -2719,16 +2729,8 @@ function AdminPortal({ onExit }) {
                 {statementTab === 'income' && (
                   <div>
                     <div className="report-row section-title">Revenue</div>
-                    <div className="report-row report-indent"><span>Ledger Income</span><span>{fmtK(calc.totalIncome)}</span></div>
-                    <div className="report-row report-indent"><span>Verified Financial Commencements (50%)</span><span>{fmtK(calc.finCollected)}</span></div>
-                    <div className="report-row report-indent"><span>Venture & Directory Service Fees (100%)</span><span>{fmtK(calc.dirCollected)}</span></div>
-                    <div className="report-row total"><span>Total Revenue</span><span>{fmtK(calc.totalRevenue)}</span></div>
-
-                    <div className="report-row section-title">Income Breakdown by Category</div>
-                    {Object.entries(calc.incomeByCategory).map(([cat, val]) => (
-                      <div key={cat} className="report-row report-indent"><span>{cat}</span><span>{fmtK(val)}</span></div>
-                    ))}
-                    {Object.keys(calc.incomeByCategory).length === 0 && <div className="report-row report-indent" style={{ color:'#94A3B8', fontStyle:'italic' }}><span>No income recorded</span><span>{fmtK(0)}</span></div>}
+                    <div className="report-row report-indent"><span>Operating Revenue (from Ledger)</span><span>{fmtK(calc.totalIncome)}</span></div>
+                    <div className="report-row total"><span>Total Revenue</span><span>{fmtK(calc.totalIncome)}</span></div>
 
                     <div className="report-row section-title">Operating Expenses</div>
                     {Object.entries(calc.expenseByCategory).map(([cat, val]) => (
@@ -2746,7 +2748,7 @@ function AdminPortal({ onExit }) {
 
                     <div className="report-row total" style={{ fontSize:18, color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F' }}>
                       <span>Net Income (Profit / Loss)</span>
-                      <span>{fmtK(calc.netProfit)}</span>
+                      <span>{fmtKAccounting(calc.netProfit)}</span>
                     </div>
                   </div>
                 )}
@@ -2754,22 +2756,22 @@ function AdminPortal({ onExit }) {
                 {statementTab === 'balance' && (
                   <div>
                     <div className="report-row section-title">Assets</div>
-                    <div className="report-row report-indent"><span>Cash & Cash Equivalents</span><span>{fmtK(Math.max(0, calc.netCashflow))}</span></div>
+                    <div className="report-row report-indent"><span>Cash & Cash Equivalents</span><span>{fmtKAccounting(calc.netCashflow)}</span></div>
                     <div className="report-row report-indent"><span>Accounts Receivable (Outstanding Invoices)</span><span>{fmtK(calc.invMetrics.pending + calc.invMetrics.overdue)}</span></div>
-                    <div className="report-row total"><span>Total Assets</span><span>{fmtK(Math.max(0, calc.netCashflow) + calc.invMetrics.pending + calc.invMetrics.overdue)}</span></div>
+                    <div className="report-row total"><span>Total Assets</span><span>{fmtKAccounting(calc.totalAssets)}</span></div>
 
                     <div className="report-row section-title">Liabilities</div>
-                    <div className="report-row report-indent"><span>Accounts Payable (Vendor Liabilities)</span><span>{fmtK(vendors.reduce((s,v)=>s+num(v.totalLiability)-num(v.amountPaid),0))}</span></div>
-                    <div className="report-row total"><span>Total Liabilities</span><span>{fmtK(vendors.reduce((s,v)=>s+num(v.totalLiability)-num(v.amountPaid),0))}</span></div>
+                    <div className="report-row report-indent"><span>Accounts Payable (Vendor Liabilities)</span><span>{fmtK(calc.totalLiabilities)}</span></div>
+                    <div className="report-row total"><span>Total Liabilities</span><span>{fmtK(calc.totalLiabilities)}</span></div>
 
                     <div className="report-row section-title">Equity</div>
                     <div className="report-row report-indent"><span>Share Capital & Financing</span><span>{fmtK(calc.totalFinancing)}</span></div>
-                    <div className="report-row report-indent"><span>Retained Earnings (Net Income)</span><span>{fmtK(calc.netProfit)}</span></div>
-                    <div className="report-row total"><span>Total Equity</span><span>{fmtK(calc.totalFinancing + calc.netProfit)}</span></div>
+                    <div className="report-row report-indent"><span>Retained Earnings (Net Income)</span><span>{fmtKAccounting(calc.retainedEarnings)}</span></div>
+                    <div className="report-row total"><span>Total Equity</span><span>{fmtKAccounting(calc.totalFinancing + calc.retainedEarnings)}</span></div>
 
                     <div className="report-row total" style={{ borderTop:'2px solid #333', borderBottom:'4px double #333', fontSize:16 }}>
                       <span>Total Liabilities & Equity</span>
-                      <span>{fmtK(Math.max(0, calc.netCashflow) + calc.invMetrics.pending + calc.invMetrics.overdue)}</span>
+                      <span>{fmtKAccounting(calc.totalLiabilities + calc.totalFinancing + calc.retainedEarnings)}</span>
                     </div>
                   </div>
                 )}
@@ -2779,24 +2781,24 @@ function AdminPortal({ onExit }) {
                     <div className="report-row section-title">Operating Activities</div>
                     <div className="report-row report-indent"><span>Cash Inflows (Operating)</span><span>{fmtK(calc.cashflow.operating.in)}</span></div>
                     <div className="report-row report-indent"><span>Cash Outflows (Operating)</span><span>({fmtK(calc.cashflow.operating.out)})</span></div>
-                    <div className="report-row total"><span>Net Cash from Operating Activities</span><span>{fmtK(calc.cfOperating)}</span></div>
+                    <div className="report-row total"><span>Net Cash from Operating Activities</span><span>{fmtKAccounting(calc.cfOperating)}</span></div>
 
                     <div className="report-row section-title">Investing Activities</div>
                     <div className="report-row report-indent"><span>Cash Inflows (Investing)</span><span>{fmtK(calc.cashflow.investing.in)}</span></div>
                     <div className="report-row report-indent"><span>Cash Outflows (Investing)</span><span>({fmtK(calc.cashflow.investing.out)})</span></div>
-                    <div className="report-row total"><span>Net Cash from Investing Activities</span><span>{fmtK(calc.cfInvesting)}</span></div>
+                    <div className="report-row total"><span>Net Cash from Investing Activities</span><span>{fmtKAccounting(calc.cfInvesting)}</span></div>
 
                     <div className="report-row section-title">Financing Activities</div>
                     <div className="report-row report-indent"><span>Cash Inflows (Financing / Capital)</span><span>{fmtK(calc.cashflow.financing.in)}</span></div>
                     <div className="report-row report-indent"><span>Cash Outflows (Financing)</span><span>({fmtK(calc.cashflow.financing.out)})</span></div>
-                    <div className="report-row total"><span>Net Cash from Financing Activities</span><span>{fmtK(calc.cfFinancing)}</span></div>
+                    <div className="report-row total"><span>Net Cash from Financing Activities</span><span>{fmtKAccounting(calc.cfFinancing)}</span></div>
 
                     <div className="report-row total" style={{ fontSize:18, color: calc.netCashflow >= 0 ? '#1E7B3C' : '#B8564F' }}>
                       <span>Net Increase / (Decrease) in Cash</span>
-                      <span>{fmtK(calc.netCashflow)}</span>
+                      <span>{fmtKAccounting(calc.netCashflow)}</span>
                     </div>
                     <div className="report-row report-indent" style={{ marginTop:12, borderTop:'1px solid #ccc', paddingTop:12 }}><span>Cash at Beginning of Period</span><span>{fmtK(0)}</span></div>
-                    <div className="report-row total" style={{ fontSize:16 }}><span>Cash at End of Period</span><span>{fmtK(calc.netCashflow)}</span></div>
+                    <div className="report-row total" style={{ fontSize:16 }}><span>Cash at End of Period</span><span>{fmtKAccounting(calc.netCashflow)}</span></div>
                   </div>
                 )}
               </div>
