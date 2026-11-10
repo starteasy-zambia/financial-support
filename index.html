@@ -258,14 +258,16 @@ const PACKAGES = [
 
 const LEDGER_CATEGORIES = {
   Income: ['Service Fees','Commencement Fees','Consulting Fees','Other Income'],
-  Expense: ['Retainers & Fees','Rent','Utilities','Marketing','Travel','Equipment','Software','Professional Fees','Bank Charges','Other']
+  Expense: ['Retainers & Fees','Rent','Utilities','Marketing','Travel','Equipment','Software','Professional Fees','Bank Charges','Other'],
+  Financing: ['Equity Investment', 'Grant Funding', 'Shareholder Loan', 'Other Capital']
 };
 
 const CASHFLOW_CLASS = {
   'Service Fees':'operating','Commencement Fees':'operating','Consulting Fees':'operating','Other Income':'operating',
   'Retainers & Fees':'operating','Rent':'operating','Utilities':'operating','Marketing':'operating',
   'Travel':'operating','Software':'operating','Professional Fees':'operating','Bank Charges':'operating','Other':'operating',
-  'Equipment':'investing'
+  'Equipment':'investing',
+  'Equity Investment':'financing', 'Grant Funding':'financing', 'Shareholder Loan':'financing', 'Other Capital':'financing'
 };
 
 const PERIOD_LABELS = { month:'This Month', last_month:'Last Month', quarter:'This Quarter', year:'This Year', all:'All Time' };
@@ -284,8 +286,8 @@ const NHIMA_RATE = 0.01;
 const SDL_RATE = 0.005; // Skills Development Levy
 
 const DEFAULT_TEAM = [
-  { name:'Mwaba Lewis', position:'Principal Founder & Strategic Sponsor', netMonthlyUSD:1725, equity:'50%', email:'', phone:'', employeeId:'SE-RET-001', status:'Active', paymentNotes:'Bank Transfer - Standard Chartered', contractRef:'Monthly Payment Agreement', employmentType:'contractor' },
-  { name:'Carol Kambole', position:'Co-founder & Director of Finance & Administration', netMonthlyUSD:600, equity:'6%', email:'', phone:'', employeeId:'SE-RET-002', status:'Active', paymentNotes:'Bank Transfer - Standard Chartered', contractRef:'Monthly Payment Agreement', employmentType:'contractor' }
+  { name:'Mwaba Lewis', position:'Principal Founder & Strategic Sponsor', netMonthlyUSD:1725, equity:'50%', email:'', phone:'', employeeId:'SE-RET-001', status:'Active', paymentNotes:'Bank Transfer - Standard Chartered', contractRef:'Monthly Payment Agreement', employmentType:'founder' },
+  { name:'Carol Kambole', position:'Co-founder & Director of Finance & Administration', netMonthlyUSD:600, equity:'6%', email:'', phone:'', employeeId:'SE-RET-002', status:'Active', paymentNotes:'Bank Transfer - Standard Chartered', contractRef:'Monthly Payment Agreement', employmentType:'founder' }
 ];
 
 const DEFAULT_VENDORS = [
@@ -302,7 +304,7 @@ const addDays = (dateStr, n) => { const d = new Date(dateStr); d.setDate(d.getDa
 const fmtNum = (n) => num(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const curSym = (currency) => currency === 'USD' ? '$' : 'K';
 
-/* PAYE + gross-up helpers (Handles both Contractor and Employee logic) */
+/* PAYE + gross-up helpers (Handles both Founder and Employee logic) */
 const calcPAYE = (taxable) => {
   let tax = 0;
   for (const band of ZAMBIA_PAYE_BANDS) {
@@ -1198,14 +1200,15 @@ function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
             <div className="form-group">
               <label className="form-label">Type *</label>
               <select className="form-input" value={data.type || 'Income'} onChange={e => { set('type', e.target.value); set('category', ''); }}>
-                <option value="Income">Income</option>
+                <option value="Income">Income (Operating)</option>
                 <option value="Expense">Expense</option>
+                <option value="Financing">Financing / Capital</option>
               </select>
             </div>
           </div>
           <div className="form-group">
             <label className="form-label">Description *</label>
-            <input type="text" className="form-input" value={data.desc || ''} onChange={e => set('desc', e.target.value)} placeholder="e.g. Monthly service fee — Client X" required />
+            <input type="text" className="form-input" value={data.desc || ''} onChange={e => set('desc', e.target.value)} placeholder="e.g. Pre-seed investment / Client fee" required />
           </div>
           <div className="form-row">
             <div className="form-group">
@@ -1222,7 +1225,7 @@ function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
           </div>
           <div className="form-group">
             <label className="form-label">Reference / Notes</label>
-            <input type="text" className="form-input" value={data.reference || ''} onChange={e => set('reference', e.target.value)} placeholder="e.g. Receipt No., Client Ref" />
+            <input type="text" className="form-input" value={data.reference || ''} onChange={e => set('reference', e.target.value)} placeholder="e.g. Receipt No., Invoice Ref" />
           </div>
         </>
       );
@@ -1362,9 +1365,9 @@ function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
             <input type="text" className="form-input" value={data.name || ''} onChange={e => set('name', e.target.value)} required placeholder="e.g. Carol Kambole" />
           </div>
           <div className="form-group">
-            <label className="form-label">Employment Type *</label>
-            <select className="form-input" value={data.employmentType || 'contractor'} onChange={e => set('employmentType', e.target.value)} required>
-              <option value="contractor">Contractor / Founder (Retainer)</option>
+            <label className="form-label">Engagement Type *</label>
+            <select className="form-input" value={data.employmentType || 'founder'} onChange={e => set('employmentType', e.target.value)} required>
+              <option value="founder">Founder / Advisory (Retainer)</option>
               <option value="employee">Standard Employee (PAYE + NAPSA/NHIMA)</option>
             </select>
           </div>
@@ -1626,6 +1629,8 @@ function AdminPortal({ onExit }) {
   const [modal, setModal] = useState(null);
   const [payslipModal, setPayslipModal] = useState(null);
   const [viewingPayslip, setViewingPayslip] = useState(null);
+  const [vendorPaymentModal, setVendorPaymentModal] = useState(null);
+  
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -1641,9 +1646,9 @@ function AdminPortal({ onExit }) {
 
   /* body scroll lock */
   useEffect(() => {
-    document.body.style.overflow = (modal || payslipModal || viewingPayslip) ? 'hidden' : 'unset';
+    document.body.style.overflow = (modal || payslipModal || viewingPayslip || vendorPaymentModal) ? 'hidden' : 'unset';
     return () => { document.body.style.overflow = 'unset'; };
-  }, [modal, payslipModal, viewingPayslip]);
+  }, [modal, payslipModal, viewingPayslip, vendorPaymentModal]);
 
   /* auth */
   useEffect(() => {
@@ -1860,8 +1865,12 @@ function AdminPortal({ onExit }) {
   const calc = useMemo(() => {
     const income = periodLedger.filter(l => l.type === 'Income');
     const expense = periodLedger.filter(l => l.type === 'Expense');
+    const financing = periodLedger.filter(l => l.type === 'Financing');
+    
     const totalIncome = income.reduce((s, l) => s + num(l.amount), 0);
     const totalExpense = expense.reduce((s, l) => s + num(l.amount), 0);
+    const totalFinancing = financing.reduce((s, l) => s + num(l.amount), 0);
+    
     const netProfit = totalIncome - totalExpense;
     const profitMargin = totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0;
     const expenseRatio = totalIncome > 0 ? (totalExpense / totalIncome) * 100 : 0;
@@ -1873,9 +1882,9 @@ function AdminPortal({ onExit }) {
 
     const cashflow = { operating: { in: 0, out: 0 }, investing: { in: 0, out: 0 }, financing: { in: 0, out: 0 } };
     periodLedger.forEach(l => {
-      const cls = CASHFLOW_CLASS[l.category] || 'operating';
+      const cls = CASHFLOW_CLASS[l.category] || (l.type === 'Financing' ? 'financing' : 'operating');
       const v = num(l.amount);
-      if (l.type === 'Income') cashflow[cls].in += v;
+      if (l.type === 'Income' || l.type === 'Financing') cashflow[cls].in += v;
       else cashflow[cls].out += v;
     });
     const cfOperating = cashflow.operating.in - cashflow.operating.out;
@@ -1889,7 +1898,7 @@ function AdminPortal({ onExit }) {
     const finCollected = finPmts.reduce((s, p) => s + num(p.amount) / 2, 0);
     const dirCollected = dirPmts.reduce((s, p) => s + num(p.amount), 0);
     const commencementCollected = finCollected + dirCollected;
-    const totalRevenue = totalIncome + commencementCollected;
+    const totalRevenue = totalIncome + commencementCollected; // Operating Revenue
 
     const invMetrics = { total:0, paid:0, pending:0, overdue:0, count:0 };
     periodInvoices.forEach(inv => {
@@ -1906,7 +1915,7 @@ function AdminPortal({ onExit }) {
     const mrr = activeClients.reduce((s, c) => s + (pkgPrice[c.package] || 0), 0);
 
     return {
-      totalIncome, totalExpense, netProfit, profitMargin, expenseRatio,
+      totalIncome, totalExpense, totalFinancing, netProfit, profitMargin, expenseRatio,
       incomeByCategory, expenseByCategory,
       cashflow, cfOperating, cfInvesting, cfFinancing, netCashflow,
       commencementCollected, totalRevenue, dirCollected, finCollected,
@@ -1948,7 +1957,7 @@ function AdminPortal({ onExit }) {
         return match ? Math.max(max, parseInt(match[1])) : max;
       }, 0);
       const nextId = `SE-RET-${String(maxRet + 1).padStart(3, '0')}`;
-      data = { name: '', employmentType: 'contractor', position: '', email: '', phone: '', netMonthlyUSD: '', employeeId: nextId, equity: '', status: 'Active', bankName: '', bankAccount: '', contractRef: '' };
+      data = { name: '', employmentType: 'founder', position: '', email: '', phone: '', netMonthlyUSD: '', employeeId: nextId, equity: '', status: 'Active', bankName: '', bankAccount: '', contractRef: '' };
     }
 
     setModal({ type, mode: 'add', data });
@@ -1985,6 +1994,55 @@ function AdminPortal({ onExit }) {
     setFormError('');
   };
   const closePayslipModal = () => { setPayslipModal(null); setFormError(''); };
+
+  /* open vendor payment */
+  const openVendorPayment = (vendor) => {
+    setVendorPaymentModal({
+      vendorId: vendor.id,
+      vendorName: vendor.name,
+      amount: '',
+      date: todayStr(),
+      reference: '',
+      notes: ''
+    });
+  };
+
+  /* save vendor payment */
+  const saveVendorPayment = async (data) => {
+    setSaving(true);
+    try {
+      const amt = num(data.amount);
+      if (amt <= 0) throw new Error('Amount must be greater than zero');
+      
+      // 1. Create Ledger Expense Entry
+      await db.collection('se_ledger').add({
+        date: data.date,
+        type: 'Expense',
+        category: 'Professional Fees',
+        desc: `Payment to Vendor: ${data.vendorName} - ${data.notes || 'Service Fee'}`,
+        amount: amt,
+        reference: data.reference || 'VENDOR-PAY',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // 2. Update Vendor Record
+      const vendor = vendors.find(v => v.id === data.vendorId);
+      const newPaid = num(vendor.amountPaid) + amt;
+      const newStatus = newPaid >= num(vendor.totalLiability) ? 'Settled' : 'Active';
+      
+      await db.collection('se_vendors').doc(data.vendorId).update({
+        amountPaid: newPaid,
+        status: newStatus
+      });
+
+      showToast('Payment recorded to ledger and vendor balance updated.', 'success');
+      setVendorPaymentModal(null);
+    } catch (err) {
+      showToast('Failed to record payment: ' + err.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   /* save payslip */
   const savePayslip = async (data) => {
@@ -2315,19 +2373,19 @@ function AdminPortal({ onExit }) {
 
               <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:20, marginBottom:32 }}>
                 <div className="admin-card">
-                  <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Gross Revenue</div>
+                  <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Operating Revenue</div>
                   <div className="serif" style={{ fontSize:30, fontWeight:800, color:'#1E7B3C' }}>{fmtK(calc.totalRevenue)}</div>
-                  <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Ledger + Verified Payments</div>
+                  <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Ledger Income + Payments</div>
+                </div>
+                <div className="admin-card">
+                  <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Capital / Funding Raised</div>
+                  <div className="serif" style={{ fontSize:30, fontWeight:800, color:'#1B6CA8' }}>{fmtK(calc.totalFinancing)}</div>
+                  <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Equity & Grants (Non-Taxable)</div>
                 </div>
                 <div className="admin-card">
                   <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Net Profit</div>
                   <div className="serif" style={{ fontSize:30, fontWeight:800, color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtK(calc.netProfit)}</div>
                   <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Revenue − Expenses</div>
-                </div>
-                <div className="admin-card">
-                  <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Profit Margin</div>
-                  <div className="serif" style={{ fontSize:30, fontWeight:800, color: calc.profitMargin >= 20 ? '#1E7B3C' : calc.profitMargin >= 0 ? '#E8730F' : '#B8564F' }}>{calc.profitMargin.toFixed(1)}%</div>
-                  <div style={{ fontSize:12, color:'rgba(10,31,18,0.5)', marginTop:8 }}>Net Profit ÷ Total Income</div>
                 </div>
                 <div className="admin-card">
                   <div style={{ fontSize:11, fontWeight:800, color:'rgba(10,31,18,0.5)', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:8 }}>Active Clients</div>
@@ -2346,7 +2404,7 @@ function AdminPortal({ onExit }) {
                   <div style={{ fontFamily:'Consolas, monospace', fontSize:22, fontWeight:800, color: calc.netCashflow >= 0 ? '#1E7B3C' : '#B8564F' }}>{fmtK(calc.netCashflow)}</div>
                   <div style={{ display:'flex', gap:12, marginTop:16, fontSize:11, color:'#64748B' }}>
                     <span>Operating: <strong style={{ color:'#0A1F12' }}>{fmtK(calc.cfOperating)}</strong></span>
-                    <span>Investing: <strong style={{ color:'#0A1F12' }}>{fmtK(calc.cfInvesting)}</strong></span>
+                    <span>Financing: <strong style={{ color:'#0A1F12' }}>{fmtK(calc.cfFinancing)}</strong></span>
                   </div>
                 </div>
                 <div className="admin-card">
@@ -2518,8 +2576,8 @@ function AdminPortal({ onExit }) {
                   <div style={{ fontSize:22, fontWeight:800, color:'#B8564F', marginTop:4 }}>{fmtK(calc.totalExpense)}</div>
                 </div>
                 <div className="admin-card" style={{ padding:16 }}>
-                  <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Net Profit</div>
-                  <div style={{ fontSize:22, fontWeight:800, color: calc.netProfit >= 0 ? '#1E7B3C' : '#B8564F', marginTop:4 }}>{fmtK(calc.netProfit)}</div>
+                  <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Capital Raised</div>
+                  <div style={{ fontSize:22, fontWeight:800, color:'#1B6CA8', marginTop:4 }}>{fmtK(calc.totalFinancing)}</div>
                 </div>
                 <div className="admin-card" style={{ padding:16 }}>
                   <div style={{ fontSize:10, fontWeight:800, color:'#64748B', textTransform:'uppercase' }}>Expense Ratio</div>
@@ -2532,22 +2590,25 @@ function AdminPortal({ onExit }) {
                   <table className="admin-table">
                     <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th>Amount</th><th>Ref</th><th>Actions</th></tr></thead>
                     <tbody>
-                      {filteredLedger.map(t => (
-                        <tr key={t.id}>
-                          <td style={{ whiteSpace:'nowrap', fontSize:12 }}>{dateStr(t.date) || '—'}</td>
-                          <td style={{ fontWeight:600 }}>{t.desc}</td>
-                          <td style={{ fontSize:12, color:'#64748B' }}>{t.category || '—'}</td>
-                          <td><span style={{ fontSize:11, fontWeight:800, color: t.type === 'Income' ? '#1E7B3C' : '#B8564F' }}>{(t.type || '').toUpperCase()}</span></td>
-                          <td style={{ fontWeight:800, color: t.type === 'Income' ? '#1E7B3C' : '#0A1F12' }}>{t.type === 'Income' ? '+' : '−'} {fmtK(t.amount)}</td>
-                          <td style={{ fontSize:11, color:'#64748B' }}>{t.reference || '—'}</td>
-                          <td>
-                            <div style={{ display:'flex', gap:6 }}>
-                              <button onClick={() => openEdit('ledger', t)} className="btn-sm btn-edit"><i className="fas fa-pen"></i></button>
-                              <button onClick={() => handleDelete('se_ledger', t.id)} className="btn-sm btn-del"><i className="fas fa-trash"></i></button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {filteredLedger.map(t => {
+                        const isCashIn = t.type === 'Income' || t.type === 'Financing';
+                        return (
+                          <tr key={t.id}>
+                            <td style={{ whiteSpace:'nowrap', fontSize:12 }}>{dateStr(t.date) || '—'}</td>
+                            <td style={{ fontWeight:600 }}>{t.desc}</td>
+                            <td style={{ fontSize:12, color:'#64748B' }}>{t.category || '—'}</td>
+                            <td><span style={{ fontSize:11, fontWeight:800, color: t.type === 'Income' ? '#1E7B3C' : t.type === 'Financing' ? '#1B6CA8' : '#B8564F' }}>{(t.type || '').toUpperCase()}</span></td>
+                            <td style={{ fontWeight:800, color: t.type === 'Income' ? '#1E7B3C' : t.type === 'Financing' ? '#1B6CA8' : '#0A1F12' }}>{isCashIn ? '+' : '−'} {fmtK(t.amount)}</td>
+                            <td style={{ fontSize:11, color:'#64748B' }}>{t.reference || '—'}</td>
+                            <td>
+                              <div style={{ display:'flex', gap:6 }}>
+                                <button onClick={() => openEdit('ledger', t)} className="btn-sm btn-edit"><i className="fas fa-pen"></i></button>
+                                <button onClick={() => handleDelete('se_ledger', t.id)} className="btn-sm btn-del"><i className="fas fa-trash"></i></button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                       {filteredLedger.length === 0 && <tr><td colSpan="7" className="empty-state">No ledger entries found.</td></tr>}
                     </tbody>
                   </table>
@@ -2700,8 +2761,9 @@ function AdminPortal({ onExit }) {
                     <div className="report-row total"><span>Total Liabilities</span><span>{fmtK(vendors.reduce((s,v)=>s+num(v.totalLiability)-num(v.amountPaid),0))}</span></div>
 
                     <div className="report-row section-title">Equity</div>
+                    <div className="report-row report-indent"><span>Share Capital & Financing</span><span>{fmtK(calc.totalFinancing)}</span></div>
                     <div className="report-row report-indent"><span>Retained Earnings (Net Income)</span><span>{fmtK(calc.netProfit)}</span></div>
-                    <div className="report-row total"><span>Total Equity</span><span>{fmtK(calc.netProfit)}</span></div>
+                    <div className="report-row total"><span>Total Equity</span><span>{fmtK(calc.totalFinancing + calc.netProfit)}</span></div>
 
                     <div className="report-row total" style={{ borderTop:'2px solid #333', borderBottom:'4px double #333', fontSize:16 }}>
                       <span>Total Liabilities & Equity</span>
@@ -2723,7 +2785,7 @@ function AdminPortal({ onExit }) {
                     <div className="report-row total"><span>Net Cash from Investing Activities</span><span>{fmtK(calc.cfInvesting)}</span></div>
 
                     <div className="report-row section-title">Financing Activities</div>
-                    <div className="report-row report-indent"><span>Cash Inflows (Financing)</span><span>{fmtK(calc.cashflow.financing.in)}</span></div>
+                    <div className="report-row report-indent"><span>Cash Inflows (Financing / Capital)</span><span>{fmtK(calc.cashflow.financing.in)}</span></div>
                     <div className="report-row report-indent"><span>Cash Outflows (Financing)</span><span>({fmtK(calc.cashflow.financing.out)})</span></div>
                     <div className="report-row total"><span>Net Cash from Financing Activities</span><span>{fmtK(calc.cfFinancing)}</span></div>
 
@@ -2777,7 +2839,7 @@ function AdminPortal({ onExit }) {
                               <div style={{ fontWeight:700, color:'#0A1F12' }}>{m.name}</div>
                               {m.email && <div style={{ fontSize:11, color:'#64748B' }}>{m.email}</div>}
                             </td>
-                            <td><span style={{ fontSize:11, fontWeight:700, padding:'3px 8px', borderRadius:4, background: m.employmentType === 'employee' ? '#DBEAFE' : '#FEF3C7', color: m.employmentType === 'employee' ? '#1E40AF' : '#92400E' }}>{m.employmentType === 'employee' ? 'Employee' : 'Contractor'}</span></td>
+                            <td><span style={{ fontSize:11, fontWeight:700, padding:'3px 8px', borderRadius:4, background: m.employmentType === 'employee' ? '#DBEAFE' : '#FEF3C7', color: m.employmentType === 'employee' ? '#1E40AF' : '#92400E' }}>{m.employmentType === 'employee' ? 'Employee' : 'Founder'}</span></td>
                             <td style={{ fontSize:12.5 }}>{m.position}</td>
                             <td style={{ fontWeight:800, color:'#1E7B3C', fontFamily:'Consolas, monospace' }}>${fmtNum(m.netMonthlyUSD)}</td>
                             <td style={{ fontSize:12, color:'#64748B', fontFamily:'monospace' }}>{m.employeeId || '—'}</td>
@@ -2976,6 +3038,7 @@ function AdminPortal({ onExit }) {
                             <td><span className={`status-pill ${v.status==='Settled'?'active':'pending'}`}>{v.status}</span></td>
                             <td>
                               <div style={{ display:'flex', gap:6 }}>
+                                <button onClick={() => openVendorPayment(v)} className="btn-sm btn-add" title="Record Payment"><i className="fas fa-money-bill-wave"></i></button>
                                 <button onClick={() => openEdit('vendor', v)} className="btn-sm btn-edit"><i className="fas fa-pen"></i></button>
                                 <button onClick={() => handleDelete('se_vendors', v.id)} className="btn-sm btn-del"><i className="fas fa-trash"></i></button>
                               </div>
@@ -3018,6 +3081,43 @@ function AdminPortal({ onExit }) {
           onClose={() => setViewingPayslip(null)}
           onDownload={downloadPayslipPDF}
         />
+      )}
+
+      {vendorPaymentModal && (
+        <div className="modal-form-overlay" onClick={() => setVendorPaymentModal(null)}>
+          <div className="modal-form" onClick={e => e.stopPropagation()}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20 }}>
+              <h3 style={{ fontFamily:"'Playfair Display',serif", margin:0 }}>Record Vendor Payment</h3>
+              <button onClick={() => setVendorPaymentModal(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'#666', fontSize:18 }}><i className="fas fa-times"></i></button>
+            </div>
+            <form onSubmit={e => { e.preventDefault(); saveVendorPayment(vendorPaymentModal); }}>
+              <div className="form-group">
+                <label className="form-label">Vendor</label>
+                <input type="text" className="form-input" value={vendorPaymentModal.vendorName} readOnly style={{ background:'#F8FAFC', fontWeight:700 }} />
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Payment Amount (USD) *</label>
+                  <input type="number" step="0.01" className="form-input" value={vendorPaymentModal.amount} onChange={e => setVendorPaymentModal({...vendorPaymentModal, amount: e.target.value})} required />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Payment Date *</label>
+                  <input type="date" className="form-input" value={vendorPaymentModal.date} onChange={e => setVendorPaymentModal({...vendorPaymentModal, date: e.target.value})} required />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Reference / Notes *</label>
+                <input type="text" className="form-input" value={vendorPaymentModal.reference} onChange={e => setVendorPaymentModal({...vendorPaymentModal, reference: e.target.value})} placeholder="e.g. Tranche 1 Payment / Invoice #" required />
+              </div>
+              <div style={{ display:'flex', gap:12, marginTop:24 }}>
+                <button type="submit" disabled={saving} className="btn-primary" style={{ flex:1, justifyContent:'center' }}>
+                  {saving ? <><i className="fas fa-circle-notch fa-spin"></i> Processing...</> : <><i className="fas fa-check"></i> Record Payment</>}
+                </button>
+                <button type="button" onClick={() => setVendorPaymentModal(null)} style={{ padding:'14px 24px', background:'#fff', border:'1px solid #ccc', borderRadius:9, fontWeight:600, cursor:'pointer' }}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </>
   );
