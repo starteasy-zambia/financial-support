@@ -197,13 +197,16 @@ body {
   <!-- HERO SECTION -->
   <section class="fadein" style="background: linear-gradient(135deg,#0A1F12 0%,#123A1F 100%); color: #fff; padding: 100px 24px; text-align: center; width: 100%;">
     <div class="container" style="max-width: 900px;">
+      <div style="display: inline-block; background: rgba(232,115,15,0.2); color: #F5A623; padding: 6px 16px; border-radius: 99px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 24px;">
+        <i class="fas fa-gift" style="margin-right: 6px;"></i> Free 15-Minute Initial Consultation
+      </div>
       <h1 class="serif" style="font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 24px;">Accounting, Bookkeeping <br/><em style="font-style: italic; color: #F5A623;">& Tax Support</em></h1>
       <p style="font-size: 16px; line-height: 1.7; color: rgba(255,255,255,0.75); margin-bottom: 40px; max-width: 800px; margin: 0 auto 40px;">
         We help you to manage your business accounting, keep your records organised and help you stay tax-compliant. <em style="color: #fff;">— better financial management and compliance — is what we deliver.</em>
       </p>
       <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-        <button onclick="openModal('')" class="btn-primary">Request Consultation <i class="fas fa-arrow-right" style="font-size: 12px;"></i></button>
-        <a href="#individual" class="btn-ghost">Fast-Track Individual Services</a>
+        <button onclick="openModal('')" class="btn-primary">Book Your Free Consultation <i class="fas fa-arrow-right" style="font-size: 12px;"></i></button>
+        <a href="#packages" class="btn-ghost">View Pricing Packages</a>
       </div>
     </div>
   </section>
@@ -218,17 +221,17 @@ body {
         <div style="background: #F8FAFC; padding: 24px; border-radius: 12px; border: 1px solid #E2E8F0;">
           <i class="fas fa-bolt" style="font-size: 24px; color: #E8730F; margin-bottom: 16px;"></i>
           <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 8px;">Fast-Track Tasks</h3>
-          <p style="font-size: 13px; color: #64748B;">Pay for the specific task you need completed right now (e.g., Just filing a tax return).</p>
+          <p style="font-size: 13px; color: #64748B;">Transparent pricing for specific tasks. Pay for exactly what you need completed right now.</p>
         </div>
         <div style="background: #F8FAFC; padding: 24px; border-radius: 12px; border: 1px solid #E2E8F0;">
           <i class="fas fa-sync-alt" style="font-size: 24px; color: #1B6CA8; margin-bottom: 16px;"></i>
           <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 8px;">Monthly Retainer</h3>
-          <p style="font-size: 13px; color: #64748B;">Ongoing accounting, bookkeeping, and tax administration on a predictable monthly support plan.</p>
+          <p style="font-size: 13px; color: #64748B;">Predictable monthly starting prices for ongoing accounting, bookkeeping, and tax administration.</p>
         </div>
         <div style="background: #F8FAFC; padding: 24px; border-radius: 12px; border: 1px solid #E2E8F0;">
           <i class="fas fa-building" style="font-size: 24px; color: #1E7B3C; margin-bottom: 16px;"></i>
           <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 8px;">Complete Business Support</h3>
-          <p style="font-size: 13px; color: #64748B;">An integrated, hands-off solution covering all your accounting and financial administration.</p>
+          <p style="font-size: 13px; color: #64748B;">Customised agreements for larger businesses requiring integrated, hands-off financial administration.</p>
         </div>
       </div>
     </div>
@@ -239,7 +242,7 @@ body {
     <div class="container">
       <div style="text-align: center; margin-bottom: 60px;">
         <h2 class="serif" style="font-size: 32px; color: #0A1F12; margin-bottom: 16px;">Packaged Solutions</h2>
-        <p style="font-size: 15px; color: rgba(10,31,18,0.6); max-width: 650px; margin: 0 auto;">Pick the package that aligns with your current business needs. All packages define clear deliverables and are scoped during a discovery call.</p>
+        <p style="font-size: 15px; color: rgba(10,31,18,0.6); max-width: 650px; margin: 0 auto;">Pick the package that aligns with your current business needs. Pricing is based on transaction volume, employees, and complexity.</p>
       </div>
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; align-items: stretch;">
@@ -247,20 +250,22 @@ body {
         <!-- Package 1 -->
         <div class="pricing-card">
           <h3 style="font-size: 20px; font-weight: 800; color: #0A1F12; margin-bottom: 4px;">Bookkeeping & Financial Records</h3>
-          <p style="font-size: 13px; color: rgba(10,31,18,0.6); margin-bottom: 24px;">We help businesses that need organised and accurate financial records, with:</p>
+          <div style="font-size: 24px; font-weight: 800; color: #E8730F; margin-bottom: 8px;">From K1,500 <span style="font-size: 14px; font-weight: 500; color: #666;">/ month</span></div>
+          <p style="font-size: 13px; color: rgba(10,31,18,0.6); margin-bottom: 24px;">For small businesses requiring ongoing bookkeeping support.</p>
           <ul class="check-list" style="flex-grow: 1;">
             <li><i class="fas fa-check-circle"></i> Bookkeeping</li>
             <li><i class="fas fa-check-circle"></i> Financial record reconstruction</li>
             <li><i class="fas fa-check-circle"></i> Accounting systems implementation</li>
             <li><i class="fas fa-check-circle"></i> Accounting software support</li>
           </ul>
-          <button onclick="openModal('Bookkeeping & Financial Records')" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center;">Request Consultation</button>
+          <button onclick="openModal('Bookkeeping & Financial Records')" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center;">Request a Quote</button>
         </div>
 
         <!-- Package 2 -->
         <div class="pricing-card">
           <h3 style="font-size: 20px; font-weight: 800; color: #0A1F12; margin-bottom: 4px;">Tax & Statutory Compliance</h3>
-          <p style="font-size: 13px; color: rgba(10,31,18,0.6); margin-bottom: 24px;">We help businesses that need assistance meeting their tax obligations, with:</p>
+          <div style="font-size: 24px; font-weight: 800; color: #E8730F; margin-bottom: 8px;">From K2,000 <span style="font-size: 14px; font-weight: 500; color: #666;">/ month</span></div>
+          <p style="font-size: 13px; color: rgba(10,31,18,0.6); margin-bottom: 24px;">Tax administration and statutory compliance support.</p>
           <ul class="check-list" style="flex-grow: 1;">
             <li><i class="fas fa-check-circle"></i> Tax planning and advisory</li>
             <li><i class="fas fa-check-circle"></i> Tax returns and filing support</li>
@@ -268,27 +273,29 @@ body {
             <li><i class="fas fa-check-circle"></i> PAYE administration</li>
             <li><i class="fas fa-check-circle"></i> Withholding tax administration</li>
           </ul>
-          <button onclick="openModal('Tax & Statutory Compliance')" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center;">Request Consultation</button>
+          <button onclick="openModal('Tax & Statutory Compliance')" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center;">Request a Quote</button>
         </div>
 
         <!-- Package 3 -->
         <div class="pricing-card">
           <h3 style="font-size: 20px; font-weight: 800; color: #0A1F12; margin-bottom: 4px;">Payroll & Financial Reporting</h3>
-          <p style="font-size: 13px; color: rgba(10,31,18,0.6); margin-bottom: 24px;">We help businesses that need proper payroll administration and financial reporting, including:</p>
+          <div style="font-size: 24px; font-weight: 800; color: #E8730F; margin-bottom: 8px;">Custom Pricing</div>
+          <p style="font-size: 13px; color: rgba(10,31,18,0.6); margin-bottom: 24px;">Based on employee numbers and reporting requirements.</p>
           <ul class="check-list" style="flex-grow: 1;">
             <li><i class="fas fa-check-circle"></i> Payroll administration</li>
             <li><i class="fas fa-check-circle"></i> Preparation of financial statements</li>
             <li><i class="fas fa-check-circle"></i> Financial reporting</li>
             <li><i class="fas fa-check-circle"></i> Audit preparation and coordination</li>
           </ul>
-          <button onclick="openModal('Payroll & Financial Reporting')" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center;">Request Consultation</button>
+          <button onclick="openModal('Payroll & Financial Reporting')" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center;">Book a Consultation</button>
         </div>
 
         <!-- Package 4 (Flagship) -->
         <div class="pricing-card popular">
           <div class="pricing-badge">Recommended Flagship</div>
           <h3 style="font-size: 20px; font-weight: 800; color: #0A1F12; margin-bottom: 4px;">Complete Accounting & Financial Administration</h3>
-          <p style="font-size: 13px; color: rgba(10,31,18,0.6); margin-bottom: 24px;">We provide an integrated service for businesses that want ongoing, hands-off support.</p>
+          <div style="font-size: 24px; font-weight: 800; color: #E8730F; margin-bottom: 8px;">From K4,500 <span style="font-size: 14px; font-weight: 500; color: #666;">/ month</span></div>
+          <p style="font-size: 13px; color: rgba(10,31,18,0.6); margin-bottom: 24px;">Integrated accounting, bookkeeping, payroll and tax support.</p>
           <ul class="check-list" style="flex-grow: 1;">
             <li><i class="fas fa-check-circle" style="color: #E8730F;"></i> <strong>Everything in Packages 1, 2 & 3</strong></li>
             <li><i class="fas fa-check-circle"></i> Bookkeeping & Financial statements</li>
@@ -297,7 +304,7 @@ body {
             <li><i class="fas fa-check-circle"></i> Accounting systems support</li>
             <li><i class="fas fa-check-circle"></i> Audit preparation and coordination</li>
           </ul>
-          <button onclick="openModal('Complete Accounting & Financial Administration')" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center; background: #E8730F;">Request Consultation</button>
+          <button onclick="openModal('Complete Accounting & Financial Administration')" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center; background: #E8730F;">Request a Consultation</button>
         </div>
 
       </div>
@@ -309,7 +316,7 @@ body {
     <div class="container" style="max-width: 900px;">
       <div style="text-align: center; margin-bottom: 40px;">
         <h2 class="serif" style="font-size: 28px; color: #0A1F12; margin-bottom: 12px;">Need Something Specific?</h2>
-        <p style="font-size: 15px; color: rgba(10,31,18,0.6);">Not every customer needs a complete package. Fast-track a specific task below.</p>
+        <p style="font-size: 15px; color: rgba(10,31,18,0.6);">Transparent pricing for specific tasks. Pay for exactly what you need, when you need it.</p>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -319,11 +326,14 @@ body {
           <div style="display: flex; align-items: center; gap: 16px;">
             <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(232,115,15,0.1); color: #E8730F; display: flex; align-items: center; justify-content: center;"><i class="fas fa-book"></i></div>
             <div>
-              <div style="font-weight: 700; color: #0A1F12;">"I only need my books updated."</div>
+              <div style="font-weight: 700; color: #0A1F12;">I only need my books updated</div>
               <div style="font-size: 12px; color: #64748B;">You purchase: Bookkeeping</div>
             </div>
           </div>
-          <button onclick="openModal('Individual Task: Bookkeeping')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Fast-Track <i class="fas fa-arrow-right"></i></button>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-weight: 800; color: #1E7B3C; font-size: 14px;">From K500</div>
+            <button onclick="openModal('Individual Task: Bookkeeping')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Request <i class="fas fa-arrow-right"></i></button>
+          </div>
         </div>
 
         <!-- Service 2 -->
@@ -331,11 +341,14 @@ body {
           <div style="display: flex; align-items: center; gap: 16px;">
             <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(232,115,15,0.1); color: #E8730F; display: flex; align-items: center; justify-content: center;"><i class="fas fa-file-invoice"></i></div>
             <div>
-              <div style="font-weight: 700; color: #0A1F12;">"I need my tax returns filed."</div>
+              <div style="font-weight: 700; color: #0A1F12;">I need my tax returns filed</div>
               <div style="font-size: 12px; color: #64748B;">You purchase: Tax filing support</div>
             </div>
           </div>
-          <button onclick="openModal('Individual Task: Tax filing support')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Fast-Track <i class="fas fa-arrow-right"></i></button>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-weight: 800; color: #1E7B3C; font-size: 14px;">Indicative K800</div>
+            <button onclick="openModal('Individual Task: Tax filing support')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Request <i class="fas fa-arrow-right"></i></button>
+          </div>
         </div>
 
         <!-- Service 3 -->
@@ -343,11 +356,14 @@ body {
           <div style="display: flex; align-items: center; gap: 16px;">
             <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(232,115,15,0.1); color: #E8730F; display: flex; align-items: center; justify-content: center;"><i class="fas fa-users"></i></div>
             <div>
-              <div style="font-weight: 700; color: #0A1F12;">"I need my employees' salaries processed."</div>
+              <div style="font-weight: 700; color: #0A1F12;">I need my employees' salaries processed</div>
               <div style="font-size: 12px; color: #64748B;">You purchase: Payroll administration</div>
             </div>
           </div>
-          <button onclick="openModal('Individual Task: Payroll administration')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Fast-Track <i class="fas fa-arrow-right"></i></button>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-weight: 800; color: #1E7B3C; font-size: 14px;">From K150 / employee</div>
+            <button onclick="openModal('Individual Task: Payroll administration')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Request <i class="fas fa-arrow-right"></i></button>
+          </div>
         </div>
 
         <!-- Service 4 -->
@@ -355,11 +371,14 @@ body {
           <div style="display: flex; align-items: center; gap: 16px;">
             <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(232,115,15,0.1); color: #E8730F; display: flex; align-items: center; justify-content: center;"><i class="fas fa-chart-line"></i></div>
             <div>
-              <div style="font-weight: 700; color: #0A1F12;">"I need financial statements."</div>
+              <div style="font-weight: 700; color: #0A1F12;">I need financial statements</div>
               <div style="font-size: 12px; color: #64748B;">You purchase: Financial statement preparation</div>
             </div>
           </div>
-          <button onclick="openModal('Individual Task: Financial statement preparation')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Fast-Track <i class="fas fa-arrow-right"></i></button>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-weight: 800; color: #1E7B3C; font-size: 14px;">Starting K1,200</div>
+            <button onclick="openModal('Individual Task: Financial statement preparation')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Request <i class="fas fa-arrow-right"></i></button>
+          </div>
         </div>
 
         <!-- Service 5 -->
@@ -367,11 +386,29 @@ body {
           <div style="display: flex; align-items: center; gap: 16px;">
             <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(232,115,15,0.1); color: #E8730F; display: flex; align-items: center; justify-content: center;"><i class="fas fa-history"></i></div>
             <div>
-              <div style="font-weight: 700; color: #0A1F12;">"I have years of incomplete records."</div>
+              <div style="font-weight: 700; color: #0A1F12;">I have years of incomplete records</div>
               <div style="font-size: 12px; color: #64748B;">You purchase: Financial record reconstruction</div>
             </div>
           </div>
-          <button onclick="openModal('Individual Task: Financial record reconstruction')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Fast-Track <i class="fas fa-arrow-right"></i></button>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-weight: 800; color: #1E7B3C; font-size: 14px;">Custom Quotation</div>
+            <button onclick="openModal('Individual Task: Financial record reconstruction')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Request <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div>
+
+        <!-- Service 6 -->
+        <div class="service-row">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(232,115,15,0.1); color: #E8730F; display: flex; align-items: center; justify-content: center;"><i class="fas fa-cogs"></i></div>
+            <div>
+              <div style="font-weight: 700; color: #0A1F12;">Accounting Systems Implementation</div>
+              <div style="font-size: 12px; color: #64748B;">You purchase: System Setup & Training</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-weight: 800; color: #1E7B3C; font-size: 14px;">Custom Quotation</div>
+            <button onclick="openModal('Individual Task: Accounting Systems Implementation')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Request <i class="fas fa-arrow-right"></i></button>
+          </div>
         </div>
 
       </div>
@@ -383,11 +420,11 @@ body {
     <div class="container">
       <h2 class="serif" style="font-size: 28px; color: #fff; margin-bottom: 16px;">Ready to get your finances in order?</h2>
       <p style="font-size: 15px; color: rgba(255,255,255,0.7); margin-bottom: 32px; max-width: 600px; margin: 0 auto 32px;">
-        Whether you need to discuss a custom package or just want to hand off a specific task, we are ready to assist.
+        Let's discuss your specific needs. Book your free 15-minute initial consultation, and we will provide a formal quotation based on your business requirements.
       </p>
       <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
         <button onclick="openModal('')" class="btn-primary" style="font-size: 15px; padding: 14px 32px;">
-          <i class="fas fa-calendar-check" style="margin-right: 8px;"></i> Request Consultation
+          <i class="fas fa-calendar-check" style="margin-right: 8px;"></i> Book Free Consultation
         </button>
       </div>
     </div>
@@ -408,7 +445,7 @@ body {
   <div class="modal-content">
     <div class="modal-header">
       <div>
-        <h2 class="serif" style="font-size: 22px; color: #F5A623; margin: 0 0 4px;">Request Consultation</h2>
+        <h2 class="serif" style="font-size: 22px; color: #F5A623; margin: 0 0 4px;">Free 15-Minute Consultation</h2>
         <p style="font-size: 13px; color: rgba(255,255,255,0.7); margin: 0;">Fill in your details to jumpstart your financial organisation.</p>
       </div>
       <button onclick="closeModal()" style="background: none; border: none; color: rgba(255,255,255,0.5); font-size: 20px; cursor: pointer;"><i class="fas fa-times"></i></button>
@@ -452,6 +489,7 @@ body {
             <option value="Individual Task: Payroll administration">Individual Task: Payroll administration</option>
             <option value="Individual Task: Financial statement preparation">Individual Task: Financial statement preparation</option>
             <option value="Individual Task: Financial record reconstruction">Individual Task: Financial record reconstruction</option>
+            <option value="Individual Task: Accounting Systems Implementation">Individual Task: Accounting Systems Implementation</option>
             <option value="Other / Custom Request">Other / Custom Request</option>
           </select>
         </div>
