@@ -285,17 +285,78 @@ const MAIN_PLATFORM_URL = 'https://www.starteasyzambia.com';
 
 /* FULL SERVICE CATALOGUE FROM CRM */
 const SERVICE_CATALOGUE = [
-  { category: 'A. BUSINESS REGISTRATION & CORPORATE (PACRA)', items: [ { name: 'Business Structure Advisory — Wizard', price: 25 }, { name: 'Name Preparation & Clearance — Wizard', price: 25 }, { name: 'Company Incorporation', price: 750 }, { name: 'Business Name Registration', price: 400 }, { name: 'Company Amendments', price: 400 }, { name: 'Annual Return & Statutory Filings', price: 400 }, { name: 'Beneficial Ownership Filing', price: 400 }, { name: 'Business Closure & Deregistration', price: 750 }, { name: 'Corporate Records Administration', price: 500, desc: 'Monthly' } ] },
-  { category: 'B. TAX & COMPLIANCE (ZRA)', items: [ { name: 'TPIN Registration', price: 250, note: 'Gov fee free' }, { name: 'Tax Type Registration (VAT / PAYE / WHT)', price: 400 }, { name: 'Recurring Return Filing', price: 250, desc: 'Monthly' }, { name: 'Tax Clearance Certificate', price: 400 }, { name: 'Tax Compliance Recovery', price: 750, desc: 'From' }, { name: 'Taxpayer Information Update', price: 250 }, { name: 'Annual Tax Compliance', price: 400 } ] },
-  { category: 'C. EMPLOYEE COMPLIANCE (NAPSA · NHIMA · WCFCB)', items: [ { name: 'NAPSA Employer Registration', price: 250 }, { name: 'NAPSA Employee Registration', price: 250 }, { name: 'NAPSA Monthly Contributions', price: 250, desc: 'Monthly' }, { name: 'NAPSA Compliance Clean-Up', price: 400 }, { name: 'NHIMA Employer Registration', price: 250 }, { name: 'NHIMA Employee Registration', price: 250 }, { name: 'NHIMA Monthly Premiums', price: 250, desc: 'Monthly' }, { name: 'NHIMA Compliance Regularisation', price: 400 }, { name: 'WCFCB Employer Registration', price: 250 }, { name: 'WCFCB Annual Assessment', price: 400 }, { name: 'WCFCB Compliance Regularisation', price: 400 } ] },
-  { category: 'D. LICENSING & PERMITS (COUNCILS)', items: [ { name: 'Council Trading Licence', price: 400 }, { name: 'Health & Food Handling Permit', price: 400 }, { name: 'Fire Certificate', price: 250 }, { name: 'Premises, Zoning & Planning Approval', price: 400 }, { name: 'Licence & Permit Renewal', price: 250 } ] },
-  { category: 'E. SECTOR REGULATORS', items: [ { name: 'ZDA Investment Registration', price: 750 }, { name: 'ZEMA Environmental Compliance', price: 750 }, { name: 'Tourism Enterprise Registration (ZTA)', price: 400 }, { name: 'ZABS Standards Certification', price: 400 }, { name: 'ERB Energy Licensing', price: 400 }, { name: 'ZICTA ICT Licensing', price: 400 }, { name: 'EIZ Registration & Compliance', price: 750, desc: 'From' }, { name: 'NCC Contractor Registration', price: 900, desc: 'From' }, { name: 'Cooperative Registration', price: 400 }, { name: 'CEEC Registration', price: 400 }, { name: 'ZPPA Supplier Registration', price: 400 } ] },
-  { category: 'F. COMPLIANCE MANAGEMENT', items: [ { name: 'Business Compliance Check-Up', price: 750 }, { name: 'Compliance Regularisation Programme', price: 1500, desc: 'From' }, { name: 'Ongoing Compliance Management', price: 1200, desc: 'Monthly' } ] },
-  { category: 'G. FINANCIAL SUPPORT PACKAGES', items: [ { name: 'Financial Starter', price: 1000, desc: 'Monthly' }, { name: 'Business Control', price: 2000, desc: 'Monthly' }, { name: 'Growth & Financial Planning', price: 4000, desc: 'Monthly' } ] },
-  { category: 'H. VENTURE BUILDING SERVICES', items: [ { name: 'Business Plan Development', price: 750 }, { name: 'Company Registration Support — Business Name', price: 400 }, { name: 'Company Registration Support — Company Incorporation', price: 750 }, { name: 'Supplier & Equipment Sourcing', price: 600, desc: 'From' }, { name: 'Brand & Marketing Strategy', price: 1000 }, { name: 'Financial Projections', price: 800 }, { name: 'Investor Readiness & Introductions', price: 1200, desc: 'From' }, { name: 'Sales Channel Development', price: 400, desc: 'Monthly' } ] },
-  { category: 'I. PERSONAL ADMINISTRATIVE SERVICES', items: [ { name: 'Document Preparation', price: 250 }, { name: 'Certificates & Statutory Documents', price: 400 }, { name: 'Application Submissions', price: 250 }, { name: 'Application Follow-Up', price: 250 }, { name: 'Scanning, Printing & Copies', price: 25 } ] },
-  { category: 'J. OUTSOURCED ADMINISTRATIVE DESK', items: [ { name: 'Outsourced Desk — Starter', price: 250, desc: 'Monthly' }, { name: 'Outsourced Desk — Organisation', price: 500, desc: 'Monthly' }, { name: 'Outsourced Desk — Executive', price: 1200, desc: 'Monthly' }, { name: 'Administrative One-Off Clean-Up', price: 750 } ] },
-  { category: 'K. SUPPLIERS DIRECTORY & MARKETPLACE', items: [ { name: 'Supplier Listing — Monthly (Local)', price: 100 }, { name: 'Supplier Listing — Monthly (International)', price: 140 }, { name: 'Supplier Listing — Annual (Local)', price: 1000 }, { name: 'Supplier Listing — Annual (International)', price: 1400 }, { name: 'Buyer Access Subscription', price: 50, desc: 'Monthly' }, { name: 'Supplier Verification (One-off)', price: 75 }, { name: 'Campaign Placement', price: 455 }, { name: 'Sourcing & Procurement Support', price: 600 } ] }
+  {
+    category: 'Accounting, Bookkeeping & Tax Support',
+    items: [
+      { name: 'Bookkeeping', price: 500, desc: 'From' },
+      { name: 'Preparation of financial statements', price: 1200, desc: 'From' },
+      { name: 'Payroll administration', price: 150, desc: 'Per Employee' },
+      { name: 'Tax planning and advisory', price: 1000, desc: 'From' },
+      { name: 'Tax returns and filing support', price: 800, desc: 'From' },
+      { name: 'VAT administration', price: 500, desc: 'Monthly' },
+      { name: 'PAYE and withholding tax administration', price: 500, desc: 'Monthly' },
+      { name: 'Financial record reconstruction', price: 0, desc: 'Custom Quote' },
+      { name: 'Accounting systems implementation', price: 0, desc: 'Custom Quote' },
+      { name: 'Accounting software support', price: 500, desc: 'Monthly' },
+      { name: 'Audit preparation and coordination', price: 0, desc: 'Custom Quote' }
+    ]
+  },
+  {
+    category: 'Strategic Advisory Services',
+    items: [
+      { name: 'Investment Readiness & Investor Relations', price: 0, desc: 'Custom Quote' },
+      { name: 'Project & Infrastructure Finance', price: 0, desc: 'Custom Quote' },
+      { name: 'Business Risk & Insurance Advisory', price: 0, desc: 'Custom Quote' },
+      { name: 'Treasury & Cash Management', price: 0, desc: 'Custom Quote' },
+      { name: 'Business Restructuring & Turnaround', price: 0, desc: 'Custom Quote' },
+      { name: 'Financial Management & Advisory', price: 0, desc: 'Custom Quote' }
+    ]
+  },
+  {
+    category: 'Business Registration & Corporate (PACRA)',
+    items: [
+      { name: 'Company Incorporation', price: 750 },
+      { name: 'Business Name Registration', price: 400 },
+      { name: 'Company Amendments', price: 400 },
+      { name: 'Annual Return & Statutory Filings', price: 400 },
+      { name: 'Beneficial Ownership Filing', price: 400 },
+      { name: 'Business Closure & Deregistration', price: 750 },
+      { name: 'Corporate Records Administration', price: 500, desc: 'Monthly' }
+    ]
+  },
+  {
+    category: 'Employee Compliance (NAPSA · NHIMA · WCFCB)',
+    items: [
+      { name: 'NAPSA Employer Registration', price: 250 },
+      { name: 'NAPSA Employee Registration', price: 250 },
+      { name: 'NAPSA Monthly Contributions', price: 250, desc: 'Monthly' },
+      { name: 'NAPSA Compliance Clean-Up', price: 400 },
+      { name: 'NHIMA Employer Registration', price: 250 },
+      { name: 'NHIMA Employee Registration', price: 250 },
+      { name: 'NHIMA Monthly Premiums', price: 250, desc: 'Monthly' },
+      { name: 'NHIMA Compliance Regularisation', price: 400 },
+      { name: 'WCFCB Employer Registration', price: 250 },
+      { name: 'WCFCB Annual Assessment', price: 400 },
+      { name: 'WCFCB Compliance Regularisation', price: 400 }
+    ]
+  },
+  {
+    category: 'Licensing, Permits & Sector Regulators',
+    items: [
+      { name: 'Council Trading Licence', price: 400 },
+      { name: 'Health & Food Handling Permit', price: 400 },
+      { name: 'Fire Certificate', price: 250 },
+      { name: 'Premises, Zoning & Planning Approval', price: 400 },
+      { name: 'Licence & Permit Renewal', price: 250 },
+      { name: 'ZDA Investment Registration', price: 750 },
+      { name: 'ZEMA Environmental Compliance', price: 750 },
+      { name: 'Tourism Enterprise Registration (ZTA)', price: 400 },
+      { name: 'ZABS Standards Certification', price: 400 },
+      { name: 'ERB Energy Licensing', price: 400 },
+      { name: 'ZICTA ICT Licensing', price: 400 },
+      { name: 'NCC Contractor Registration', price: 900, desc: 'From' }
+    ]
+  }
 ];
 
 const ALL_SERVICES = SERVICE_CATALOGUE.flatMap(cat => cat.items);
@@ -1096,6 +1157,37 @@ function App() {
           </div>
         </section>
 
+        {/* NEW ACCOUNTING SUPPORT SECTION */}
+        <section id="accounting-support" className="section-padding" style={{ background: '#fff', borderTop: '1px solid #eee' }}>
+          <div className="container" style={{ maxWidth: 900 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: 40 }}>
+              <img src="1e741e5c-6dfc-4043-bc66-7bf9a13060ad.png" alt="Accounting Support" style={{ maxWidth: '100%', width: 400, borderRadius: 16, boxShadow: '0 20px 40px rgba(0,0,0,0.1)', marginBottom: 24 }} />
+              <h2 className="serif" style={{ fontSize: 32, color: '#0A1F12', marginBottom: 16 }}>Accounting, Bookkeeping & Tax Support</h2>
+              <p style={{ fontSize: 16, color: 'rgba(10,31,18,0.6)', maxWidth: 700, margin: '0 auto 32px' }}>
+                We help businesses maintain accurate financial records and meet statutory obligations.
+              </p>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16, marginBottom: 40 }}>
+              {[
+                'Bookkeeping', 'Preparation of financial statements', 'Payroll administration',
+                'Tax planning and advisory', 'Tax returns and filing support', 'VAT administration',
+                'PAYE and withholding tax administration', 'Financial record reconstruction',
+                'Accounting systems implementation', 'Accounting software support', 'Audit preparation and coordination'
+              ].map((svc, idx) => (
+                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#F8FAFC', padding: '16px 20px', borderRadius: 8, border: '1px solid #E2E8F0' }}>
+                  <i className="fas fa-check-circle" style={{ color: '#1E7B3C', fontSize: 18 }}></i>
+                  <span style={{ fontSize: 14.5, fontWeight: 600, color: '#0A1F12' }}>{svc}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <a href="https://starteasy-zambia.github.io/financial-support/accounting-support.html" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ fontSize: 16, padding: '16px 32px' }}>
+                Request Accounting, Bookkeeping & Tax Support <i className="fas fa-arrow-right" style={{ marginLeft: 8 }}></i>
+              </a>
+            </div>
+          </div>
+        </section>
+
         <section id="contact" style={{ background:'#0A1F12', padding:'60px 24px', textAlign:'center' }}>
           <div className="container">
             <h2 className="serif" style={{ fontSize:28, color:'#fff', marginBottom:16 }}>Ready to take control?</h2>
@@ -1337,7 +1429,7 @@ function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
               <select className="form-input" value={data.package || ''} onChange={e => set('package', e.target.value)} required>
                 <option value="">— Select —</option>
                 {ALL_SERVICES.map(p => (
-                  <option key={p.name} value={p.name}>{p.name} — K{p.price}</option>
+                  <option key={p.name} value={p.name}>{p.name} {p.price > 0 ? `— K${p.price}` : ''}</option>
                 ))}
               </select>
             </div>
@@ -1370,7 +1462,7 @@ function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
             <label className="form-label">Service Package *</label>
             <select className="form-input" value={data.serviceTitle || ''} onChange={e => set('serviceTitle', e.target.value)} required>
               <option value="">— Select —</option>
-              {ALL_SERVICES.map(p => <option key={p.name} value={p.name}>{p.name} — K{p.price}</option>)}
+              {ALL_SERVICES.map(p => <option key={p.name} value={p.name}>{p.name} {p.price > 0 ? `— K${p.price}` : ''}</option>)}
               <option value="Manual Entry">Manual Entry (Custom Amount)</option>
             </select>
           </div>
