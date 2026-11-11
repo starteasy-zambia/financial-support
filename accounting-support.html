@@ -10,6 +10,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700;1,800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <style>
 :root {
   --forest: #0A1F12;
@@ -42,25 +46,14 @@ body {
   color: var(--forest);
 }
 
-.serif {
-  font-family: 'Playfair Display', Georgia, serif;
-}
-
-.fadein {
-  animation: fi .6s cubic-bezier(.22,.61,.36,1) both;
-}
-
-@keyframes fi {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: none; }
-}
+.serif { font-family: 'Playfair Display', Georgia, serif; }
 
 /* Header */
 .site-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(10, 31, 18, 0.95);
+  background: rgba(10, 31, 18, 0.98);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(245, 166, 35, .1);
   width: 100%;
@@ -74,83 +67,31 @@ body {
   height: 72px;
   padding: 0 24px;
 }
-.logo-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-}
+.logo-group { display: flex; align-items: center; gap: 12px; text-decoration: none; }
 .logo-mark {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+  width: 38px; height: 38px; border-radius: 50%;
   background: linear-gradient(135deg, #E8730F, #F5A623);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 18px;
-  font-family: 'Playfair Display', serif;
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 18px; font-family: 'Playfair Display', serif;
 }
-.logo-text-sub {
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
-  font-weight: 700;
-}
-.logo-text-main {
-  font-size: 15px;
-  font-weight: 700;
-  color: #fff;
-}
+.logo-text-sub { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); font-weight: 700; }
+.logo-text-main { font-size: 15px; font-weight: 700; color: #fff; }
 
 /* Buttons */
 .btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: none;
-  border-radius: 9px;
-  cursor: pointer;
-  font-family: inherit;
-  font-weight: 700;
-  transition: all .2s;
-  background: linear-gradient(135deg, #E8730F, #F5A623);
-  color: #fff;
-  padding: 14px 28px;
-  font-size: 14.5px;
-  text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: none; border-radius: 9px; cursor: pointer; font-family: inherit; font-weight: 700;
+  transition: all .2s; background: linear-gradient(135deg, #E8730F, #F5A623); color: #fff;
+  padding: 14px 28px; font-size: 14.5px; text-decoration: none;
   box-shadow: 0 10px 26px rgba(232, 115, 15, .32);
 }
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-  box-shadow: 0 16px 34px rgba(232, 115, 15, .45);
-}
+.btn-primary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 16px 34px rgba(232, 115, 15, .45); }
 .btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 9px;
-  cursor: pointer;
-  font-family: inherit;
-  font-weight: 700;
-  transition: all .2s;
-  background: transparent;
-  color: #fff;
-  padding: 14px 28px;
-  font-size: 14.5px;
-  text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 9px; cursor: pointer; font-family: inherit; font-weight: 700;
+  transition: all .2s; background: transparent; color: #fff; padding: 14px 28px; font-size: 14.5px; text-decoration: none;
 }
-.btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
-}
+.btn-ghost:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
 
 /* Sections */
 .section-padding { padding: 80px 24px; }
@@ -158,68 +99,81 @@ body {
 
 /* Pricing / Packages */
 .pricing-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 32px;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  transition: all 0.4s ease;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 32px;
+  display: flex; flex-direction: column; position: relative; transition: all 0.4s ease;
 }
-.pricing-card.popular {
-  border: 2px solid #E8730F;
-  box-shadow: 0 20px 40px rgba(232, 115, 15, 0.1);
-}
+.pricing-card.popular { border: 2px solid #E8730F; box-shadow: 0 20px 40px rgba(232, 115, 15, 0.1); }
 .pricing-badge {
-  position: absolute;
-  top: -14px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #E8730F;
-  color: #fff;
-  padding: 4px 16px;
-  border-radius: 99px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+  background: #E8730F; color: #fff; padding: 4px 16px; border-radius: 99px;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
 }
 .check-list { list-style: none; padding: 0; margin: 0; }
-.check-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: rgba(10, 31, 18, 0.8);
-  line-height: 1.5;
-}
+.check-list li { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-size: 14px; color: rgba(10, 31, 18, 0.8); line-height: 1.5; }
 .check-list li i { color: #1E7B3C; margin-top: 3px; font-size: 14px; }
 
 /* Individual Services Table/Grid */
 .service-row {
-  background: #fff;
-  border: 1px solid #E2E8F0;
-  border-radius: 12px;
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: all 0.2s;
+  background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px;
+  display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;
 }
-.service-row:hover {
-  border-color: var(--orange);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  transform: translateX(4px);
+.service-row:hover { border-color: var(--orange); box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: translateX(4px); }
+
+/* ─── MODAL STYLES ─── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(10, 31, 18, 0.85); backdrop-filter: blur(5px);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 20px; overflow-y: auto;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
 }
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+.modal-content {
+  background: #fff; border-radius: 16px; width: 100%; max-width: 600px;
+  margin: auto; box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+  transform: translateY(20px); transition: transform 0.3s ease;
+  overflow: hidden;
+}
+.modal-overlay.active .modal-content { transform: translateY(0); }
+
+.modal-header {
+  background: #0A1F12; padding: 20px 24px; display: flex; justify-content: space-between; align-items: flex-start;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.modal-body { padding: 24px; }
+
+.form-label {
+  display: block; font-size: 11px; font-weight: 800; color: #0A1F12;
+  margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.form-input, .form-select {
+  width: 100%; padding: 12px 14px; border: 1px solid #E2E8F0; border-radius: 8px;
+  font-size: 14px; font-family: inherit; background: #fff; color: #0A1F12;
+  transition: all .15s; margin-bottom: 16px;
+}
+.form-input:focus, .form-select:focus {
+  outline: none; border-color: var(--orange); box-shadow: 0 0 0 3px rgba(232,115,15,0.1);
+}
+.form-select {
+  appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%235E7A67' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 16px center;
+}
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.btn-submit {
+  width: 100%; padding: 16px; background: #25D366; color: #fff; border: none; border-radius: 9px;
+  font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: all 0.2s; box-shadow: 0 10px 26px rgba(37,211,102,0.3);
+}
+.btn-submit:hover { background: #20ba59; transform: translateY(-2px); box-shadow: 0 16px 34px rgba(37,211,102,0.45); }
+.btn-submit:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
 
 @media (max-width: 768px) {
-  .service-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
+  .service-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .form-grid-2 { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -235,7 +189,7 @@ body {
         <div class="logo-text-main">StartEasy Zambia</div>
       </div>
     </a>
-    <a href="#contact" class="btn-primary" style="padding: 10px 20px; font-size: 13px;">Get Started</a>
+    <button onclick="openModal('')" class="btn-primary" style="padding: 10px 20px; font-size: 13px;">Get Started</button>
   </div>
 </header>
 
@@ -248,7 +202,7 @@ body {
         We help you to manage your business accounting, keep your records organised and help you stay tax-compliant. <em style="color: #fff;">— better financial management and compliance — is what we deliver.</em>
       </p>
       <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-        <a href="#packages" class="btn-primary">View Packages <i class="fas fa-arrow-down" style="font-size: 12px;"></i></a>
+        <button onclick="openModal('')" class="btn-primary">Request Consultation <i class="fas fa-arrow-right" style="font-size: 12px;"></i></button>
         <a href="#individual" class="btn-ghost">Fast-Track Individual Services</a>
       </div>
     </div>
@@ -300,7 +254,7 @@ body {
             <li><i class="fas fa-check-circle"></i> Accounting systems implementation</li>
             <li><i class="fas fa-check-circle"></i> Accounting software support</li>
           </ul>
-          <a href="https://www.starteasyzambia.com/onboarding" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center;">Request Consultation</a>
+          <button onclick="openModal('Bookkeeping & Financial Records')" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center;">Request Consultation</button>
         </div>
 
         <!-- Package 2 -->
@@ -314,7 +268,7 @@ body {
             <li><i class="fas fa-check-circle"></i> PAYE administration</li>
             <li><i class="fas fa-check-circle"></i> Withholding tax administration</li>
           </ul>
-          <a href="https://www.starteasyzambia.com/onboarding" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center;">Request Consultation</a>
+          <button onclick="openModal('Tax & Statutory Compliance')" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center;">Request Consultation</button>
         </div>
 
         <!-- Package 3 -->
@@ -327,7 +281,7 @@ body {
             <li><i class="fas fa-check-circle"></i> Financial reporting</li>
             <li><i class="fas fa-check-circle"></i> Audit preparation and coordination</li>
           </ul>
-          <a href="https://www.starteasyzambia.com/onboarding" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center;">Request Consultation</a>
+          <button onclick="openModal('Payroll & Financial Reporting')" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center;">Request Consultation</button>
         </div>
 
         <!-- Package 4 (Flagship) -->
@@ -343,7 +297,7 @@ body {
             <li><i class="fas fa-check-circle"></i> Accounting systems support</li>
             <li><i class="fas fa-check-circle"></i> Audit preparation and coordination</li>
           </ul>
-          <a href="https://www.starteasyzambia.com/onboarding" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center; background: #E8730F;">Request Consultation</a>
+          <button onclick="openModal('Complete Accounting & Financial Administration')" class="btn-primary" style="width: 100%; margin-top: 24px; justify-content: center; background: #E8730F;">Request Consultation</button>
         </div>
 
       </div>
@@ -369,7 +323,7 @@ body {
               <div style="font-size: 12px; color: #64748B;">You purchase: Bookkeeping</div>
             </div>
           </div>
-          <a href="https://wa.me/260762499581?text=Hello%20StartEasy,%20I%20want%20to%20fast-track%20a%20Bookkeeping%20request." target="_blank" rel="noopener noreferrer" style="font-size: 13px; font-weight: 700; color: #1B6CA8; text-decoration: none;">Fast-Track <i class="fas fa-arrow-right"></i></a>
+          <button onclick="openModal('Individual Task: Bookkeeping')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Fast-Track <i class="fas fa-arrow-right"></i></button>
         </div>
 
         <!-- Service 2 -->
@@ -381,7 +335,7 @@ body {
               <div style="font-size: 12px; color: #64748B;">You purchase: Tax filing support</div>
             </div>
           </div>
-          <a href="https://wa.me/260762499581?text=Hello%20StartEasy,%20I%20want%20to%20fast-track%20a%20Tax%20Filing%20request." target="_blank" rel="noopener noreferrer" style="font-size: 13px; font-weight: 700; color: #1B6CA8; text-decoration: none;">Fast-Track <i class="fas fa-arrow-right"></i></a>
+          <button onclick="openModal('Individual Task: Tax filing support')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Fast-Track <i class="fas fa-arrow-right"></i></button>
         </div>
 
         <!-- Service 3 -->
@@ -393,7 +347,7 @@ body {
               <div style="font-size: 12px; color: #64748B;">You purchase: Payroll administration</div>
             </div>
           </div>
-          <a href="https://wa.me/260762499581?text=Hello%20StartEasy,%20I%20want%20to%20fast-track%20a%20Payroll%20request." target="_blank" rel="noopener noreferrer" style="font-size: 13px; font-weight: 700; color: #1B6CA8; text-decoration: none;">Fast-Track <i class="fas fa-arrow-right"></i></a>
+          <button onclick="openModal('Individual Task: Payroll administration')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Fast-Track <i class="fas fa-arrow-right"></i></button>
         </div>
 
         <!-- Service 4 -->
@@ -405,7 +359,7 @@ body {
               <div style="font-size: 12px; color: #64748B;">You purchase: Financial statement preparation</div>
             </div>
           </div>
-          <a href="https://wa.me/260762499581?text=Hello%20StartEasy,%20I%20want%20to%20fast-track%20a%20Financial%20Statements%20request." target="_blank" rel="noopener noreferrer" style="font-size: 13px; font-weight: 700; color: #1B6CA8; text-decoration: none;">Fast-Track <i class="fas fa-arrow-right"></i></a>
+          <button onclick="openModal('Individual Task: Financial statement preparation')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Fast-Track <i class="fas fa-arrow-right"></i></button>
         </div>
 
         <!-- Service 5 -->
@@ -417,19 +371,7 @@ body {
               <div style="font-size: 12px; color: #64748B;">You purchase: Financial record reconstruction</div>
             </div>
           </div>
-          <a href="https://wa.me/260762499581?text=Hello%20StartEasy,%20I%20want%20to%20fast-track%20a%20Record%20Reconstruction%20request." target="_blank" rel="noopener noreferrer" style="font-size: 13px; font-weight: 700; color: #1B6CA8; text-decoration: none;">Fast-Track <i class="fas fa-arrow-right"></i></a>
-        </div>
-        
-        <!-- Service 6 (Flagship) -->
-        <div class="service-row" style="background: #F0F7F2; border-color: #D1FAE5;">
-          <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="width: 40px; height: 40px; border-radius: 8px; background: #1E7B3C; color: #fff; display: flex; align-items: center; justify-content: center;"><i class="fas fa-crown"></i></div>
-            <div>
-              <div style="font-weight: 700; color: #0A1F12;">"I need someone to manage everything."</div>
-              <div style="font-size: 12px; color: #1E7B3C; font-weight: 600;">You purchase: Complete Accounting & Financial Administration</div>
-            </div>
-          </div>
-          <a href="https://www.starteasyzambia.com/onboarding" style="font-size: 13px; font-weight: 700; color: #1E7B3C; text-decoration: none;">Request Consultation <i class="fas fa-arrow-right"></i></a>
+          <button onclick="openModal('Individual Task: Financial record reconstruction')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Fast-Track <i class="fas fa-arrow-right"></i></button>
         </div>
 
       </div>
@@ -441,17 +383,12 @@ body {
     <div class="container">
       <h2 class="serif" style="font-size: 28px; color: #fff; margin-bottom: 16px;">Ready to get your finances in order?</h2>
       <p style="font-size: 15px; color: rgba(255,255,255,0.7); margin-bottom: 32px; max-width: 600px; margin: 0 auto 32px;">
-        Whether you need to discuss a custom package or just want to hand off a specific task, choose the best path for your business below.
+        Whether you need to discuss a custom package or just want to hand off a specific task, we are ready to assist.
       </p>
       <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-        <!-- Consultation Link -->
-        <a href="https://www.starteasyzambia.com/onboarding" class="btn-primary" style="font-size: 15px; padding: 14px 32px;">
+        <button onclick="openModal('')" class="btn-primary" style="font-size: 15px; padding: 14px 32px;">
           <i class="fas fa-calendar-check" style="margin-right: 8px;"></i> Request Consultation
-        </a>
-        <!-- WhatsApp Fast Track -->
-        <a href="https://wa.me/260762499581?text=Hello%20StartEasy,%20I%20would%20like%20to%20fast-track%20a%20specific%20accounting%20or%20tax%20task." target="_blank" rel="noopener noreferrer" class="btn-ghost" style="font-size: 15px; padding: 14px 32px; border-color: #25D366; color: #25D366;">
-          <i class="fab fa-whatsapp" style="margin-right: 8px;"></i> Fast-Track via WhatsApp
-        </a>
+        </button>
       </div>
     </div>
   </section>
@@ -465,6 +402,249 @@ body {
     <strong>Important Note:</strong> Tax, accounting, and audit work are delivered by appropriately qualified or authorised professionals where required. Package inclusions, transaction/employee limits, and reporting frequency will be clearly defined in your specific engagement letter.
   </p>
 </footer>
+
+<!-- ══════════════ SMART MODAL ══════════════ -->
+<div class="modal-overlay" id="consultationModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <h2 class="serif" style="font-size: 22px; color: #F5A623; margin: 0 0 4px;">Request Consultation</h2>
+        <p style="font-size: 13px; color: rgba(255,255,255,0.7); margin: 0;">Fill in your details to jumpstart your financial organisation.</p>
+      </div>
+      <button onclick="closeModal()" style="background: none; border: none; color: rgba(255,255,255,0.5); font-size: 20px; cursor: pointer;"><i class="fas fa-times"></i></button>
+    </div>
+    
+    <div class="modal-body">
+      <form id="smartForm" onsubmit="handleFormSubmit(event)">
+        
+        <div class="form-grid-2">
+          <div>
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="fullName" class="form-input" placeholder="e.g. Chanda Mwale" required />
+          </div>
+          <div>
+            <label class="form-label">Business Name</label>
+            <input type="text" id="businessName" class="form-input" placeholder="e.g. Acme Traders" />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div>
+            <label class="form-label">Email Address *</label>
+            <input type="email" id="email" class="form-input" placeholder="you@company.com" required />
+          </div>
+          <div>
+            <label class="form-label">Phone Number *</label>
+            <input type="tel" id="phone" class="form-input" placeholder="+260 9..." required />
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label">What service are you interested in? *</label>
+          <select id="serviceInterest" class="form-select" required>
+            <option value="" disabled selected>Select a service...</option>
+            <option value="Bookkeeping & Financial Records">Bookkeeping & Financial Records</option>
+            <option value="Tax & Statutory Compliance">Tax & Statutory Compliance</option>
+            <option value="Payroll & Financial Reporting">Payroll & Financial Reporting</option>
+            <option value="Complete Accounting & Financial Administration">Complete Accounting & Financial Administration</option>
+            <option value="Individual Task: Bookkeeping">Individual Task: Bookkeeping</option>
+            <option value="Individual Task: Tax filing support">Individual Task: Tax filing support</option>
+            <option value="Individual Task: Payroll administration">Individual Task: Payroll administration</option>
+            <option value="Individual Task: Financial statement preparation">Individual Task: Financial statement preparation</option>
+            <option value="Individual Task: Financial record reconstruction">Individual Task: Financial record reconstruction</option>
+            <option value="Other / Custom Request">Other / Custom Request</option>
+          </select>
+        </div>
+
+        <div class="form-grid-2">
+          <div>
+            <label class="form-label">Monthly Transactions (Est.)</label>
+            <select id="transactionVolume" class="form-select">
+              <option value="0-50">0 - 50</option>
+              <option value="50-200">50 - 200</option>
+              <option value="200+">200+</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Accounting Software Used</label>
+            <select id="softwareUsed" class="form-select">
+              <option value="Excel">Microsoft Excel</option>
+              <option value="QuickBooks">QuickBooks</option>
+              <option value="Sage">Sage</option>
+              <option value="Xero">Xero</option>
+              <option value="None">No Software (Paper)</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label">Do you have employees on payroll?</label>
+          <select id="hasEmployees" class="form-select">
+            <option value="No">No employees</option>
+            <option value="1-5">1 - 5 employees</option>
+            <option value="6-20">6 - 20 employees</option>
+            <option value="20+">20+ employees</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="form-label">Additional Details (Optional)</label>
+          <textarea id="additionalDetails" class="form-input" rows="3" placeholder="Tell us briefly about your current situation..."></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn-submit">
+          <i class="fab fa-whatsapp" style="font-size: 20px;"></i> Save & Connect on WhatsApp
+        </button>
+        <p style="text-align: center; font-size: 11px; color: #64748B; margin-top: 12px;">
+          Your details are securely saved to our CRM. Clicking submit will open WhatsApp to chat with our team.
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ SCRIPTS ══════════════ -->
+<script>
+  // 1. Initialize Firebase (Using your provided config)
+  const firebaseConfig = {
+    apiKey: "AIzaSyDdEyxvsd2RjgKVYTGYJfYUB_637lV3n5I",
+    authDomain: "starteasy-zambia.firebaseapp.com",
+    projectId: "starteasy-zambia",
+    storageBucket: "starteasy-zambia.firebasestorage.app",
+    messagingSenderId: "54136399237",
+    appId: "1:54136399237:web:2f9f2d7f86bfdfb4be50ec"
+  };
+  
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.firestore();
+  const WHATSAPP_NUMBER = '260762499581';
+
+  // 2. Modal Logic
+  const modal = document.getElementById('consultationModal');
+  const serviceSelect = document.getElementById('serviceInterest');
+
+  function openModal(preselectedService) {
+    // Reset form
+    document.getElementById('smartForm').reset();
+    
+    // If a specific package/button was clicked, pre-select it in the dropdown
+    if (preselectedService) {
+      // Find the matching option and select it
+      for (let i = 0; i < serviceSelect.options.length; i++) {
+        if (serviceSelect.options[i].value === preselectedService) {
+          serviceSelect.selectedIndex = i;
+          break;
+        }
+      }
+    }
+    
+    // Show modal
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+  }
+
+  function closeModal() {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // Close modal if user clicks outside of the white box
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // 3. Form Submission Logic (Firebase + WhatsApp)
+  async function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    const btn = document.getElementById('submitBtn');
+    const originalText = btn.innerHTML;
+    
+    // Collect Form Data
+    const formData = {
+      name: document.getElementById('fullName').value.trim(),
+      business: document.getElementById('businessName').value.trim() || '-',
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      service: document.getElementById('serviceInterest').value,
+      transactions: document.getElementById('transactionVolume').value,
+      software: document.getElementById('softwareUsed').value,
+      employees: document.getElementById('hasEmployees').value,
+      details: document.getElementById('additionalDetails').value.trim() || 'None provided'
+    };
+
+    // Validation
+    if (!formData.name || !formData.email || !formData.phone || !formData.service) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    // Update Button State
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving details...';
+
+    try {
+      // Save to Firebase (se_leads collection)
+      await db.collection('se_leads').add({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        business: formData.business,
+        service: formData.service,
+        details: `Transactions: ${formData.transactions} | Software: ${formData.software} | Employees: ${formData.employees} | Notes: ${formData.details}`,
+        status: 'New lead',
+        source: 'Accounting Page Modal',
+        priority: 'Warm',
+        assignee: 'Unassigned',
+        notes: [],
+        createdAt: Date.now()
+      });
+
+      // Create WhatsApp Message
+      const waMessage = 
+        `*NEW ACCOUNTING CONSULTATION REQUEST*%0A%0A` +
+        `*Name:* ${formData.name}%0A` +
+        `*Business:* ${formData.business}%0A` +
+        `*Email:* ${formData.email}%0A` +
+        `*Phone:* ${formData.phone}%0A%0A` +
+        `*Service Requested:* ${formData.service}%0A` +
+        `*Monthly Transactions:* ${formData.transactions}%0A` +
+        `*Software Used:* ${formData.software}%0A` +
+        `*Employees:* ${formData.employees}%0A%0A` +
+        `*Additional Notes:*%0A${formData.details}%0A%0A` +
+        `I have just submitted this via the website. Looking forward to speaking!`;
+
+      // Short delay to show success state before redirecting
+      btn.innerHTML = '<i class="fas fa-check-circle"></i> Opening WhatsApp...';
+      btn.style.background = '#0A1F12';
+
+      setTimeout(() => {
+        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`, '_blank');
+        
+        // Reset and close
+        closeModal();
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        btn.style.background = '#25D366';
+      }, 1000);
+
+    } catch (error) {
+      console.error("Error saving lead:", error);
+      alert("There was an issue saving your data, but we will still open WhatsApp so you can reach us.");
+      
+      // Fallback: Still open WhatsApp even if Firebase fails
+      const waMessage = `*NEW CONSULTATION REQUEST (Fallback)*%0A%0A*Name:* ${formData.name}%0A*Service:* ${formData.service}%0A*Phone:* ${formData.phone}`;
+      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`, '_blank');
+      
+      closeModal();
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+</script>
 
 </body>
 </html>
