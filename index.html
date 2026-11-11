@@ -196,7 +196,26 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
 
 /* Payslip modal layout */
 .payslip-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-@media (max-width: 900px) { .payslip-layout { grid-template-columns: 1fr; } }
+
+/* ─── RETAINER DOCUMENT RESPONSIVE STYLES ─── */
+.retainer-doc {
+  background: #fff; border: 1px solid #D0D0D0; border-radius: 8px;
+  padding: 34px 40px; font-family: Inter, sans-serif; font-size: 12.5px;
+  color: #222; width: 100%; max-width: 780px; margin: 0 auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,.06); overflow-wrap: break-word;
+}
+.retainer-head { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 16px; border-bottom: 3px solid #0A1F12; margin-bottom: 22px; gap: 16px; }
+.retainer-head-right { text-align: right; }
+.retainer-grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.retainer-split-table { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; }
+.retainer-split-col-right { border-left: 1px solid #ddd; }
+.retainer-net-box { display: flex; justify-content: space-between; align-items: center; }
+.retainer-net-amount { text-align: right; }
+.retainer-signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+
+@media (max-width: 900px) { 
+  .payslip-layout { grid-template-columns: 1fr; } 
+}
 
 @media (max-width: 768px) {
   .admin-content { padding: 16px; }
@@ -208,6 +227,19 @@ body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-
   .modal-body { padding: 16px; }
   .report-container { padding: 20px; }
   .form-row { grid-template-columns: 1fr; }
+  
+  /* Retainer Mobile Adjustments */
+  .retainer-doc { padding: 20px 16px; }
+  .retainer-head { flex-direction: column; }
+  .retainer-head-right { text-align: left; margin-top: 12px; }
+  .retainer-grid-2col { grid-template-columns: 1fr; gap: 16px; }
+  .retainer-split-table { grid-template-columns: 1fr; }
+  .retainer-split-col-right { border-left: none; border-top: 1px solid #ddd; }
+  .retainer-net-box { flex-direction: column; align-items: flex-start !important; gap: 12px; }
+  .retainer-net-amount { text-align: left !important; }
+  .retainer-signatures { grid-template-columns: 1fr; gap: 24px; }
+  .retainer-modal-content { padding: 12px !important; }
+  .retainer-preview-wrap { padding: 8px !important; }
 }
 
 /* PRINT STYLES */
@@ -459,14 +491,9 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
   const legalFooter = `This monthly retainer is processed in accordance with the ${contractRef} entered into between ${empName} and StartEasy Zambia, covering their responsibilities as ${empPos}. It does not constitute an employment contract and does not create an employer–employee relationship.`;
 
   return (
-    <div id={renderId} style={{
-      background:'#fff', border:'1px solid #D0D0D0', borderRadius:8,
-      padding:'34px 40px', fontFamily:'Inter, sans-serif', fontSize:12.5,
-      color:'#222', width:'100%', maxWidth:780, margin:'0 auto',
-      boxShadow:'0 10px 30px rgba(0,0,0,.06)', overflowWrap:'break-word'
-    }}>
+    <div id={renderId} className="retainer-doc">
       {/* Header */}
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', paddingBottom:16, borderBottom:'3px solid #0A1F12', marginBottom:22, flexWrap:'wrap', gap:16 }}>
+      <div className="retainer-head">
         <div>
           <div style={{ fontFamily:"'Playfair Display',serif", fontSize:24, fontWeight:800, color:'#0A1F12', letterSpacing:0.5 }}>
             Start<em style={{ fontStyle:'normal', color:'#E8730F' }}>Easy</em> Zambia
@@ -475,7 +502,7 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
             Confidential Retainer Advice
           </div>
         </div>
-        <div style={{ textAlign:'right' }}>
+        <div className="retainer-head-right">
           <div style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:800, color:'#E8730F', letterSpacing:'1.2px' }}>ADVICE</div>
           <div style={{ fontSize:10.5, color:'#666', marginTop:4, lineHeight:1.5 }}>
             {payslip.periodLabel || '—'}<br/>
@@ -485,7 +512,7 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
       </div>
 
       {/* Employee & Payment info */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:20 }}>
+      <div className="retainer-grid-2col" style={{ marginBottom:20 }}>
         <div>
           <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:6 }}>Recipient</div>
           <div style={{ fontSize:14.5, fontWeight:700, color:'#0A1F12' }}>{empName}</div>
@@ -507,44 +534,44 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
       </div>
 
       {/* Earnings / Deductions tables */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:0, border:'1px solid #ddd', borderRadius:6, overflow:'hidden' }}>
+      <div className="retainer-split-table">
         <div>
           <div style={{ background:'#0A1F12', color:'#fff', padding:'9px 14px', fontSize:10.5, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.06em' }}>Retainer Breakdown</div>
           {(payslip.earnings || []).map((e, i) => (
             <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'8px 14px', borderBottom:'1px solid #f0f0f0', fontSize:12 }}>
-              <span style={{ color:'#555' }}>{e.label || '—'}</span>
-              <span style={{ fontWeight:600, fontFamily:'Consolas, monospace' }}>{sym}{fmtNum(e.amount)}</span>
+              <span style={{ color:'#555', paddingRight: 8 }}>{e.label || '—'}</span>
+              <span style={{ fontWeight:600, fontFamily:'Consolas, monospace', whiteSpace:'nowrap' }}>{sym}{fmtNum(e.amount)}</span>
             </div>
           ))}
           {(payslip.earnings || []).length === 0 && <div style={{ padding:'10px 14px', fontSize:11.5, color:'#999', fontStyle:'italic' }}>No compensation</div>}
           <div style={{ display:'flex', justifyContent:'space-between', padding:'10px 14px', background:'#F0F7F2', borderTop:'2px solid #0A1F12', fontSize:12, fontWeight:800 }}>
             <span>Gross Retainer</span>
-            <span style={{ fontFamily:'Consolas, monospace' }}>{sym}{fmtNum(totalEarnings)}</span>
+            <span style={{ fontFamily:'Consolas, monospace', whiteSpace:'nowrap' }}>{sym}{fmtNum(totalEarnings)}</span>
           </div>
         </div>
-        <div style={{ borderLeft:'1px solid #ddd' }}>
+        <div className="retainer-split-col-right">
           <div style={{ background:'#B8564F', color:'#fff', padding:'9px 14px', fontSize:10.5, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.06em' }}>Withholding / Deductions</div>
           {(payslip.deductions || []).map((d, i) => (
             <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'8px 14px', borderBottom:'1px solid #f0f0f0', fontSize:12 }}>
-              <span style={{ color:'#555' }}>{d.label || '—'}</span>
-              <span style={{ fontWeight:600, fontFamily:'Consolas, monospace' }}>{sym}{fmtNum(d.amount)}</span>
+              <span style={{ color:'#555', paddingRight: 8 }}>{d.label || '—'}</span>
+              <span style={{ fontWeight:600, fontFamily:'Consolas, monospace', whiteSpace:'nowrap' }}>{sym}{fmtNum(d.amount)}</span>
             </div>
           ))}
           {(payslip.deductions || []).length === 0 && <div style={{ padding:'10px 14px', fontSize:11.5, color:'#999', fontStyle:'italic' }}>No deductions</div>}
           <div style={{ display:'flex', justifyContent:'space-between', padding:'10px 14px', background:'#FDF2F1', borderTop:'2px solid #B8564F', fontSize:12, fontWeight:800 }}>
             <span>Total Withholding</span>
-            <span style={{ fontFamily:'Consolas, monospace' }}>{sym}{fmtNum(totalDeductions)}</span>
+            <span style={{ fontFamily:'Consolas, monospace', whiteSpace:'nowrap' }}>{sym}{fmtNum(totalDeductions)}</span>
           </div>
         </div>
       </div>
 
       {/* Net pay highlight */}
-      <div style={{ marginTop:18, background:'linear-gradient(135deg,#0A1F12,#123A1F)', color:'#fff', padding:'18px 22px', borderRadius:10, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+      <div className="retainer-net-box" style={{ marginTop:18, background:'linear-gradient(135deg,#0A1F12,#123A1F)', color:'#fff', padding:'18px 22px', borderRadius:10 }}>
         <div>
           <div style={{ fontSize:9.5, fontWeight:800, letterSpacing:'0.16em', textTransform:'uppercase', color:'#F5A623', marginBottom:4 }}>Net Retainer Paid</div>
           <div style={{ fontSize:10.5, color:'rgba(255,255,255,0.8)' }}>Paid to: <strong>{empName}</strong></div>
         </div>
-        <div style={{ textAlign: 'right' }}>
+        <div className="retainer-net-amount">
           <div style={{ fontFamily:"'Playfair Display',serif", fontSize:28, fontWeight:800, color:'#F5A623' }}>
             {sym}{fmtNum(net)}
           </div>
@@ -560,19 +587,19 @@ function RetainerDocument({ payslip, team, renderId = 'payslip-render' }) {
           <div style={{ background:'#1B6CA8', color:'#fff', padding:'9px 14px', fontSize:10.5, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.06em' }}>Payroll Costs (Employer Contributions)</div>
           {(payslip.employerContributions || []).map((c, i) => (
             <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'8px 14px', borderBottom:'1px solid #f0f0f0', fontSize:12 }}>
-              <span style={{ color:'#555' }}>{c.label || '—'}</span>
-              <span style={{ fontWeight:600, fontFamily:'Consolas, monospace' }}>{sym}{fmtNum(c.amount)}</span>
+              <span style={{ color:'#555', paddingRight: 8 }}>{c.label || '—'}</span>
+              <span style={{ fontWeight:600, fontFamily:'Consolas, monospace', whiteSpace:'nowrap' }}>{sym}{fmtNum(c.amount)}</span>
             </div>
           ))}
           <div style={{ display:'flex', justifyContent:'space-between', padding:'10px 14px', background:'#F8FAFC', borderTop:'2px solid #1B6CA8', fontSize:12, fontWeight:800 }}>
             <span>Total Cost to Company</span>
-            <span style={{ fontFamily:'Consolas, monospace', color:'#1B6CA8' }}>{sym}{fmtNum(totalCostToCompany)}</span>
+            <span style={{ fontFamily:'Consolas, monospace', color:'#1B6CA8', whiteSpace:'nowrap' }}>{sym}{fmtNum(totalCostToCompany)}</span>
           </div>
         </div>
       )}
 
       {/* Footer signatures */}
-      <div style={{ marginTop:28, paddingTop:18, borderTop:'1px solid #ddd', display:'grid', gridTemplateColumns:'1fr 1fr', gap:36 }}>
+      <div className="retainer-signatures" style={{ marginTop:28, paddingTop:18, borderTop:'1px solid #ddd' }}>
         <div>
           <div style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', color:'#888', letterSpacing:'0.06em', marginBottom:8 }}>Prepared By</div>
           <div style={{ borderBottom:'1px solid #333', paddingBottom:4, minHeight:30, fontFamily:"'Playfair Display',serif", fontSize:15, fontStyle:'italic', color:'#0A1F12' }}>
@@ -698,7 +725,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
 
   return (
     <div className="modal-form-overlay" onClick={onClose}>
-      <div className="modal-form wide" onClick={e => e.stopPropagation()}>
+      <div className="modal-form wide retainer-modal-content" onClick={e => e.stopPropagation()}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20 }}>
           <div>
             <h3 style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:22, color:'#0A1F12' }}>
@@ -864,7 +891,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
                 </button>
               </div>
               {showPreview && (
-                <div style={{ maxHeight:'70vh', overflow:'auto', border:'1px dashed #CBD5E1', borderRadius:8, padding:10, background:'#F8FAFC' }}>
+                <div className="retainer-preview-wrap" style={{ maxHeight:'70vh', overflow:'auto', border:'1px dashed #CBD5E1', borderRadius:8, padding:10, background:'#F8FAFC' }}>
                   <RetainerDocument payslip={previewPayslip} team={selectedTeam} renderId="payslip-live-preview" />
                 </div>
               )}
@@ -892,7 +919,7 @@ function PayslipModal({ modal, onClose, onSave, onDownload, saving, error, teamM
 function PayslipViewModal({ payslip, team, onClose, onDownload }) {
   return (
     <div className="modal-form-overlay" onClick={onClose}>
-      <div className="modal-form wide" onClick={e => e.stopPropagation()} style={{ padding:24 }}>
+      <div className="modal-form wide retainer-modal-content" onClick={e => e.stopPropagation()} style={{ padding:24 }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
           <h3 style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:20, color:'#0A1F12' }}>Retainer Advice Preview</h3>
           <div style={{ display:'flex', gap:8 }}>
@@ -902,7 +929,7 @@ function PayslipViewModal({ payslip, team, onClose, onDownload }) {
             <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'#666', fontSize:18 }}><i className="fas fa-times"></i></button>
           </div>
         </div>
-        <div style={{ maxHeight:'80vh', overflow:'auto', background:'#F8FAFC', borderRadius:8, padding:16 }}>
+        <div className="retainer-preview-wrap" style={{ maxHeight:'80vh', overflow:'auto', background:'#F8FAFC', borderRadius:8, padding:16 }}>
           <RetainerDocument payslip={payslip} team={team} renderId="payslip-view-render" />
         </div>
       </div>
@@ -1759,16 +1786,28 @@ function AdminPortal({ onExit }) {
     const empName = (teamMember?.name || payslip?.employeeName || 'Team').replace(/\s+/g,'_');
     const periodLabel = (payslip?.periodLabel || 'Period').replace(/\s+/g,'_');
     showToast('Generating retainer advice PDF...', 'info');
+    
+    // Create a clone to render the PDF without affecting the on-screen mobile styling
+    const clone = element.cloneNode(true);
+    const wrapper = document.createElement('div');
+    wrapper.style.width = '780px'; // Force desktop width for PDF
+    wrapper.style.position = 'fixed';
+    wrapper.style.top = '-9999px';
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
+
     window.html2pdf().set({
       margin:       0.3,
       filename:     `Retainer_Advice_${empName}_${periodLabel}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
+      html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0, windowWidth: 780 },
       jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-    }).from(element).save().then(() => {
+    }).from(clone).save().then(() => {
       showToast('Retainer advice downloaded successfully!', 'success');
+      document.body.removeChild(wrapper);
     }).catch(() => {
       showToast('Failed to generate retainer advice PDF.', 'error');
+      if(document.body.contains(wrapper)) document.body.removeChild(wrapper);
     });
   };
 
