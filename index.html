@@ -283,7 +283,7 @@ const SIGNATORY_NAME = 'Carol Kambole';
 const SIGNATORY_TITLE = 'Co-founder & Director of Finance & Administration, StartEasy Zambia';
 const MAIN_PLATFORM_URL = 'https://www.starteasyzambia.com';
 
-/* FULL SERVICE CATALOGUE */
+/* FULL SERVICE CATALOGUE FROM CRM */
 const SERVICE_CATALOGUE = [
   { category: 'A. BUSINESS REGISTRATION & CORPORATE (PACRA)', items: [ { name: 'Business Structure Advisory — Wizard', price: 25 }, { name: 'Name Preparation & Clearance — Wizard', price: 25 }, { name: 'Company Incorporation', price: 750 }, { name: 'Business Name Registration', price: 400 }, { name: 'Company Amendments', price: 400 }, { name: 'Annual Return & Statutory Filings', price: 400 }, { name: 'Beneficial Ownership Filing', price: 400 }, { name: 'Business Closure & Deregistration', price: 750 }, { name: 'Corporate Records Administration', price: 500, desc: 'Monthly' } ] },
   { category: 'B. TAX & COMPLIANCE (ZRA)', items: [ { name: 'TPIN Registration', price: 250, note: 'Gov fee free' }, { name: 'Tax Type Registration (VAT / PAYE / WHT)', price: 400 }, { name: 'Recurring Return Filing', price: 250, desc: 'Monthly' }, { name: 'Tax Clearance Certificate', price: 400 }, { name: 'Tax Compliance Recovery', price: 750, desc: 'From' }, { name: 'Taxpayer Information Update', price: 250 }, { name: 'Annual Tax Compliance', price: 400 } ] },
@@ -298,6 +298,7 @@ const SERVICE_CATALOGUE = [
   { category: 'K. SUPPLIERS DIRECTORY & MARKETPLACE', items: [ { name: 'Supplier Listing — Monthly (Local)', price: 100 }, { name: 'Supplier Listing — Monthly (International)', price: 140 }, { name: 'Supplier Listing — Annual (Local)', price: 1000 }, { name: 'Supplier Listing — Annual (International)', price: 1400 }, { name: 'Buyer Access Subscription', price: 50, desc: 'Monthly' }, { name: 'Supplier Verification (One-off)', price: 75 }, { name: 'Campaign Placement', price: 455 }, { name: 'Sourcing & Procurement Support', price: 600 } ] }
 ];
 
+// Flatten for easy dropdowns
 const ALL_SERVICES = SERVICE_CATALOGUE.flatMap(cat => cat.items);
 
 const LEDGER_CATEGORIES = {
@@ -1333,13 +1334,12 @@ function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
           <div className="form-row">
             <div className="form-group">
               <label className="form-label">Package *</label>
+              {/* FIXED: Uses the full ALL_SERVICES catalogue */}
               <select className="form-input" value={data.package || ''} onChange={e => set('package', e.target.value)} required>
                 <option value="">— Select —</option>
-                <option value="Financial Starter">Financial Starter — K1,000</option>
-                <option value="Business Control">Business Control — K2,000</option>
-                <option value="Growth & Financial Planning">Growth & Financial Planning — K4,000</option>
-                <option value="Directory Service">Directory Service</option>
-                <option value="Venture Service">Venture Service</option>
+                {ALL_SERVICES.map(p => (
+                  <option key={p.name} value={p.name}>{p.name} — K{p.price}</option>
+                ))}
               </select>
             </div>
             <div className="form-group">
@@ -1766,7 +1766,7 @@ function AdminPortal({ onExit }) {
   };
   const handleLogout = () => auth.signOut();
 
-  /* ─── PDF: Statements ─── */
+  /* ─── PDF: Statements (unchanged) ─── */
   const downloadPDF = () => {
     const element = document.getElementById('print-area');
     if (!element) return;
@@ -1791,23 +1791,30 @@ function AdminPortal({ onExit }) {
     const periodLabel = (payslip?.periodLabel || 'Period').replace(/\s+/g,'_');
     showToast('Generating retainer advice PDF...', 'info');
     
-    // Clone to avoid affecting the live UI and force a strict width
-    const clone = element.cloneNode(true);
+    // FIXED: Create an absolute hidden wrapper to prevent scroll height/overflow artifacts that cause Page 2 to contain random numbers
     const wrapper = document.createElement('div');
-    wrapper.style.width = '750px'; 
     wrapper.style.position = 'fixed';
-    wrapper.style.top = '-9999px';
-    wrapper.style.padding = '20px';
+    wrapper.style.top = '0';
+    wrapper.style.left = '-9999px'; // off-screen
+    wrapper.style.width = '800px';
+    wrapper.style.background = '#fff';
+    wrapper.style.zIndex = '-9999';
+
+    const clone = element.cloneNode(true);
+    // Strip any maxHeight/overflow that might be causing html2canvas to expand the page
+    clone.style.maxHeight = 'none';
+    clone.style.overflow = 'visible';
+    clone.style.boxShadow = 'none'; // shadows sometimes cause rendering artifacts
     wrapper.appendChild(clone);
     document.body.appendChild(wrapper);
 
     window.html2pdf().set({
-      margin:       0, // 0 margin prevents overflow to page 2
+      margin:       0,
       filename:     `Retainer_Advice_${empName}_${periodLabel}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0, windowWidth: 800 },
       jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-      pagebreak:    { mode: 'avoid-all' } // Prevents awkward breaks
+      pagebreak:    { mode: ['css', 'legacy'] } // Prevents awkward breaks
     }).from(clone).save().then(() => {
       showToast('Retainer advice downloaded successfully!', 'success');
       document.body.removeChild(wrapper);
@@ -1817,7 +1824,7 @@ function AdminPortal({ onExit }) {
     });
   };
 
-  /* CSV export */
+  /* CSV export (unchanged) */
   const exportToCSV = (data, filename, headers) => {
     if (!data || !data.length) return showToast("No data to export.", "error");
     setIsExporting(true);
@@ -1860,7 +1867,8 @@ function AdminPortal({ onExit }) {
 
   /* ZRA Tax Online Export */
   const exportZRA = (selectedPayslips) => {
-    // Fallback to all payslips if filtered is empty
+    // FIXED: Fallback to all payslips if filtered is empty. 
+    // Also falls back to payslip.employeeName if team member is not found.
     const dataToExport = (selectedPayslips && selectedPayslips.length > 0) ? selectedPayslips : payslips;
     
     if (!dataToExport || dataToExport.length === 0) {
@@ -1870,14 +1878,17 @@ function AdminPortal({ onExit }) {
     const rows = [['TIN', 'Name', 'Gross', 'PAYE', 'NAPSA', 'NHIMA', 'SDL']];
     dataToExport.forEach(p => {
       const t = team.find(tm => tm.id === p.employeeId);
-      if (!t) return; // Skip if team member doesn't exist
+      
+      // Use fallbacks to prevent skipping data if team member was deleted
+      const empName = t?.name || p.employeeName || 'Unknown';
+      const tin = t?.tin || 'N/A';
       
       const paye = (p.deductions || []).filter(d => d.label && d.label.includes('PAYE')).reduce((s, d) => s + num(d.amount), 0);
       const napsa = (p.employerContributions || []).filter(d => d.label && d.label.includes('NAPSA')).reduce((s, d) => s + num(d.amount), 0);
       const nhima = (p.employerContributions || []).filter(d => d.label && d.label.includes('NHIMA')).reduce((s, d) => s + num(d.amount), 0);
       const sdl = (p.employerContributions || []).filter(d => d.label && d.label.includes('SDL')).reduce((s, d) => s + num(d.amount), 0);
       
-      rows.push([t.tin || 'N/A', t.name, p.gross || 0, paye, napsa, nhima, sdl]);
+      rows.push([tin, empName, p.gross || 0, paye, napsa, nhima, sdl]);
     });
 
     if (rows.length === 1) {
