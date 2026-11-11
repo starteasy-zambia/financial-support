@@ -174,6 +174,7 @@ body {
 @media (max-width: 768px) {
   .service-row { flex-direction: column; align-items: flex-start; gap: 12px; }
   .form-grid-2 { grid-template-columns: 1fr; }
+  .dynamic-fields-row { flex-direction: column; }
 }
 </style>
 </head>
@@ -478,7 +479,7 @@ body {
 
         <div>
           <label class="form-label">What service are you interested in? *</label>
-          <select id="serviceInterest" class="form-select" required>
+          <select id="serviceInterest" class="form-select" required onchange="configureModalFields(this.value)">
             <option value="" disabled selected>Select a service...</option>
             <option value="Bookkeeping & Financial Records">Bookkeeping & Financial Records</option>
             <option value="Tax & Statutory Compliance">Tax & Statutory Compliance</option>
@@ -494,18 +495,31 @@ body {
           </select>
         </div>
 
-        <div class="form-grid-2">
-          <div>
+        <!-- Dynamic Fields Container -->
+        <div class="dynamic-fields-row" style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
+          
+          <div id="field-transactions" style="display: none; flex: 1 1 200px;">
             <label class="form-label">Monthly Transactions (Est.)</label>
-            <select id="transactionVolume" class="form-select">
+            <select id="transactionVolume" class="form-select" style="margin-bottom: 0;">
               <option value="0-50">0 - 50</option>
               <option value="50-200">50 - 200</option>
               <option value="200+">200+</option>
             </select>
           </div>
-          <div>
-            <label class="form-label">Accounting Software Used</label>
-            <select id="softwareUsed" class="form-select">
+
+          <div id="field-employees" style="display: none; flex: 1 1 200px;">
+            <label class="form-label">Number of Employees</label>
+            <select id="hasEmployees" class="form-select" style="margin-bottom: 0;">
+              <option value="No">No employees</option>
+              <option value="1-5">1 - 5 employees</option>
+              <option value="6-20">6 - 20 employees</option>
+              <option value="20+">20+ employees</option>
+            </select>
+          </div>
+
+          <div id="field-software" style="display: none; flex: 1 1 200px;">
+            <label class="form-label">Accounting Software</label>
+            <select id="softwareUsed" class="form-select" style="margin-bottom: 0;">
               <option value="Excel">Microsoft Excel</option>
               <option value="QuickBooks">QuickBooks</option>
               <option value="Sage">Sage</option>
@@ -514,16 +528,7 @@ body {
               <option value="Other">Other</option>
             </select>
           </div>
-        </div>
 
-        <div>
-          <label class="form-label">Do you have employees on payroll?</label>
-          <select id="hasEmployees" class="form-select">
-            <option value="No">No employees</option>
-            <option value="1-5">1 - 5 employees</option>
-            <option value="6-20">6 - 20 employees</option>
-            <option value="20+">20+ employees</option>
-          </select>
         </div>
 
         <div>
@@ -544,7 +549,7 @@ body {
 
 <!-- ══════════════ SCRIPTS ══════════════ -->
 <script>
-  // 1. Initialize Firebase (Using your provided config)
+  // 1. Initialize Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyDdEyxvsd2RjgKVYTGYJfYUB_637lV3n5I",
     authDomain: "starteasy-zambia.firebaseapp.com",
@@ -560,28 +565,75 @@ body {
   const db = firebase.firestore();
   const WHATSAPP_NUMBER = '260762499581';
 
-  // 2. Modal Logic
+  // 2. Modal Logic & Dynamic Fields
   const modal = document.getElementById('consultationModal');
   const serviceSelect = document.getElementById('serviceInterest');
 
+  function configureModalFields(service) {
+    // Hide all dynamic fields by default
+    document.getElementById('field-transactions').style.display = 'none';
+    document.getElementById('field-employees').style.display = 'none';
+    document.getElementById('field-software').style.display = 'none';
+
+    let placeholder = "Tell us briefly about your current situation...";
+    let showTrans = false;
+    let showEmp = false;
+    let showSoft = false;
+
+    // Logic to determine which fields to show based on the service
+    if (service.includes('Bookkeeping & Financial Records') || service.includes('Individual Task: Bookkeeping')) {
+        showTrans = true;
+        showSoft = true;
+        placeholder = "e.g. I have 3 months of backlog, currently using Excel.";
+    } else if (service.includes('Tax & Statutory Compliance') || service.includes('Individual Task: Tax filing support')) {
+        showTrans = true;
+        placeholder = "e.g. I need help filing VAT and PAYE returns. Currently registered for VAT.";
+    } else if (service.includes('Payroll & Financial Reporting') || service.includes('Individual Task: Payroll administration')) {
+        showEmp = true;
+        placeholder = "e.g. I have 12 employees. I need monthly payslips and NAPSA/NHIMA tracking.";
+    } else if (service.includes('Complete Accounting')) {
+        showTrans = true;
+        showEmp = true;
+        showSoft = true;
+        placeholder = "e.g. I want to hand over all accounting and compliance. Currently doing it myself.";
+    } else if (service.includes('Financial statement preparation')) {
+        showTrans = true;
+        placeholder = "e.g. I need statements prepared for a bank loan application.";
+    } else if (service.includes('Financial record reconstruction')) {
+        placeholder = "e.g. I have 2 years of receipts in a box and need them digitised.";
+    } else if (service.includes('Accounting Systems Implementation')) {
+        showSoft = true;
+        placeholder = "e.g. I want to move from Excel to QuickBooks and need setup and training.";
+    }
+
+    // Show relevant fields
+    if (showTrans) document.getElementById('field-transactions').style.display = 'block';
+    if (showEmp) document.getElementById('field-employees').style.display = 'block';
+    if (showSoft) document.getElementById('field-software').style.display = 'block';
+    
+    // Update the textarea placeholder
+    document.getElementById('additionalDetails').placeholder = placeholder;
+  }
+
   function openModal(preselectedService) {
-    // Reset form
     document.getElementById('smartForm').reset();
     
-    // If a specific package/button was clicked, pre-select it in the dropdown
     if (preselectedService) {
-      // Find the matching option and select it
       for (let i = 0; i < serviceSelect.options.length; i++) {
         if (serviceSelect.options[i].value === preselectedService) {
           serviceSelect.selectedIndex = i;
           break;
         }
       }
+    } else {
+        serviceSelect.selectedIndex = 0;
     }
-    
-    // Show modal
+
+    // Configure the fields based on the pre-selected service
+    configureModalFields(serviceSelect.value);
+
     modal.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
   }
 
   function closeModal() {
@@ -589,7 +641,6 @@ body {
     document.body.style.overflow = '';
   }
 
-  // Close modal if user clicks outside of the white box
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
   });
@@ -601,38 +652,47 @@ body {
     const btn = document.getElementById('submitBtn');
     const originalText = btn.innerHTML;
     
-    // Collect Form Data
+    // Collect Base Form Data
     const formData = {
       name: document.getElementById('fullName').value.trim(),
       business: document.getElementById('businessName').value.trim() || '-',
       email: document.getElementById('email').value.trim(),
       phone: document.getElementById('phone').value.trim(),
       service: document.getElementById('serviceInterest').value,
-      transactions: document.getElementById('transactionVolume').value,
-      software: document.getElementById('softwareUsed').value,
-      employees: document.getElementById('hasEmployees').value,
       details: document.getElementById('additionalDetails').value.trim() || 'None provided'
     };
 
-    // Validation
     if (!formData.name || !formData.email || !formData.phone || !formData.service) {
       alert("Please fill in all required fields.");
       return;
     }
 
-    // Update Button State
+    // Build dynamic details string based on what was actually visible
+    let dynamicInfo = '';
+    if (document.getElementById('field-transactions').style.display !== 'none') {
+        dynamicInfo += `Transactions: ${document.getElementById('transactionVolume').value} | `;
+    }
+    if (document.getElementById('field-software').style.display !== 'none') {
+        dynamicInfo += `Software: ${document.getElementById('softwareUsed').value} | `;
+    }
+    if (document.getElementById('field-employees').style.display !== 'none') {
+        dynamicInfo += `Employees: ${document.getElementById('hasEmployees').value} | `;
+    }
+
+    const fullDetailsString = `${dynamicInfo}Notes: ${formData.details}`;
+
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving details...';
 
     try {
-      // Save to Firebase (se_leads collection)
+      // Save to Firebase
       await db.collection('se_leads').add({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         business: formData.business,
         service: formData.service,
-        details: `Transactions: ${formData.transactions} | Software: ${formData.software} | Employees: ${formData.employees} | Notes: ${formData.details}`,
+        details: fullDetailsString,
         status: 'New lead',
         source: 'Accounting Page Modal',
         priority: 'Warm',
@@ -648,21 +708,16 @@ body {
         `*Business:* ${formData.business}%0A` +
         `*Email:* ${formData.email}%0A` +
         `*Phone:* ${formData.phone}%0A%0A` +
-        `*Service Requested:* ${formData.service}%0A` +
-        `*Monthly Transactions:* ${formData.transactions}%0A` +
-        `*Software Used:* ${formData.software}%0A` +
-        `*Employees:* ${formData.employees}%0A%0A` +
-        `*Additional Notes:*%0A${formData.details}%0A%0A` +
+        `*Service Requested:* ${formData.service}%0A%0A` +
+        `*Details:*%0A${fullDetailsString}%0A%0A` +
         `I have just submitted this via the website. Looking forward to speaking!`;
 
-      // Short delay to show success state before redirecting
       btn.innerHTML = '<i class="fas fa-check-circle"></i> Opening WhatsApp...';
       btn.style.background = '#0A1F12';
 
       setTimeout(() => {
         window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`, '_blank');
         
-        // Reset and close
         closeModal();
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -673,8 +728,7 @@ body {
       console.error("Error saving lead:", error);
       alert("There was an issue saving your data, but we will still open WhatsApp so you can reach us.");
       
-      // Fallback: Still open WhatsApp even if Firebase fails
-      const waMessage = `*NEW CONSULTATION REQUEST (Fallback)*%0A%0A*Name:* ${formData.name}%0A*Service:* ${formData.service}%0A*Phone:* ${formData.phone}`;
+      const waMessage = `*NEW CONSULTATION REQUEST (Fallback)*%0A%0A*Name:* ${formData.name}%0A*Service:* ${formData.service}%0A*Phone:* ${formData.phone}%0A%0A*Details:* ${fullDetailsString}`;
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`, '_blank');
       
       closeModal();
