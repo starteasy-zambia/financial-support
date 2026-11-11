@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Accounting, Bookkeeping & Tax Support | StartEasy Zambia</title>
+<title>Accounting, Tax & Advisory Support | StartEasy Zambia</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -119,6 +119,21 @@ body {
 }
 .service-row:hover { border-color: var(--orange); box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: translateX(4px); }
 
+/* ─── SPECIALISED SERVICES GRID ─── */
+.spec-card {
+  background: #fff; border: 1px solid #E2E8F0; border-radius: 16px;
+  overflow: hidden; display: flex; flex-direction: column; transition: all 0.3s;
+}
+.spec-card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.08); transform: translateY(-4px); }
+.spec-img-wrap {
+  height: 180px; width: 100%; position: relative; overflow: hidden; background: #E2E8F0;
+}
+.spec-img-wrap img {
+  width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;
+}
+.spec-card:hover .spec-img-wrap img { transform: scale(1.05); }
+.spec-content { padding: 24px; flex-grow: 1; display: flex; flex-direction: column; }
+
 /* ─── MODAL STYLES ─── */
 .modal-overlay {
   position: fixed; inset: 0; z-index: 9999;
@@ -185,65 +200,49 @@ body {
 <header class="site-header">
   <div class="header-content">
     <a href="#" class="logo-group">
-      <div class="logo-mark">S</div>
+      <img src="Logo2.png" alt="StartEasy" style="height: 36px; max-width: 140px; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+      <div class="logo-mark" style="display: none;">S</div>
       <div>
-        <div class="logo-text-sub">Accounting & Tax</div>
+        <div class="logo-text-sub">Financial & Advisory</div>
         <div class="logo-text-main">StartEasy Zambia</div>
       </div>
     </a>
-    <button onclick="openModal('')" class="btn-primary" style="padding: 10px 20px; font-size: 13px;">Get Started</button>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <a href="https://www.starteasyzambia.com" style="display: inline-flex; align-items: center; gap: 7px; padding: 9px 13px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 9px; font-size: 12px; font-weight: 800; text-decoration: none; white-space: nowrap; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+        <i class="fas fa-arrow-left" style="font-size: 11px;"></i> Back to Platform
+      </a>
+      <button onclick="openModal('')" class="btn-primary" style="padding: 10px 20px; font-size: 13px;">Get Started</button>
+    </div>
   </div>
 </header>
 
 <main>
   <!-- HERO SECTION -->
-  <section class="fadein" style="background: linear-gradient(135deg,#0A1F12 0%,#123A1F 100%); color: #fff; padding: 100px 24px; text-align: center; width: 100%;">
-    <div class="container" style="max-width: 900px;">
+  <section class="fadein" style="background: linear-gradient(135deg,#0A1F12 0%,#123A1F 100%); color: #fff; padding: 80px 24px 100px; text-align: center; width: 100%;">
+    <div class="container" style="max-width: 900px; display: flex; flex-direction: column; align-items: center;">
+      
+      <!-- Hero Image -->
+      <img src="1e741e5c-6dfc-4043-bc66-7bf9a13060ad.png" alt="Consultation" style="max-width: 100%; width: 320px; height: auto; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);" onerror="this.style.display='none';" />
+
       <div style="display: inline-block; background: rgba(232,115,15,0.2); color: #F5A623; padding: 6px 16px; border-radius: 99px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 24px;">
         <i class="fas fa-gift" style="margin-right: 6px;"></i> Free 15-Minute Initial Consultation
       </div>
-      <h1 class="serif" style="font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 24px;">Accounting, Bookkeeping <br/><em style="font-style: italic; color: #F5A623;">& Tax Support</em></h1>
+      <h1 class="serif" style="font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 24px;">Accounting, Tax & <br/><em style="font-style: italic; color: #F5A623;">Strategic Advisory</em></h1>
       <p style="font-size: 16px; line-height: 1.7; color: rgba(255,255,255,0.75); margin-bottom: 40px; max-width: 800px; margin: 0 auto 40px;">
-        We help you to manage your business accounting, keep your records organised and help you stay tax-compliant. <em style="color: #fff;">— better financial management and compliance — is what we deliver.</em>
+        We help you manage your business accounting, keep your records organised, and stay tax-compliant. <em style="color: #fff;">Beyond that, we provide the financial advisory and structuring you need to grow.</em>
       </p>
       <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
         <button onclick="openModal('')" class="btn-primary">Book Your Free Consultation <i class="fas fa-arrow-right" style="font-size: 12px;"></i></button>
-        <a href="#packages" class="btn-ghost">View Pricing Packages</a>
+        <a href="#packages" class="btn-ghost">View Packages</a>
       </div>
     </div>
   </section>
 
-  <!-- PURCHASING OPTIONS -->
-  <section class="section-padding" style="background: #fff; border-bottom: 1px solid #eee;">
-    <div class="container" style="max-width: 900px; text-align: center;">
-      <h2 class="serif" style="font-size: 28px; color: #0A1F12; margin-bottom: 12px;">How You Can Work With Us</h2>
-      <p style="font-size: 15px; color: rgba(10,31,18,0.6); margin-bottom: 40px;">Flexible options depending on where your business is right now.</p>
-      
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-        <div style="background: #F8FAFC; padding: 24px; border-radius: 12px; border: 1px solid #E2E8F0;">
-          <i class="fas fa-bolt" style="font-size: 24px; color: #E8730F; margin-bottom: 16px;"></i>
-          <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 8px;">Fast-Track Tasks</h3>
-          <p style="font-size: 13px; color: #64748B;">Transparent pricing for specific tasks. Pay for exactly what you need completed right now.</p>
-        </div>
-        <div style="background: #F8FAFC; padding: 24px; border-radius: 12px; border: 1px solid #E2E8F0;">
-          <i class="fas fa-sync-alt" style="font-size: 24px; color: #1B6CA8; margin-bottom: 16px;"></i>
-          <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 8px;">Monthly Retainer</h3>
-          <p style="font-size: 13px; color: #64748B;">Predictable monthly starting prices for ongoing accounting, bookkeeping, and tax administration.</p>
-        </div>
-        <div style="background: #F8FAFC; padding: 24px; border-radius: 12px; border: 1px solid #E2E8F0;">
-          <i class="fas fa-building" style="font-size: 24px; color: #1E7B3C; margin-bottom: 16px;"></i>
-          <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 8px;">Complete Business Support</h3>
-          <p style="font-size: 13px; color: #64748B;">Customised agreements for larger businesses requiring integrated, hands-off financial administration.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PACKAGES SECTION -->
+  <!-- CORE PACKAGES SECTION -->
   <section id="packages" class="section-padding">
     <div class="container">
       <div style="text-align: center; margin-bottom: 60px;">
-        <h2 class="serif" style="font-size: 32px; color: #0A1F12; margin-bottom: 16px;">Packaged Solutions</h2>
+        <h2 class="serif" style="font-size: 32px; color: #0A1F12; margin-bottom: 16px;">Accounting & Compliance Packages</h2>
         <p style="font-size: 15px; color: rgba(10,31,18,0.6); max-width: 650px; margin: 0 auto;">Pick the package that aligns with your current business needs. Pricing is based on transaction volume, employees, and complexity.</p>
       </div>
 
@@ -313,16 +312,15 @@ body {
     </div>
   </section>
 
-  <!-- INDIVIDUAL SERVICES SECTION -->
+  <!-- INDIVIDUAL ACCOUNTING SERVICES -->
   <section id="individual" class="section-padding" style="background: #fff; border-top: 1px solid #eee;">
     <div class="container" style="max-width: 900px;">
       <div style="text-align: center; margin-bottom: 40px;">
-        <h2 class="serif" style="font-size: 28px; color: #0A1F12; margin-bottom: 12px;">Need Something Specific?</h2>
+        <h2 class="serif" style="font-size: 28px; color: #0A1F12; margin-bottom: 12px;">Need a Specific Accounting Task?</h2>
         <p style="font-size: 15px; color: rgba(10,31,18,0.6);">Transparent pricing for specific tasks. Pay for exactly what you need, when you need it.</p>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 16px;">
-        
         <!-- Service 1 -->
         <div class="service-row">
           <div style="display: flex; align-items: center; gap: 16px;">
@@ -337,7 +335,6 @@ body {
             <button onclick="openModal('Individual Task: Bookkeeping')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Request <i class="fas fa-arrow-right"></i></button>
           </div>
         </div>
-
         <!-- Service 2 -->
         <div class="service-row">
           <div style="display: flex; align-items: center; gap: 16px;">
@@ -352,7 +349,6 @@ body {
             <button onclick="openModal('Individual Task: Tax filing support')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Request <i class="fas fa-arrow-right"></i></button>
           </div>
         </div>
-
         <!-- Service 3 -->
         <div class="service-row">
           <div style="display: flex; align-items: center; gap: 16px;">
@@ -367,49 +363,127 @@ body {
             <button onclick="openModal('Individual Task: Payroll administration')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Request <i class="fas fa-arrow-right"></i></button>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <!-- Service 4 -->
-        <div class="service-row">
-          <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(232,115,15,0.1); color: #E8730F; display: flex; align-items: center; justify-content: center;"><i class="fas fa-chart-line"></i></div>
-            <div>
-              <div style="font-weight: 700; color: #0A1F12;">I need financial statements</div>
-              <div style="font-size: 12px; color: #64748B;">You purchase: Financial statement preparation</div>
-            </div>
+  <!-- ══════════════ SPECIALISED ADVISORY SERVICES ══════════════ -->
+  <section id="specialised-services" class="section-padding" style="background: var(--light); border-top: 1px solid #eee;">
+    <div class="container">
+      <div style="text-align: center; margin-bottom: 60px;">
+        <h2 class="serif" style="font-size: 32px; color: #0A1F12; margin-bottom: 16px;">Strategic Financial & Advisory Services</h2>
+        <p style="font-size: 15px; color: rgba(10,31,18,0.6); max-width: 750px; margin: 0 auto;">
+          Beyond everyday accounting, we provide the high-level financial structuring, risk management, and advisory services required to scale, fund, and protect your business.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+        
+        <!-- A. Investment Readiness -->
+        <div class="spec-card">
+          <div class="spec-img-wrap">
+            <img src="YnV0CHn2iZ3obrMJJh0iITnB6aJ7JvRZ7UO8dlg9n1fXYuN_48eXM2Grjujiek_8Zegns9wWr6viYtm-byAtM3DfUpuo1ilMCEj9J54vmKZKfAmpniywkqVzcPlPGgWKpIJ2MwKXJ_0zvKJx8ViVi-XOEdv9KL7wCiPli-i_jLhxbj9dXrqqoXFdow1rfDAb.jpeg" alt="Investment Readiness" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'height:100%; display:flex; align-items:center; justify-content:center; background:#123A1F; color:#F5A623; font-size:32px;\'><i class=\'fas fa-chart-pie\'></i></div>';" />
           </div>
-          <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="font-weight: 800; color: #1E7B3C; font-size: 14px;">Starting K1,200</div>
-            <button onclick="openModal('Individual Task: Financial statement preparation')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Request <i class="fas fa-arrow-right"></i></button>
+          <div class="spec-content">
+            <h3 style="font-size: 18px; font-weight: 800; color: #0A1F12; margin-bottom: 8px;">Investment Readiness & Investor Relations</h3>
+            <p style="font-size: 13px; color: #B8564F; font-weight: 600; margin-bottom: 16px;">Problem solved: Businesses have growth potential but cannot effectively present their investment opportunities.</p>
+            <ul class="check-list" style="flex-grow: 1; margin-bottom: 20px;">
+              <li><i class="fas fa-check-circle"></i> Investment readiness assessments</li>
+              <li><i class="fas fa-check-circle"></i> Fundraising strategy & pitch decks</li>
+              <li><i class="fas fa-check-circle"></i> Financial projections & valuations</li>
+              <li><i class="fas fa-check-circle"></i> Due diligence preparation & data rooms</li>
+            </ul>
+            <button onclick="openModal('Advisory: Investment Readiness & Investor Relations')" class="btn-primary" style="width: 100%; margin-top: auto; background: transparent; border: 1px solid var(--orange); color: var(--orange); box-shadow: none;">Discuss this Service <i class="fas fa-arrow-right" style="font-size: 12px;"></i></button>
           </div>
         </div>
 
-        <!-- Service 5 -->
-        <div class="service-row">
-          <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(232,115,15,0.1); color: #E8730F; display: flex; align-items: center; justify-content: center;"><i class="fas fa-history"></i></div>
-            <div>
-              <div style="font-weight: 700; color: #0A1F12;">I have years of incomplete records</div>
-              <div style="font-size: 12px; color: #64748B;">You purchase: Financial record reconstruction</div>
-            </div>
+        <!-- B. Project Finance -->
+        <div class="spec-card">
+          <div class="spec-img-wrap">
+            <img src="jj6y73FU_1MJRzVEwEQllNrL6lnDn3PwCoFqTPOEsDYuGwI1gnt4Q1lQ_FnolP6pisGTMISBl7xKSdOFTwpPj__WROymyvo1JNIXIVWYKn1Bw7WmDpLb-hRkgW6T0TQK9tEUlz-EzaNm3W4sBLSRfvueZbLRatPGAwk5HGuRaYPb5wIsFcEQbMfjte8ckwiZ.jpeg" alt="Project Finance" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'height:100%; display:flex; align-items:center; justify-content:center; background:#123A1F; color:#F5A623; font-size:32px;\'><i class=\'fas fa-hard-hat\'></i></div>';" />
           </div>
-          <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="font-weight: 800; color: #1E7B3C; font-size: 14px;">Custom Quotation</div>
-            <button onclick="openModal('Individual Task: Financial record reconstruction')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Request <i class="fas fa-arrow-right"></i></button>
+          <div class="spec-content">
+            <h3 style="font-size: 18px; font-weight: 800; color: #0A1F12; margin-bottom: 8px;">Project & Infrastructure Finance</h3>
+            <p style="font-size: 13px; color: #B8564F; font-weight: 600; margin-bottom: 16px;">Problem solved: Companies have viable projects but need specialised financial structures and funding to implement them.</p>
+            <ul class="check-list" style="flex-grow: 1; margin-bottom: 20px;">
+              <li><i class="fas fa-check-circle"></i> Project feasibility studies</li>
+              <li><i class="fas fa-check-circle"></i> Project financial modelling</li>
+              <li><i class="fas fa-check-circle"></i> Public-private partnership (PPP) advisory</li>
+              <li><i class="fas fa-check-circle"></i> Development finance facilitation</li>
+            </ul>
+            <button onclick="openModal('Advisory: Project & Infrastructure Finance')" class="btn-primary" style="width: 100%; margin-top: auto; background: transparent; border: 1px solid var(--orange); color: var(--orange); box-shadow: none;">Discuss this Service <i class="fas fa-arrow-right" style="font-size: 12px;"></i></button>
           </div>
         </div>
 
-        <!-- Service 6 -->
-        <div class="service-row">
-          <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(232,115,15,0.1); color: #E8730F; display: flex; align-items: center; justify-content: center;"><i class="fas fa-cogs"></i></div>
-            <div>
-              <div style="font-weight: 700; color: #0A1F12;">Accounting Systems Implementation</div>
-              <div style="font-size: 12px; color: #64748B;">You purchase: System Setup & Training</div>
-            </div>
+        <!-- D. Risk & Insurance -->
+        <div class="spec-card">
+          <div class="spec-img-wrap">
+            <img src="snddO79T38ajMF66u8LKWTaXbX2QkZzclFlmnXtOYNaKyFSo1riA-3pM6A2ZN7OWE4Sz-J5mvSUcVMF9t2XsYvUwtXTpmqS9_XeOUSNpROiZhT232vUgtj6_zMpW1tvDO4NOIa_GwFx47DDYTcn9YGxBZs76lm4Jyt2Zcpw51w7FKwRxwglM_GqmbHvYmuh_.jpeg" alt="Risk Management" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'height:100%; display:flex; align-items:center; justify-content:center; background:#123A1F; color:#F5A623; font-size:32px;\'><i class=\'fas fa-shield-alt\'></i></div>';" />
           </div>
-          <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="font-weight: 800; color: #1E7B3C; font-size: 14px;">Custom Quotation</div>
-            <button onclick="openModal('Individual Task: Accounting Systems Implementation')" style="font-size: 13px; font-weight: 700; color: #1B6CA8; background: none; border: none; cursor: pointer;">Request <i class="fas fa-arrow-right"></i></button>
+          <div class="spec-content">
+            <h3 style="font-size: 18px; font-weight: 800; color: #0A1F12; margin-bottom: 8px;">Business Risk & Insurance Advisory</h3>
+            <p style="font-size: 13px; color: #B8564F; font-weight: 600; margin-bottom: 16px;">Problem solved: Businesses face financial exposure that could threaten their operations, assets, or investments.</p>
+            <ul class="check-list" style="flex-grow: 1; margin-bottom: 20px;">
+              <li><i class="fas fa-check-circle"></i> Business & credit risk assessments</li>
+              <li><i class="fas fa-check-circle"></i> Business, asset & trade credit insurance</li>
+              <li><i class="fas fa-check-circle"></i> Key-person & interruption insurance</li>
+              <li><i class="fas fa-check-circle"></i> Foreign exchange risk management</li>
+            </ul>
+            <button onclick="openModal('Advisory: Business Risk & Insurance')" class="btn-primary" style="width: 100%; margin-top: auto; background: transparent; border: 1px solid var(--orange); color: var(--orange); box-shadow: none;">Discuss this Service <i class="fas fa-arrow-right" style="font-size: 12px;"></i></button>
+          </div>
+        </div>
+
+        <!-- E. Treasury & Cash Management -->
+        <div class="spec-card">
+          <div class="spec-img-wrap">
+            <img src="YnV0CHn2iZ3obrMJJh0iITnB6aJ7JvRZ7UO8dlg9n1fXYuN_48eXM2Grjujiek_8Zegns9wWr6viYtm-byAtM3DfUpuo1ilMCEj9J54vmKZKfAmpniywkqVzcPlPGgWKpIJ2MwKXJ_0zvKJx8ViVi-XOEdv9KL7wCiPli-i_jLhxbj9dXrqqoXFdow1rfDAb.jpeg" alt="Treasury" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'height:100%; display:flex; align-items:center; justify-content:center; background:#123A1F; color:#F5A623; font-size:32px;\'><i class=\'fas fa-money-bill-wave\'></i></div>';" />
+          </div>
+          <div class="spec-content">
+            <h3 style="font-size: 18px; font-weight: 800; color: #0A1F12; margin-bottom: 8px;">Treasury & Cash Management</h3>
+            <p style="font-size: 13px; color: #B8564F; font-weight: 600; margin-bottom: 16px;">Problem solved: Businesses struggle with liquidity, payment delays, and foreign currency exposure.</p>
+            <ul class="check-list" style="flex-grow: 1; margin-bottom: 20px;">
+              <li><i class="fas fa-check-circle"></i> Business banking & merchant advisory</li>
+              <li><i class="fas fa-check-circle"></i> Bulk & supplier payment systems</li>
+              <li><i class="fas fa-check-circle"></i> Cash & liquidity management</li>
+              <li><i class="fas fa-check-circle"></i> Short-term investment of surplus funds</li>
+            </ul>
+            <button onclick="openModal('Advisory: Treasury & Cash Management')" class="btn-primary" style="width: 100%; margin-top: auto; background: transparent; border: 1px solid var(--orange); color: var(--orange); box-shadow: none;">Discuss this Service <i class="fas fa-arrow-right" style="font-size: 12px;"></i></button>
+          </div>
+        </div>
+
+        <!-- F. Restructuring -->
+        <div class="spec-card">
+          <div class="spec-img-wrap">
+            <img src="jj6y73FU_1MJRzVEwEQllNrL6lnDn3PwCoFqTPOEsDYuGwI1gnt4Q1lQ_FnolP6pisGTMISBl7xKSdOFTwpPj__WROymyvo1JNIXIVWYKn1Bw7WmDpLb-hRkgW6T0TQK9tEUlz-EzaNm3W4sBLSRfvueZbLRatPGAwk5HGuRaYPb5wIsFcEQbMfjte8ckwiZ.jpeg" alt="Restructuring" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'height:100%; display:flex; align-items:center; justify-content:center; background:#123A1F; color:#F5A623; font-size:32px;\'><i class=\'fas fa-sync-alt\'></i></div>';" />
+          </div>
+          <div class="spec-content">
+            <h3 style="font-size: 18px; font-weight: 800; color: #0A1F12; margin-bottom: 8px;">Business Restructuring & Turnaround</h3>
+            <p style="font-size: 13px; color: #B8564F; font-weight: 600; margin-bottom: 16px;">Problem solved: Operationally viable businesses that are currently financially distressed.</p>
+            <ul class="check-list" style="flex-grow: 1; margin-bottom: 20px;">
+              <li><i class="fas fa-check-circle"></i> Financial & debt restructuring</li>
+              <li><i class="fas fa-check-circle"></i> Balance sheet restructuring & refinancing</li>
+              <li><i class="fas fa-check-circle"></i> Business turnaround planning</li>
+              <li><i class="fas fa-check-circle"></i> Cash flow recovery & cost restructuring</li>
+            </ul>
+            <button onclick="openModal('Advisory: Business Restructuring & Turnaround')" class="btn-primary" style="width: 100%; margin-top: auto; background: transparent; border: 1px solid var(--orange); color: var(--orange); box-shadow: none;">Discuss this Service <i class="fas fa-arrow-right" style="font-size: 12px;"></i></button>
+          </div>
+        </div>
+
+        <!-- H. Financial Management & Advisory -->
+        <div class="spec-card">
+          <div class="spec-img-wrap">
+            <img src="snddO79T38ajMF66u8LKWTaXbX2QkZzclFlmnXtOYNaKyFSo1riA-3pM6A2ZN7OWE4Sz-J5mvSUcVMF9t2XsYvUwtXTpmqS9_XeOUSNpROiZhT232vUgtj6_zMpW1tvDO4NOIa_GwFx47DDYTcn9YGxBZs76lm4Jyt2Zcpw51w7FKwRxwglM_GqmbHvYmuh_.jpeg" alt="Financial Management" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'height:100%; display:flex; align-items:center; justify-content:center; background:#123A1F; color:#F5A623; font-size:32px;\'><i class=\'fas fa-chart-line\'></i></div>';" />
+          </div>
+          <div class="spec-content">
+            <h3 style="font-size: 18px; font-weight: 800; color: #0A1F12; margin-bottom: 8px;">Financial Management & Advisory</h3>
+            <p style="font-size: 13px; color: #B8564F; font-weight: 600; margin-bottom: 16px;">Problem solved: Businesses generate revenue but cannot accurately understand their financial position.</p>
+            <ul class="check-list" style="flex-grow: 1; margin-bottom: 20px;">
+              <li><i class="fas fa-check-circle"></i> Financial planning & budgeting</li>
+              <li><i class="fas fa-check-circle"></i> Cash flow & working capital management</li>
+              <li><i class="fas fa-check-circle"></i> Management accounts preparation</li>
+              <li><i class="fas fa-check-circle"></i> Internal financial controls & reporting</li>
+            </ul>
+            <button onclick="openModal('Advisory: Financial Management & Advisory')" class="btn-primary" style="width: 100%; margin-top: auto; background: transparent; border: 1px solid var(--orange); color: var(--orange); box-shadow: none;">Discuss this Service <i class="fas fa-arrow-right" style="font-size: 12px;"></i></button>
           </div>
         </div>
 
@@ -420,9 +494,9 @@ body {
   <!-- CTA SECTION -->
   <section id="contact" style="background: #0A1F12; padding: 60px 24px; text-align: center;">
     <div class="container">
-      <h2 class="serif" style="font-size: 28px; color: #fff; margin-bottom: 16px;">Ready to get your finances in order?</h2>
+      <h2 class="serif" style="font-size: 28px; color: #fff; margin-bottom: 16px;">Ready to scale or stabilise your business?</h2>
       <p style="font-size: 15px; color: rgba(255,255,255,0.7); margin-bottom: 32px; max-width: 600px; margin: 0 auto 32px;">
-        Let's discuss your specific needs. Book your free 15-minute initial consultation, and we will provide a formal quotation based on your business requirements.
+        Let's discuss your specific needs. Book your free 15-minute initial consultation, and we will provide a formal quotation or advisory proposal.
       </p>
       <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
         <button onclick="openModal('')" class="btn-primary" style="font-size: 15px; padding: 14px 32px;">
@@ -482,16 +556,32 @@ body {
           <label class="form-label">What service are you interested in? <span>*</span></label>
           <select id="serviceInterest" class="form-select" required onchange="configureModalFields(this.value)">
             <option value="" disabled selected>Select a service...</option>
-            <option value="Bookkeeping & Financial Records">Bookkeeping & Financial Records</option>
-            <option value="Tax & Statutory Compliance">Tax & Statutory Compliance</option>
-            <option value="Payroll & Financial Reporting">Payroll & Financial Reporting</option>
-            <option value="Complete Accounting & Financial Administration">Complete Accounting & Financial Administration</option>
-            <option value="Individual Task: Bookkeeping">Individual Task: Bookkeeping</option>
-            <option value="Individual Task: Tax filing support">Individual Task: Tax filing support</option>
-            <option value="Individual Task: Payroll administration">Individual Task: Payroll administration</option>
-            <option value="Individual Task: Financial statement preparation">Individual Task: Financial statement preparation</option>
-            <option value="Individual Task: Financial record reconstruction">Individual Task: Financial record reconstruction</option>
-            <option value="Individual Task: Accounting Systems Implementation">Individual Task: Accounting Systems Implementation</option>
+            
+            <optgroup label="Accounting & Compliance Packages">
+              <option value="Bookkeeping & Financial Records">Bookkeeping & Financial Records</option>
+              <option value="Tax & Statutory Compliance">Tax & Statutory Compliance</option>
+              <option value="Payroll & Financial Reporting">Payroll & Financial Reporting</option>
+              <option value="Complete Accounting & Financial Administration">Complete Accounting & Financial Administration</option>
+            </optgroup>
+
+            <optgroup label="Individual Accounting Tasks">
+              <option value="Individual Task: Bookkeeping">Individual Task: Bookkeeping</option>
+              <option value="Individual Task: Tax filing support">Individual Task: Tax filing support</option>
+              <option value="Individual Task: Payroll administration">Individual Task: Payroll administration</option>
+              <option value="Individual Task: Financial statement preparation">Individual Task: Financial statement preparation</option>
+              <option value="Individual Task: Financial record reconstruction">Individual Task: Financial record reconstruction</option>
+              <option value="Individual Task: Accounting Systems Implementation">Individual Task: Accounting Systems Implementation</option>
+            </optgroup>
+
+            <optgroup label="Strategic Advisory Services">
+              <option value="Advisory: Investment Readiness & Investor Relations">Investment Readiness & Investor Relations</option>
+              <option value="Advisory: Project & Infrastructure Finance">Project & Infrastructure Finance</option>
+              <option value="Advisory: Business Risk & Insurance">Business Risk & Insurance</option>
+              <option value="Advisory: Treasury & Cash Management">Treasury & Cash Management</option>
+              <option value="Advisory: Business Restructuring & Turnaround">Business Restructuring & Turnaround</option>
+              <option value="Advisory: Financial Management & Advisory">Financial Management & Advisory</option>
+            </optgroup>
+            
             <option value="Other / Custom Request">Other / Custom Request</option>
           </select>
         </div>
@@ -614,6 +704,9 @@ body {
     } else if (service.includes('Accounting Systems Implementation')) {
         showSoft = true;
         placeholder = "e.g. I want to move from Excel to QuickBooks and need setup and training.";
+    } else if (service.includes('Advisory:')) {
+        // For all advisory services, we don't need standard accounting volume metrics
+        placeholder = "Please briefly describe your project, funding target, or the challenge you are facing.";
     }
 
     // 3. Show relevant fields and make them strictly mandatory
@@ -699,7 +792,7 @@ body {
         service: formData.service,
         details: fullDetailsString,
         status: 'New lead',
-        source: 'Accounting Page Modal',
+        source: 'Accounting & Advisory Page',
         priority: 'Warm',
         assignee: 'Unassigned',
         notes: [],
@@ -708,7 +801,7 @@ body {
 
       // Create WhatsApp Message
       const waMessage = 
-        `*NEW ACCOUNTING CONSULTATION REQUEST*%0A%0A` +
+        `*NEW CONSULTATION REQUEST*%0A%0A` +
         `*Name:* ${formData.name}%0A` +
         `*Business:* ${formData.business}%0A` +
         `*Email:* ${formData.email}%0A` +
