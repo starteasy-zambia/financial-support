@@ -147,6 +147,7 @@ body {
   display: block; font-size: 11px; font-weight: 800; color: #0A1F12;
   margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;
 }
+.form-label span { color: var(--red); }
 .form-input, .form-select {
   width: 100%; padding: 12px 14px; border: 1px solid #E2E8F0; border-radius: 8px;
   font-size: 14px; font-family: inherit; background: #fff; color: #0A1F12;
@@ -457,28 +458,28 @@ body {
         
         <div class="form-grid-2">
           <div>
-            <label class="form-label">Full Name *</label>
+            <label class="form-label">Full Name <span>*</span></label>
             <input type="text" id="fullName" class="form-input" placeholder="e.g. Chanda Mwale" required />
           </div>
           <div>
-            <label class="form-label">Business Name</label>
-            <input type="text" id="businessName" class="form-input" placeholder="e.g. Acme Traders" />
+            <label class="form-label">Business Name <span>*</span></label>
+            <input type="text" id="businessName" class="form-input" placeholder="e.g. Acme Traders" required />
           </div>
         </div>
 
         <div class="form-grid-2">
           <div>
-            <label class="form-label">Email Address *</label>
+            <label class="form-label">Email Address <span>*</span></label>
             <input type="email" id="email" class="form-input" placeholder="you@company.com" required />
           </div>
           <div>
-            <label class="form-label">Phone Number *</label>
+            <label class="form-label">Phone Number <span>*</span></label>
             <input type="tel" id="phone" class="form-input" placeholder="+260 9..." required />
           </div>
         </div>
 
         <div>
-          <label class="form-label">What service are you interested in? *</label>
+          <label class="form-label">What service are you interested in? <span>*</span></label>
           <select id="serviceInterest" class="form-select" required onchange="configureModalFields(this.value)">
             <option value="" disabled selected>Select a service...</option>
             <option value="Bookkeeping & Financial Records">Bookkeeping & Financial Records</option>
@@ -499,8 +500,9 @@ body {
         <div class="dynamic-fields-row" style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
           
           <div id="field-transactions" style="display: none; flex: 1 1 200px;">
-            <label class="form-label">Monthly Transactions (Est.)</label>
+            <label class="form-label">Monthly Transactions <span>*</span></label>
             <select id="transactionVolume" class="form-select" style="margin-bottom: 0;">
+              <option value="" disabled selected>Select volume...</option>
               <option value="0-50">0 - 50</option>
               <option value="50-200">50 - 200</option>
               <option value="200+">200+</option>
@@ -508,8 +510,9 @@ body {
           </div>
 
           <div id="field-employees" style="display: none; flex: 1 1 200px;">
-            <label class="form-label">Number of Employees</label>
+            <label class="form-label">Number of Employees <span>*</span></label>
             <select id="hasEmployees" class="form-select" style="margin-bottom: 0;">
+              <option value="" disabled selected>Select employees...</option>
               <option value="No">No employees</option>
               <option value="1-5">1 - 5 employees</option>
               <option value="6-20">6 - 20 employees</option>
@@ -518,8 +521,9 @@ body {
           </div>
 
           <div id="field-software" style="display: none; flex: 1 1 200px;">
-            <label class="form-label">Accounting Software</label>
+            <label class="form-label">Accounting Software <span>*</span></label>
             <select id="softwareUsed" class="form-select" style="margin-bottom: 0;">
+              <option value="" disabled selected>Select software...</option>
               <option value="Excel">Microsoft Excel</option>
               <option value="QuickBooks">QuickBooks</option>
               <option value="Sage">Sage</option>
@@ -532,8 +536,8 @@ body {
         </div>
 
         <div>
-          <label class="form-label">Additional Details (Optional)</label>
-          <textarea id="additionalDetails" class="form-input" rows="3" placeholder="Tell us briefly about your current situation..."></textarea>
+          <label class="form-label">Additional Details <span>*</span></label>
+          <textarea id="additionalDetails" class="form-input" rows="3" placeholder="Tell us briefly about your current situation..." required></textarea>
         </div>
 
         <button type="submit" id="submitBtn" class="btn-submit">
@@ -569,21 +573,29 @@ body {
   const modal = document.getElementById('consultationModal');
   const serviceSelect = document.getElementById('serviceInterest');
 
+  // Cache DOM elements for dynamic fields
+  const dom = {
+    transContainer: document.getElementById('field-transactions'),
+    transInput: document.getElementById('transactionVolume'),
+    empContainer: document.getElementById('field-employees'),
+    empInput: document.getElementById('hasEmployees'),
+    softContainer: document.getElementById('field-software'),
+    softInput: document.getElementById('softwareUsed'),
+    textDetails: document.getElementById('additionalDetails')
+  };
+
   function configureModalFields(service) {
-    // Hide all dynamic fields by default
-    document.getElementById('field-transactions').style.display = 'none';
-    document.getElementById('field-employees').style.display = 'none';
-    document.getElementById('field-software').style.display = 'none';
+    // 1. Hide all dynamic fields and remove required constraints
+    dom.transContainer.style.display = 'none'; dom.transInput.required = false;
+    dom.empContainer.style.display = 'none'; dom.empInput.required = false;
+    dom.softContainer.style.display = 'none'; dom.softInput.required = false;
 
     let placeholder = "Tell us briefly about your current situation...";
-    let showTrans = false;
-    let showEmp = false;
-    let showSoft = false;
+    let showTrans = false, showEmp = false, showSoft = false;
 
-    // Logic to determine which fields to show based on the service
+    // 2. Determine visibility based on the service
     if (service.includes('Bookkeeping & Financial Records') || service.includes('Individual Task: Bookkeeping')) {
-        showTrans = true;
-        showSoft = true;
+        showTrans = true; showSoft = true;
         placeholder = "e.g. I have 3 months of backlog, currently using Excel.";
     } else if (service.includes('Tax & Statutory Compliance') || service.includes('Individual Task: Tax filing support')) {
         showTrans = true;
@@ -592,9 +604,7 @@ body {
         showEmp = true;
         placeholder = "e.g. I have 12 employees. I need monthly payslips and NAPSA/NHIMA tracking.";
     } else if (service.includes('Complete Accounting')) {
-        showTrans = true;
-        showEmp = true;
-        showSoft = true;
+        showTrans = true; showEmp = true; showSoft = true;
         placeholder = "e.g. I want to hand over all accounting and compliance. Currently doing it myself.";
     } else if (service.includes('Financial statement preparation')) {
         showTrans = true;
@@ -606,13 +616,13 @@ body {
         placeholder = "e.g. I want to move from Excel to QuickBooks and need setup and training.";
     }
 
-    // Show relevant fields
-    if (showTrans) document.getElementById('field-transactions').style.display = 'block';
-    if (showEmp) document.getElementById('field-employees').style.display = 'block';
-    if (showSoft) document.getElementById('field-software').style.display = 'block';
+    // 3. Show relevant fields and make them strictly mandatory
+    if (showTrans) { dom.transContainer.style.display = 'block'; dom.transInput.required = true; }
+    if (showEmp) { dom.empContainer.style.display = 'block'; dom.empInput.required = true; }
+    if (showSoft) { dom.softContainer.style.display = 'block'; dom.softInput.required = true; }
     
-    // Update the textarea placeholder
-    document.getElementById('additionalDetails').placeholder = placeholder;
+    // 4. Update textarea placeholder
+    dom.textDetails.placeholder = placeholder;
   }
 
   function openModal(preselectedService) {
@@ -629,7 +639,7 @@ body {
         serviceSelect.selectedIndex = 0;
     }
 
-    // Configure the fields based on the pre-selected service
+    // Trigger dynamic configuration
     configureModalFields(serviceSelect.value);
 
     modal.classList.add('active');
@@ -645,7 +655,7 @@ body {
     if (e.target === modal) closeModal();
   });
 
-  // 3. Form Submission Logic (Firebase + WhatsApp)
+  // 3. Form Submission Logic
   async function handleFormSubmit(e) {
     e.preventDefault();
     
@@ -655,28 +665,23 @@ body {
     // Collect Base Form Data
     const formData = {
       name: document.getElementById('fullName').value.trim(),
-      business: document.getElementById('businessName').value.trim() || '-',
+      business: document.getElementById('businessName').value.trim(),
       email: document.getElementById('email').value.trim(),
       phone: document.getElementById('phone').value.trim(),
       service: document.getElementById('serviceInterest').value,
-      details: document.getElementById('additionalDetails').value.trim() || 'None provided'
+      details: document.getElementById('additionalDetails').value.trim()
     };
 
-    if (!formData.name || !formData.email || !formData.phone || !formData.service) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-
-    // Build dynamic details string based on what was actually visible
+    // Build dynamic details string based on what was actually required/visible
     let dynamicInfo = '';
-    if (document.getElementById('field-transactions').style.display !== 'none') {
-        dynamicInfo += `Transactions: ${document.getElementById('transactionVolume').value} | `;
+    if (dom.transContainer.style.display !== 'none') {
+        dynamicInfo += `Transactions: ${dom.transInput.value} | `;
     }
-    if (document.getElementById('field-software').style.display !== 'none') {
-        dynamicInfo += `Software: ${document.getElementById('softwareUsed').value} | `;
+    if (dom.softContainer.style.display !== 'none') {
+        dynamicInfo += `Software: ${dom.softInput.value} | `;
     }
-    if (document.getElementById('field-employees').style.display !== 'none') {
-        dynamicInfo += `Employees: ${document.getElementById('hasEmployees').value} | `;
+    if (dom.empContainer.style.display !== 'none') {
+        dynamicInfo += `Employees: ${dom.empInput.value} | `;
     }
 
     const fullDetailsString = `${dynamicInfo}Notes: ${formData.details}`;
