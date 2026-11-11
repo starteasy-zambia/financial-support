@@ -283,11 +283,22 @@ const SIGNATORY_NAME = 'Carol Kambole';
 const SIGNATORY_TITLE = 'Co-founder & Director of Finance & Administration, StartEasy Zambia';
 const MAIN_PLATFORM_URL = 'https://www.starteasyzambia.com';
 
-const PACKAGES = [
-  { id:'starter', title:'Financial Starter', price:'K1,000', audience:'For sole traders, startups and microbusinesses.', desc:'Establishing clean financial records and a basic cash position.', features:['Income and expense recording','Sales and purchase tracking','Invoice preparation and payment register','Monthly income and expense summary','Basic cash position report'], outcome:'Organised financial records and a clearer picture of where the money goes.', timeline:'Ongoing monthly' },
-  { id:'control', title:'Business Control', price:'K2,000', audience:'For active SMEs with regular transactions.', popular:true, desc:'Taking full control of cash flow, budgets, and monthly performance.', features:['Everything in Starter, plus:','Monthly budget preparation','Cash-flow monitoring','Receivables and payables tracking','Monthly management report','Budget-versus-actual review','Monthly financial review meeting'], outcome:'Better control over cash flow, expenses and business performance.', timeline:'Ongoing monthly' },
-  { id:'growth', title:'Growth & Financial Planning', price:'K4,000', audience:'For growing SMEs and businesses preparing to expand.', desc:'Forecasting, funding readiness, and strategic financial planning.', features:['Everything in Business Control, plus:','Rolling cash-flow forecasts','Quarterly financial planning','Growth budgets and financial scenarios','Financial performance analysis','Funding-readiness assessment','Preparation of financial info for funders'], outcome:'More informed growth decisions and better-organised financial information.', timeline:'Ongoing monthly' }
+/* FULL SERVICE CATALOGUE FROM CRM */
+const SERVICE_CATALOGUE = [
+  { category: 'A. BUSINESS REGISTRATION & CORPORATE (PACRA)', items: [ { name: 'Business Structure Advisory — Wizard', price: 25 }, { name: 'Name Preparation & Clearance — Wizard', price: 25 }, { name: 'Company Incorporation', price: 750 }, { name: 'Business Name Registration', price: 400 }, { name: 'Company Amendments', price: 400 }, { name: 'Annual Return & Statutory Filings', price: 400 }, { name: 'Beneficial Ownership Filing', price: 400 }, { name: 'Business Closure & Deregistration', price: 750 }, { name: 'Corporate Records Administration', price: 500, desc: 'Monthly' } ] },
+  { category: 'B. TAX & COMPLIANCE (ZRA)', items: [ { name: 'TPIN Registration', price: 250, note: 'Gov fee free' }, { name: 'Tax Type Registration (VAT / PAYE / WHT)', price: 400 }, { name: 'Recurring Return Filing', price: 250, desc: 'Monthly' }, { name: 'Tax Clearance Certificate', price: 400 }, { name: 'Tax Compliance Recovery', price: 750, desc: 'From' }, { name: 'Taxpayer Information Update', price: 250 }, { name: 'Annual Tax Compliance', price: 400 } ] },
+  { category: 'C. EMPLOYEE COMPLIANCE (NAPSA · NHIMA · WCFCB)', items: [ { name: 'NAPSA Employer Registration', price: 250 }, { name: 'NAPSA Employee Registration', price: 250 }, { name: 'NAPSA Monthly Contributions', price: 250, desc: 'Monthly' }, { name: 'NAPSA Compliance Clean-Up', price: 400 }, { name: 'NHIMA Employer Registration', price: 250 }, { name: 'NHIMA Employee Registration', price: 250 }, { name: 'NHIMA Monthly Premiums', price: 250, desc: 'Monthly' }, { name: 'NHIMA Compliance Regularisation', price: 400 }, { name: 'WCFCB Employer Registration', price: 250 }, { name: 'WCFCB Annual Assessment', price: 400 }, { name: 'WCFCB Compliance Regularisation', price: 400 } ] },
+  { category: 'D. LICENSING & PERMITS (COUNCILS)', items: [ { name: 'Council Trading Licence', price: 400 }, { name: 'Health & Food Handling Permit', price: 400 }, { name: 'Fire Certificate', price: 250 }, { name: 'Premises, Zoning & Planning Approval', price: 400 }, { name: 'Licence & Permit Renewal', price: 250 } ] },
+  { category: 'E. SECTOR REGULATORS', items: [ { name: 'ZDA Investment Registration', price: 750 }, { name: 'ZEMA Environmental Compliance', price: 750 }, { name: 'Tourism Enterprise Registration (ZTA)', price: 400 }, { name: 'ZABS Standards Certification', price: 400 }, { name: 'ERB Energy Licensing', price: 400 }, { name: 'ZICTA ICT Licensing', price: 400 }, { name: 'EIZ Registration & Compliance', price: 750, desc: 'From' }, { name: 'NCC Contractor Registration', price: 900, desc: 'From' }, { name: 'Cooperative Registration', price: 400 }, { name: 'CEEC Registration', price: 400 }, { name: 'ZPPA Supplier Registration', price: 400 } ] },
+  { category: 'F. COMPLIANCE MANAGEMENT', items: [ { name: 'Business Compliance Check-Up', price: 750 }, { name: 'Compliance Regularisation Programme', price: 1500, desc: 'From' }, { name: 'Ongoing Compliance Management', price: 1200, desc: 'Monthly' } ] },
+  { category: 'G. FINANCIAL SUPPORT PACKAGES', items: [ { name: 'Financial Starter', price: 1000, desc: 'Monthly' }, { name: 'Business Control', price: 2000, desc: 'Monthly' }, { name: 'Growth & Financial Planning', price: 4000, desc: 'Monthly' } ] },
+  { category: 'H. VENTURE BUILDING SERVICES', items: [ { name: 'Business Plan Development', price: 750 }, { name: 'Company Registration Support — Business Name', price: 400 }, { name: 'Company Registration Support — Company Incorporation', price: 750 }, { name: 'Supplier & Equipment Sourcing', price: 600, desc: 'From' }, { name: 'Brand & Marketing Strategy', price: 1000 }, { name: 'Financial Projections', price: 800 }, { name: 'Investor Readiness & Introductions', price: 1200, desc: 'From' }, { name: 'Sales Channel Development', price: 400, desc: 'Monthly' } ] },
+  { category: 'I. PERSONAL ADMINISTRATIVE SERVICES', items: [ { name: 'Document Preparation', price: 250 }, { name: 'Certificates & Statutory Documents', price: 400 }, { name: 'Application Submissions', price: 250 }, { name: 'Application Follow-Up', price: 250 }, { name: 'Scanning, Printing & Copies', price: 25 } ] },
+  { category: 'J. OUTSOURCED ADMINISTRATIVE DESK', items: [ { name: 'Outsourced Desk — Starter', price: 250, desc: 'Monthly' }, { name: 'Outsourced Desk — Organisation', price: 500, desc: 'Monthly' }, { name: 'Outsourced Desk — Executive', price: 1200, desc: 'Monthly' }, { name: 'Administrative One-Off Clean-Up', price: 750 } ] },
+  { category: 'K. SUPPLIERS DIRECTORY & MARKETPLACE', items: [ { name: 'Supplier Listing — Monthly (Local)', price: 100 }, { name: 'Supplier Listing — Monthly (International)', price: 140 }, { name: 'Supplier Listing — Annual (Local)', price: 1000 }, { name: 'Supplier Listing — Annual (International)', price: 1400 }, { name: 'Buyer Access Subscription', price: 50, desc: 'Monthly' }, { name: 'Supplier Verification (One-off)', price: 75 }, { name: 'Campaign Placement', price: 455 }, { name: 'Sourcing & Procurement Support', price: 600 } ] }
 ];
+
+const ALL_SERVICES = SERVICE_CATALOGUE.flatMap(cat => cat.items);
 
 const LEDGER_CATEGORIES = {
   Income: ['Service Fees','Commencement Fees','Consulting Fees','Other Income'],
@@ -1068,19 +1079,19 @@ function App() {
               <p style={{ fontSize:15, color:'rgba(10,31,18,0.6)', maxWidth:650, margin:'0 auto' }}>Choose the level of support that matches your business requirements.</p>
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:24, alignItems:'stretch' }}>
-              {PACKAGES.map(pkg => (
-                <div key={pkg.id} id={`pkg-${pkg.id}`} className={`pricing-card ${pkg.popular?'popular':''} ${orientation===pkg.id?'highlighted':''}`}>
-                  {pkg.popular && <div className="pricing-badge">Most Popular</div>}
-                  <h3 style={{ fontSize:20, fontWeight:800, color:'#0A1F12', marginBottom:4 }}>{pkg.title}</h3>
-                  <p style={{ fontSize:13, color:'rgba(10,31,18,0.6)', marginBottom:16 }}>{pkg.audience}</p>
-                  <div style={{ fontSize:24, fontWeight:800, color:'#E8730F', marginBottom:24 }}>{pkg.price} <span style={{ fontSize:14, fontWeight:500, color:'#666' }}>/ month</span></div>
-                  <ul className="check-list" style={{ flexGrow:1 }}>
-                    {pkg.features.map((f,i) => <li key={i}><i className={`fas fa-check-circle ${f.includes('Everything')?'text-orange-500':''}`}></i> {f}</li>)}
-                  </ul>
-                  <div style={{ marginTop:24, paddingTop:16, borderTop:'1px solid #eee', fontSize:13, fontStyle:'italic', color:'#555', marginBottom:20 }}><strong>Outcome:</strong> {pkg.outcome}</div>
-                  <button onClick={() => openEngagement(pkg)} className="btn-primary" style={{ width:'100%' }}>Select Plan</button>
-                </div>
-              ))}
+              {SERVICE_CATALOGUE.find(c => c.category.includes('FINANCIAL SUPPORT')).items.map(pkg => {
+                const pkgId = pkg.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const isPopular = pkg.name === 'Business Control';
+                return (
+                  <div key={pkg.name} id={`pkg-${pkgId}`} className={`pricing-card ${isPopular?'popular':''} ${orientation===pkgId?'highlighted':''}`}>
+                    {isPopular && <div className="pricing-badge">Most Popular</div>}
+                    <h3 style={{ fontSize:20, fontWeight:800, color:'#0A1F12', marginBottom:4 }}>{pkg.name}</h3>
+                    <div style={{ fontSize:24, fontWeight:800, color:'#E8730F', marginBottom:24 }}>K{pkg.price.toLocaleString()} <span style={{ fontSize:14, fontWeight:500, color:'#666' }}>/ month</span></div>
+                    <div style={{ marginTop:24, paddingTop:16, borderTop:'1px solid #eee', fontSize:13, color:'#555', marginBottom:20 }}>Ongoing financial management and administrative support.</div>
+                    <button onClick={() => openEngagement(pkg)} className="btn-primary" style={{ width:'100%', marginTop:'auto' }}>Select Plan</button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -1129,21 +1140,18 @@ function App() {
                   </div>
                   <p style={{ marginBottom: 20, fontSize: 14 }}>Dear <strong>{form.name || '[Client Name]'}</strong>,</p>
                   <p>Thank you for choosing StartEasy Zambia. We are pleased to submit this formal Engagement Letter and Agreement for your consideration.</p>
-                  <p>This document outlines the scope of services, compensation, and terms under which we will provide the <strong>{selectedItem.title}</strong> service to you and your business.</p>
+                  <p>This document outlines the scope of services, compensation, and terms under which we will provide the <strong>{selectedItem.name}</strong> service to you and your business.</p>
                   <h4 style={{ marginTop: 32 }}>1. Scope of Service</h4>
-                  <p>The Company hereby agrees to provide the following financial support service: <strong>{selectedItem.title}</strong>.</p>
-                  <p>{selectedItem.desc || "Dedicated execution of the requested financial task."}</p>
-                  <p><strong>Specifically, the Company will deliver:</strong></p>
-                  <ul>{selectedItem.features.map((f,i) => <li key={i}>{f}</li>)}</ul>
+                  <p>The Company hereby agrees to provide the following financial support service: <strong>{selectedItem.name}</strong>.</p>
+                  <ul><li>Ongoing support based on package terms.</li></ul>
                   <h4>2. Compensation</h4>
                   <p>In consideration of the services rendered, the Client shall pay the Company the following fee:</p>
                   <div className="feebox">
-                    <div className="row"><span className="l">Total Service Fee</span><span className="v">{fees.total}</span></div>
-                    <div className="row"><span className="l">Commencement Fee (50%)</span><span className="v">{fees.commencement}</span></div>
-                    <div className="row"><span className="l">Balance (50% due on delivery)</span><span className="v">{fees.balance}</span></div>
-                    <div className="total"><span className="tl">Due on acceptance</span><span className="tv">{fees.commencement}</span></div>
+                    <div className="row"><span className="l">Total Service Fee</span><span className="v">K{selectedItem.price.toLocaleString()}</span></div>
+                    <div className="row"><span className="l">Commencement Fee (50%)</span><span className="v">K{(selectedItem.price/2).toLocaleString()}</span></div>
+                    <div className="row"><span className="l">Balance (50% due on delivery)</span><span className="v">K{(selectedItem.price/2).toLocaleString()}</span></div>
+                    <div className="total"><span className="tl">Due on acceptance</span><span className="tv">K{(selectedItem.price/2).toLocaleString()}</span></div>
                   </div>
-                  <p style={{ fontSize:11.5, color:'#666', fontStyle:'italic', marginTop:8 }}>All amounts are StartEasy service fees for work only. They are separate from and do not include any government or regulator fee.</p>
                   <h4>3. Terms and Conditions</h4>
                   <ul>
                     <li><strong>No Employment Relationship:</strong> This Agreement does not create an employer-employee relationship. The Company operates as an independent contractor.</li>
@@ -1186,7 +1194,7 @@ function App() {
                 <div className="success-box fadein">
                   <div style={{ width:64, height:64, borderRadius:'50%', background:'#EAF7EE', color:'#1E7B3C', display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, margin:'0 auto 24px' }}><i className="fas fa-check-circle"></i></div>
                   <h2 className="serif" style={{ fontSize:24, color:'#0A1F12', marginBottom:12 }}>Agreement Executed!</h2>
-                  <p style={{ fontSize:14, color:'rgba(10,31,18,0.7)', marginBottom:24, lineHeight:1.6 }}>Your engagement letter is now locked and awaiting the <strong>Commencement Fee of {fees.commencement}</strong>. Please select a payment method below and send the transaction reference to our officer on WhatsApp.</p>
+                  <p style={{ fontSize:14, color:'rgba(10,31,18,0.7)', marginBottom:24, lineHeight:1.6 }}>Your engagement letter is now locked and awaiting the <strong>Commencement Fee of K{(selectedItem.price/2).toLocaleString()}</strong>. Please select a payment method below and send the transaction reference to our officer on WhatsApp.</p>
                   <div style={{ textAlign:'left', marginBottom:24 }}>
                     <div className="method-card">
                       <div className="method-header"><i className="fas fa-mobile-alt"></i> Airtel Money / MTN MoMo</div>
@@ -1201,7 +1209,7 @@ function App() {
                       <div className="method-row"><span className="l">Account Number</span><span className="v">0152502166700</span></div>
                     </div>
                   </div>
-                  <a href={waUrl(`*EXECUTED ENGAGEMENT PROPOSAL*\n\n*Client:* ${form.name}\n*Email:* ${form.email}\n*Phone:* ${form.phone || 'N/A'}\n\n*Service:* ${selectedItem.title}\n*Commencement Fee Due:* ${fees.commencement}\n\nI have executed the agreement. Here is my payment proof:`)} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display:'flex', width:'100%', marginBottom:12, background:'#25D366', boxShadow:'0 10px 26px rgba(37,211,102,.32)', justifyContent:'center', padding:'16px' }}>
+                  <a href={waUrl(`*EXECUTED ENGAGEMENT PROPOSAL*\n\n*Client:* ${form.name}\n*Email:* ${form.email}\n*Phone:* ${form.phone || 'N/A'}\n\n*Service:* ${selectedItem.name}\n*Commencement Fee Due:* K${(selectedItem.price/2).toLocaleString()}\n\nI have executed the agreement. Here is my payment proof:`)} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display:'flex', width:'100%', marginBottom:12, background:'#25D366', boxShadow:'0 10px 26px rgba(37,211,102,.32)', justifyContent:'center', padding:'16px' }}>
                     <i className="fab fa-whatsapp" style={{ fontSize:18 }}></i> Send Payment Proof on WhatsApp
                   </a>
                   <button onClick={closeEngagement} style={{ background:'none', border:'none', color:'#666', textDecoration:'underline', cursor:'pointer', fontSize:13, fontWeight:600 }}>Close and return</button>
@@ -1215,9 +1223,6 @@ function App() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   FORM MODAL (existing + NEW team type)
-   ═══════════════════════════════════════════════════════════════════ */
 function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
   const [data, setData] = useState(modal.data);
   const set = (k, v) => setData(d => ({...d, [k]: v}));
@@ -1328,13 +1333,12 @@ function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
           <div className="form-row">
             <div className="form-group">
               <label className="form-label">Package *</label>
+              {/* FIXED: Uses the full ALL_SERVICES catalogue */}
               <select className="form-input" value={data.package || ''} onChange={e => set('package', e.target.value)} required>
                 <option value="">— Select —</option>
-                <option value="Financial Starter">Financial Starter — K1,000</option>
-                <option value="Business Control">Business Control — K2,000</option>
-                <option value="Growth & Financial Planning">Growth & Financial Planning — K4,000</option>
-                <option value="Directory Service">Directory Service</option>
-                <option value="Venture Service">Venture Service</option>
+                {ALL_SERVICES.map(p => (
+                  <option key={p.name} value={p.name}>{p.name} — K{p.price}</option>
+                ))}
               </select>
             </div>
             <div className="form-group">
@@ -1366,9 +1370,8 @@ function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
             <label className="form-label">Service Package *</label>
             <select className="form-input" value={data.serviceTitle || ''} onChange={e => set('serviceTitle', e.target.value)} required>
               <option value="">— Select —</option>
-              {PACKAGES.map(p => <option key={p.id} value={p.title}>{p.title} — {p.price}</option>)}
-              <option value="Directory Service">Directory Service (Manual)</option>
-              <option value="Venture Service">Venture Service (Manual)</option>
+              {ALL_SERVICES.map(p => <option key={p.name} value={p.name}>{p.name} — K{p.price}</option>)}
+              <option value="Manual Entry">Manual Entry (Custom Amount)</option>
             </select>
           </div>
           <div className="form-row">
@@ -1590,7 +1593,8 @@ function FormModal({ modal, onClose, onSave, saving, error, clients, team }) {
             </div>
             <div className="form-group">
               <label className="form-label">Amount Paid So Far (USD)</label>
-              <input type="number" step="0.01" className="form-input" value={data.amountPaid || 0} onChange={e => set('amountPaid', e.target.value)} />
+              <input type="number" step="0.01" className="form-input" value={data.amountPaid || 0} readOnly style={{ background:'#F1F5F9', cursor:'not-allowed' }} />
+              <div style={{ fontSize: 11, color: '#B8564F', marginTop: 4 }}>Use the "Record Payment" button on the Vendor table to log payments to the ledger.</div>
             </div>
           </div>
           <div className="form-group">
@@ -1787,21 +1791,30 @@ function AdminPortal({ onExit }) {
     const periodLabel = (payslip?.periodLabel || 'Period').replace(/\s+/g,'_');
     showToast('Generating retainer advice PDF...', 'info');
     
-    // Create a clone to render the PDF without affecting the on-screen mobile styling
-    const clone = element.cloneNode(true);
+    // Create an absolute hidden wrapper to prevent scroll height/overflow artifacts that cause Page 2 to contain random numbers
     const wrapper = document.createElement('div');
-    wrapper.style.width = '780px'; // Force desktop width for PDF
     wrapper.style.position = 'fixed';
-    wrapper.style.top = '-9999px';
+    wrapper.style.top = '0';
+    wrapper.style.left = '-9999px'; // off-screen
+    wrapper.style.width = '800px';
+    wrapper.style.background = '#fff';
+    wrapper.style.zIndex = '-9999';
+
+    const clone = element.cloneNode(true);
+    // Strip any maxHeight/overflow that might be causing html2canvas to expand the page
+    clone.style.maxHeight = 'none';
+    clone.style.overflow = 'visible';
+    clone.style.boxShadow = 'none'; // shadows sometimes cause rendering artifacts
     wrapper.appendChild(clone);
     document.body.appendChild(wrapper);
 
     window.html2pdf().set({
-      margin:       0.3,
+      margin:       0,
       filename:     `Retainer_Advice_${empName}_${periodLabel}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0, windowWidth: 780 },
-      jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+      html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0, windowWidth: 800 },
+      jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+      pagebreak:    { mode: ['css', 'legacy'] } // Prevents awkward breaks
     }).from(clone).save().then(() => {
       showToast('Retainer advice downloaded successfully!', 'success');
       document.body.removeChild(wrapper);
@@ -1854,17 +1867,29 @@ function AdminPortal({ onExit }) {
 
   /* ZRA Tax Online Export */
   const exportZRA = (selectedPayslips) => {
-    if (!selectedPayslips || !selectedPayslips.length) return showToast("No payslips selected.", "error");
+    const dataToExport = (selectedPayslips && selectedPayslips.length > 0) ? selectedPayslips : payslips;
+    
+    if (!dataToExport || dataToExport.length === 0) {
+      return showToast("No payslips found at all to export.", "error");
+    }
+
     const rows = [['TIN', 'Name', 'Gross', 'PAYE', 'NAPSA', 'NHIMA', 'SDL']];
-    selectedPayslips.forEach(p => {
+    dataToExport.forEach(p => {
       const t = team.find(tm => tm.id === p.employeeId);
-      const paye = (p.deductions || []).filter(d => d.label.includes('PAYE')).reduce((s, d) => s + num(d.amount), 0);
-      const napsa = (p.employerContributions || []).filter(d => d.label.includes('NAPSA')).reduce((s, d) => s + num(d.amount), 0);
-      const nhima = (p.employerContributions || []).filter(d => d.label.includes('NHIMA')).reduce((s, d) => s + num(d.amount), 0);
-      const sdl = (p.employerContributions || []).filter(d => d.label.includes('SDL')).reduce((s, d) => s + num(d.amount), 0);
+      const empName = t?.name || p.employeeName || 'Unknown';
+      const tin = t?.tin || 'N/A';
       
-      if (t) rows.push([t.tin || 'N/A', t.name, p.gross, paye, napsa, nhima, sdl]);
+      const paye = (p.deductions || []).filter(d => d.label && d.label.includes('PAYE')).reduce((s, d) => s + num(d.amount), 0);
+      const napsa = (p.employerContributions || []).filter(d => d.label && d.label.includes('NAPSA')).reduce((s, d) => s + num(d.amount), 0);
+      const nhima = (p.employerContributions || []).filter(d => d.label && d.label.includes('NHIMA')).reduce((s, d) => s + num(d.amount), 0);
+      const sdl = (p.employerContributions || []).filter(d => d.label && d.label.includes('SDL')).reduce((s, d) => s + num(d.amount), 0);
+      
+      rows.push([tin, empName, p.gross || 0, paye, napsa, nhima, sdl]);
     });
+
+    if (rows.length === 1) {
+      return showToast("No valid payslip data found to export.", "error");
+    }
     exportToCSV(rows.slice(1), 'ZRA_TaxOnline_Upload', ['TIN', 'Name', 'Gross', 'PAYE', 'NAPSA', 'NHIMA', 'SDL']);
   };
 
@@ -1886,9 +1911,34 @@ function AdminPortal({ onExit }) {
   };
 
   const applySearch = (items) => {
-    if (!searchTerm) return items;
-    const lowerSearch = searchTerm.toLowerCase();
-    return items.filter(item => Object.values(item).some(val => String(val || '').toLowerCase().includes(lowerSearch)));
+    if (!searchTerm || !searchTerm.trim()) return items;
+    const lowerSearch = searchTerm.toLowerCase().trim();
+    
+    return items.filter(item => {
+      return Object.entries(item).some(([key, val]) => {
+        if (val === null || val === undefined) return false;
+        
+        // Handle Firestore Timestamps
+        if (typeof val === 'object' && val !== null) {
+          if (val.toDate) {
+            return val.toDate().toLocaleDateString().toLowerCase().includes(lowerSearch);
+          }
+          if (val.seconds) {
+            return new Date(val.seconds * 1000).toLocaleDateString().toLowerCase().includes(lowerSearch);
+          }
+          // Handle nested objects/arrays safely
+          try {
+             return JSON.stringify(val).toLowerCase().includes(lowerSearch);
+          } catch (e) {
+             return false;
+          }
+        }
+        
+        // Handle strings and numbers safely
+        const stringVal = String(val).toLowerCase();
+        return stringVal.includes(lowerSearch);
+      });
+    });
   };
 
   const isPackagePayment = (title) => {
@@ -1904,15 +1954,21 @@ function AdminPortal({ onExit }) {
     return due < new Date() ? 'Overdue' : 'Pending';
   };
 
+  // CRITICAL FIX: If searching, look at ALL data, not just the filtered period
   const periodLedger = useMemo(() => filterByPeriod(ledger, 'date'), [ledger, period]);
   const periodInvoices = useMemo(() => filterByPeriod(invoices, 'issueDate'), [invoices, period]);
   const periodPayments = useMemo(() => filterByPeriod(payments, 'submittedAt'), [payments, period]);
-  const filteredLedger = useMemo(() => applySearch(periodLedger), [periodLedger, searchTerm]);
-  const filteredInvoices = useMemo(() => applySearch(periodInvoices), [periodInvoices, searchTerm]);
-  const filteredPayments = useMemo(() => applySearch(periodPayments), [periodPayments, searchTerm]);
+  
+  const filteredLedger = useMemo(() => applySearch(searchTerm ? ledger : periodLedger), [ledger, periodLedger, searchTerm]);
+  const filteredInvoices = useMemo(() => applySearch(searchTerm ? invoices : periodInvoices), [invoices, periodInvoices, searchTerm]);
+  const filteredPayments = useMemo(() => applySearch(searchTerm ? payments : periodPayments), [payments, periodPayments, searchTerm]);
   const filteredClients = useMemo(() => applySearch(clients), [clients, searchTerm]);
   const filteredTeam = useMemo(() => applySearch(team), [team, searchTerm]);
   const filteredPayslips = useMemo(() => applySearch(payslips), [payslips, searchTerm]);
+  const filteredVendors = useMemo(() => applySearch(vendors), [vendors, searchTerm]);
+  const filteredLoans = useMemo(() => applySearch(loans), [loans, searchTerm]);
+  const filteredLeave = useMemo(() => applySearch(leaveRecords), [leaveRecords, searchTerm]);
+  
   const periodLabel = PERIOD_LABELS[period];
 
   /* financial calculations */
@@ -2047,7 +2103,8 @@ function AdminPortal({ onExit }) {
     setVendorPaymentModal({
       vendorId: vendor.id,
       vendorName: vendor.name,
-      amount: '',
+      amount: '', 
+      exchangeRate: 27.5, 
       date: todayStr(),
       reference: '',
       notes: ''
@@ -2058,23 +2115,26 @@ function AdminPortal({ onExit }) {
   const saveVendorPayment = async (data) => {
     setSaving(true);
     try {
-      const amt = num(data.amount);
-      if (amt <= 0) throw new Error('Amount must be greater than zero');
+      const amtUSD = num(data.amount);
+      const rate = num(data.exchangeRate) || 27.5;
+      const amtZMW = amtUSD * rate;
       
-      // 1. Create Ledger Expense Entry
+      if (amtUSD <= 0) throw new Error('Amount must be greater than zero');
+      
+      // 1. Create Ledger Expense Entry in ZMW
       await db.collection('se_ledger').add({
         date: data.date,
         type: 'Expense',
         category: 'Professional Fees',
-        desc: `Payment to Vendor: ${data.vendorName} - ${data.notes || 'Service Fee'}`,
-        amount: amt,
+        desc: `Payment to Vendor: ${data.vendorName} ($${amtUSD} @ K${rate}) - ${data.notes || 'Service Fee'}`,
+        amount: amtZMW, // RECORDED IN ZMW FOR ACCURATE FINANCIAL STATEMENTS
         reference: data.reference || 'VENDOR-PAY',
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // 2. Update Vendor Record
+      // 2. Update Vendor Record (in USD)
       const vendor = vendors.find(v => v.id === data.vendorId);
-      const newPaid = num(vendor.amountPaid) + amt;
+      const newPaid = num(vendor.amountPaid) + amtUSD;
       const newStatus = newPaid >= num(vendor.totalLiability) ? 'Settled' : 'Active';
       
       await db.collection('se_vendors').doc(data.vendorId).update({
@@ -2082,7 +2142,7 @@ function AdminPortal({ onExit }) {
         status: newStatus
       });
 
-      showToast('Payment recorded to ledger and vendor balance updated.', 'success');
+      showToast('Payment recorded to ledger (in ZMW) and vendor balance updated.', 'success');
       setVendorPaymentModal(null);
     } catch (err) {
       showToast('Failed to record payment: ' + err.message, 'error');
@@ -2203,7 +2263,10 @@ function AdminPortal({ onExit }) {
         if (modal.mode === 'add') {
           await db.collection('se_vendors').add({ ...data, totalLiability: num(data.totalLiability), amountPaid: num(data.amountPaid), createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         } else {
-          await db.collection('se_vendors').doc(data.id).update({ ...data, totalLiability: num(data.totalLiability), amountPaid: num(data.amountPaid) });
+          // Note: amountPaid is read-only in the UI now, but we still pass it to prevent overwriting with undefined
+          const vendor = vendors.find(v => v.id === data.id);
+          const currentAmountPaid = vendor ? vendor.amountPaid : data.amountPaid;
+          await db.collection('se_vendors').doc(data.id).update({ ...data, totalLiability: num(data.totalLiability), amountPaid: num(currentAmountPaid) });
         }
       }
       showToast('Record saved successfully.', 'success');
@@ -2398,14 +2461,16 @@ function AdminPortal({ onExit }) {
 
         <main className="admin-content">
           {/* Search + Period bar */}
-          {['overview','onboarding','portfolio','ledger','invoices'].includes(activeTab) && (
+          {['overview','onboarding','portfolio','ledger','invoices','team','payslips','loans','leave','vendors'].includes(activeTab) && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
-              <div className="filter-tabs" style={{ marginBottom: 0 }}>
-                <span style={{ fontSize:11, fontWeight:800, color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em', marginRight:8 }}>Period:</span>
-                {Object.entries(PERIOD_LABELS).map(([k, label]) => (
-                  <button key={k} className={`filter-tab ${period===k?'active':''}`} onClick={() => setPeriod(k)}>{label}</button>
-                ))}
-              </div>
+              {['overview','onboarding','portfolio','ledger','invoices'].includes(activeTab) ? (
+                <div className="filter-tabs" style={{ marginBottom: 0 }}>
+                  <span style={{ fontSize:11, fontWeight:800, color:'#64748B', textTransform:'uppercase', letterSpacing:'0.05em', marginRight:8 }}>Period:</span>
+                  {Object.entries(PERIOD_LABELS).map(([k, label]) => (
+                    <button key={k} className={`filter-tab ${period===k?'active':''}`} onClick={() => setPeriod(k)}>{label}</button>
+                  ))}
+                </div>
+              ) : <div />}
               <div style={{ width: '100%', maxWidth: 350 }}>
                 <div style={{ position: 'relative', width: '100%' }}>
                   <i className="fas fa-search" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }}></i>
@@ -2987,7 +3052,7 @@ function AdminPortal({ onExit }) {
                   <table className="admin-table">
                     <thead><tr><th>Employee</th><th>Description</th><th>Total Loan</th><th>Monthly Ded.</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody>
-                      {loans.map(l => {
+                      {filteredLoans.map(l => {
                         const t = team.find(tm => tm.id === l.employeeId);
                         return (
                           <tr key={l.id}>
@@ -3006,7 +3071,7 @@ function AdminPortal({ onExit }) {
                           </tr>
                         );
                       })}
-                      {loans.length === 0 && <tr><td colSpan="7" className="empty-state">No loans registered.</td></tr>}
+                      {filteredLoans.length === 0 && <tr><td colSpan="7" className="empty-state">No loans registered.</td></tr>}
                     </tbody>
                   </table>
                 </div>
@@ -3026,7 +3091,7 @@ function AdminPortal({ onExit }) {
                   <table className="admin-table">
                     <thead><tr><th>Employee</th><th>Leave Type</th><th>Start Date</th><th>End Date</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody>
-                      {leaveRecords.map(l => {
+                      {filteredLeave.map(l => {
                         const t = team.find(tm => tm.id === l.employeeId);
                         return (
                           <tr key={l.id}>
@@ -3044,7 +3109,7 @@ function AdminPortal({ onExit }) {
                           </tr>
                         );
                       })}
-                      {leaveRecords.length === 0 && <tr><td colSpan="6" className="empty-state">No leave records found.</td></tr>}
+                      {filteredLeave.length === 0 && <tr><td colSpan="6" className="empty-state">No leave records found.</td></tr>}
                     </tbody>
                   </table>
                 </div>
@@ -3074,7 +3139,7 @@ function AdminPortal({ onExit }) {
                   <table className="admin-table">
                     <thead><tr><th>Vendor Name</th><th>Service</th><th>Total Liability</th><th>Paid to Date</th><th>Outstanding Balance</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody>
-                      {vendors.map(v => {
+                      {filteredVendors.map(v => {
                         const bal = num(v.totalLiability) - num(v.amountPaid);
                         return (
                           <tr key={v.id}>
@@ -3097,7 +3162,7 @@ function AdminPortal({ onExit }) {
                           </tr>
                         );
                       })}
-                      {vendors.length === 0 && <tr><td colSpan="7" className="empty-state">No vendor liabilities found.</td></tr>}
+                      {filteredVendors.length === 0 && <tr><td colSpan="7" className="empty-state">No vendor liabilities found.</td></tr>}
                     </tbody>
                   </table>
                 </div>
@@ -3152,9 +3217,16 @@ function AdminPortal({ onExit }) {
                   <input type="number" step="0.01" className="form-input" value={vendorPaymentModal.amount} onChange={e => setVendorPaymentModal({...vendorPaymentModal, amount: e.target.value})} required />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Payment Date *</label>
-                  <input type="date" className="form-input" value={vendorPaymentModal.date} onChange={e => setVendorPaymentModal({...vendorPaymentModal, date: e.target.value})} required />
+                  <label className="form-label">Exchange Rate (ZMW per USD) *</label>
+                  <input type="number" step="0.01" className="form-input" value={vendorPaymentModal.exchangeRate} onChange={e => setVendorPaymentModal({...vendorPaymentModal, exchangeRate: e.target.value})} required />
                 </div>
+              </div>
+              <div style={{ background: '#F0F7F2', padding: 12, borderRadius: 8, marginBottom: 16, fontSize: 13, fontWeight: 700, color: '#1E7B3C', textAlign: 'right' }}>
+                ZMW Equivalent to record in Ledger: K{(num(vendorPaymentModal.amount) * num(vendorPaymentModal.exchangeRate)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <div className="form-group">
+                <label className="form-label">Payment Date *</label>
+                <input type="date" className="form-input" value={vendorPaymentModal.date} onChange={e => setVendorPaymentModal({...vendorPaymentModal, date: e.target.value})} required />
               </div>
               <div className="form-group">
                 <label className="form-label">Reference / Notes *</label>
