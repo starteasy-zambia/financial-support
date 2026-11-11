@@ -286,6 +286,14 @@ const MAIN_PLATFORM_URL = 'https://www.starteasyzambia.com';
 /* FULL SERVICE CATALOGUE FROM CRM */
 const SERVICE_CATALOGUE = [
   {
+    category: 'Financial Support Packages',
+    items: [
+      { name: 'Financial Starter', price: 1000, slug: 'starter', desc: 'Monthly' },
+      { name: 'Business Control', price: 2000, slug: 'control', desc: 'Monthly' },
+      { name: 'Growth & Financial Planning', price: 4000, slug: 'growth', desc: 'Monthly' }
+    ]
+  },
+  {
     category: 'Accounting, Bookkeeping & Tax Support',
     items: [
       { name: 'Bookkeeping', price: 500, desc: 'From' },
@@ -1051,17 +1059,20 @@ function App() {
     }, 100);
   };
 
-  const getFeeBreakdown = (priceStr) => {
-    if (!priceStr || !priceStr.includes('K')) return { total: priceStr, commencement: priceStr, balance:'N/A' };
-    const numMatch = priceStr.match(/[\d,]+/);
-    if (!numMatch) return { total: priceStr, commencement: priceStr, balance:'N/A' };
-    const raw = parseInt(numMatch[0].replace(/,/g,''), 10);
-    const half = raw / 2;
-    return { total: priceStr, commencement: `K${half.toLocaleString()}`, balance: `K${half.toLocaleString()}` };
+  /* FIXED: handle numeric inputs safely */
+  const getFeeBreakdown = (priceVal) => {
+    const raw = typeof priceVal === 'number'
+      ? priceVal
+      : (parseFloat(String(priceVal || '').replace(/[^\d.-]/g, '')) || 0);
+    const total = `K${raw.toLocaleString()}`;
+    const half = `K${(raw / 2).toLocaleString()}`;
+    return { total, commencement: half, balance: half };
   };
   const fees = selectedItem ? getFeeBreakdown(selectedItem.price) : { total:'', commencement:'', balance:'' };
 
   if (view === 'admin') return <AdminPortal onExit={() => setView('public')} />;
+
+  const packages = (SERVICE_CATALOGUE.find(c => c.category === 'Financial Support Packages')?.items) || [];
 
   return (
     <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', width:'100%' }}>
@@ -1140,11 +1151,11 @@ function App() {
               <p style={{ fontSize:15, color:'rgba(10,31,18,0.6)', maxWidth:650, margin:'0 auto' }}>Choose the level of support that matches your business requirements.</p>
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:24, alignItems:'stretch' }}>
-              {SERVICE_CATALOGUE.find(c => c.category.includes('FINANCIAL SUPPORT')).items.map(pkg => {
-                const pkgId = pkg.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+              {packages.map(pkg => {
+                const pkgSlug = pkg.slug || pkg.name.toLowerCase().replace(/[^a-z0-9]/g, '');
                 const isPopular = pkg.name === 'Business Control';
                 return (
-                  <div key={pkg.name} id={`pkg-${pkgId}`} className={`pricing-card ${isPopular?'popular':''} ${orientation===pkgId?'highlighted':''}`}>
+                  <div key={pkg.name} id={`pkg-${pkgSlug}`} className={`pricing-card ${isPopular?'popular':''} ${orientation===pkgSlug?'highlighted':''}`}>
                     {isPopular && <div className="pricing-badge">Most Popular</div>}
                     <h3 style={{ fontSize:20, fontWeight:800, color:'#0A1F12', marginBottom:4 }}>{pkg.name}</h3>
                     <div style={{ fontSize:24, fontWeight:800, color:'#E8730F', marginBottom:24 }}>K{pkg.price.toLocaleString()} <span style={{ fontSize:14, fontWeight:500, color:'#666' }}>/ month</span></div>
@@ -1153,6 +1164,11 @@ function App() {
                   </div>
                 );
               })}
+              {packages.length === 0 && (
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 40, color: '#94A3B8' }}>
+                  Packages are loading...
+                </div>
+              )}
             </div>
           </div>
         </section>
